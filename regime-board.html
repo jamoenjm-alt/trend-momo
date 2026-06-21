@@ -1165,7 +1165,7 @@ function SignalCell({ hasData, score, stability, onEnter, onLeave }) {
   return h('td', { className: 'td-signal', onMouseEnter: onEnter, onMouseLeave: onLeave }, h('div', { className: 'signal-inner' }, h(Badge, { regime }), h(StabilityDot, { stability: stability || 'stable', hasData: true })));
 }
 
-function TrendLadder({ asset, sigs, x, y }) {
+function TrendLadder({ asset, sigs, x, y, group }) {
   if (!sigs) return null;
   const { price, pairSigs } = sigs;
   const fmt = (n) => n != null ? n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 }) : '—';
@@ -1179,7 +1179,7 @@ function TrendLadder({ asset, sigs, x, y }) {
     h('div', { className: 'tt-header' }, 'Trend Ladder'),
     h('span', { className: 'tt-ticker' }, asset.ticker + ' — ' + asset.name),
     h('div', { style: { fontSize: '0.68rem', color: '#94a3b8', marginBottom: 6 } }, 'Last: ', h('strong', { style: { color: '#e2e8f0' } }, fmt(price))),
-    ['canary','st','lt','all'].map(g => {
+    [group||'canary'].map(g => {
       const rows = pairSigs.filter(p => p.group === g);
       return h('div', { key: g, style: { marginBottom: 8 } },
         h('div', { style: { fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.08em', color: '#64748b', textTransform: 'uppercase', marginBottom: 3 } }, GROUP_LABEL[g]),
@@ -1298,7 +1298,7 @@ function App() {
 
   useEffect(() => { if (!loadedRef.current) { loadedRef.current=true; loadAll(keys); } }, []);
   function handleSave(k) { setKeys(k); try { localStorage.setItem('regime_keys',JSON.stringify(k)); } catch {} setShowConfig(false); loadAll(k); }
-  function handleEnter(e, asset, sigs) { if (!sigs) return; setTooltip({asset,sigs,x:e.clientX,y:e.clientY}); }
+  function handleEnter(e, asset, sigs, group) { if (!sigs) return; setTooltip({asset,sigs,x:e.clientX,y:e.clientY,group}); }
   function handleLeave() { setTooltip(null); }
   function handleMouseMove(e) { if (tooltip) setTooltip(t=>t?{...t,x:e.clientX,y:e.clientY}:null); }
 
@@ -1356,7 +1356,7 @@ function App() {
                   return h('tr', { key: asset.ticker+asset.cls },
                     h('td', { className:'td-ticker' }, h('div', { className:'ticker-sym' }, asset.ticker)),
                     h('td', { className:'td-desc' }, asset.name),
-                    colScores.map((score,i) => loading ? h('td',{key:i,className:'td-signal'},h('span',{className:'spinner'})) : h(SignalCell,{key:i,hasData:!!sigs,score,stability,onEnter:e=>handleEnter(e,asset,sigs),onLeave:handleLeave})),
+                    colScores.map((score,i) => loading ? h('td',{key:i,className:'td-signal'},h('span',{className:'spinner'})) : h(SignalCell,{key:i,hasData:!!sigs,score,stability,onEnter:e=>handleEnter(e,asset,sigs,['canary','st','lt','all'][i]),onLeave:handleLeave})),
                     h(BalanceSheetCell, { ticker: asset.ticker }),
                     h(PECell, { ticker: asset.ticker }),
                     h(NewsCell, { ticker: asset.ticker, newsData, loading: newsLoading }),
@@ -1376,7 +1376,7 @@ function App() {
         'Data: STATIC_PRICES (update-prices.ps1) · CoinCap (crypto) · Yahoo Finance · Stooq. Balance sheet + P/E: Claude analysis. News: Alpha Vantage + Yahoo Finance.',
       ),
     ),
-    tooltip && h(TrendLadder, { asset:tooltip.asset, sigs:tooltip.sigs, x:tooltip.x, y:tooltip.y }),
+    tooltip && h(TrendLadder, { asset:tooltip.asset, sigs:tooltip.sigs, x:tooltip.x, y:tooltip.y, group:tooltip.group }),
   );
 }
 
