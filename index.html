@@ -1385,6 +1385,16 @@ function App() {
     setData(Object.fromEntries(WATCHLIST.map(a => [dataKey(a), { closes: null, loading: true }])));
     const staticData = {};
     for (const a of WATCHLIST) { if (window.STATIC_PRICES?.[a.ticker]?.length) staticData[a.ticker] = window.STATIC_PRICES[a.ticker]; }
+    // Load cached prices for custom tickers (avoids repeated AV calls)
+    const CACHE_TTL = 20 * 60 * 60 * 1000; // 20 hours
+    for (const a of WATCHLIST.filter(a => !staticData[a.ticker])) {
+      try {
+        const cached = JSON.parse(localStorage.getItem('pc_' + a.ticker) || 'null');
+        if (cached && Date.now() - cached.ts < CACHE_TTL && cached.c && cached.c.length >= 21) {
+          staticData[a.ticker] = cached.c;
+        }
+      } catch {}
+    }
 
     const tdTickers = [...new Set(WATCHLIST.filter(a => ['Watch','Top20','Commodity','Index','Custom'].includes(a.cls)).filter(a => !staticData[a.ticker]).map(a => a.ticker))];
     const tdResults = {};
@@ -1540,6 +1550,8 @@ function App() {
         }
 
         if(closes.length>=21){
+          // Cache result so AV isn't called again on next page load
+          try { localStorage.setItem('pc_'+t, JSON.stringify({c:closes.slice(-400), ts:Date.now()})); } catch {}
           const sigs=computeSignals(closes);
           const stability=closes.length>=32?computeStabilityState(closes):'stable';
           newData[dataKey(a)]={closes,sigs:sigs?{...sigs,stability}:null,loading:false};
@@ -1562,34 +1574,34 @@ function App() {
         if (!Array.isArray(items) || !items.length) return;
         // Build per-ticker sentiment from recent headlines mentioning the ticker name/symbol
         const cryptoTickers = WATCHLIST.filter(a => a.cls === 'Crypto').map(a => a.ticker);
-        setData(prev => {
-          const next = { ...prev };
-          cryptoTickers.forEach(t => {
-            const key = t + '__Crypto';
-            if (!next[key]) return;
-            // Find articles mentioning this ticker or its name
-            const relevant = items.filter(item => {
-              const text = (item.headline + ' ' + (item.summary||'')).toLowerCase();
-              return text.includes(t.toLowerCase());
-            });
-            const src = relevant.length ? relevant : items.slice(0, 3);
-            if (!src.length) return;
-            // Simple sentiment: positive words vs negative
-            const pos = ['bull', 'surge', 'rally', 'gain', 'rise', 'high', 'pump', 'moon', 'break', 'ath'];
-            const neg = ['bear', 'drop', 'fall', 'crash', 'dump', 'low', 'sell', 'down', 'weak', 'fear'];
-            let score = 0;
-            src.forEach(item => {
-              const txt = (item.headline + ' ' + (item.summary||'')).toLowerCase();
-              pos.forEach(w => { if (txt.includes(w)) score++; });
-              neg.forEach(w => { if (txt.includes(w)) score--; });
-            });
-            const sentiment = score > 1 ? 0.6 : score < -1 ? -0.6 : score * 0.3;
-            const headline = src[0]?.headline || '';
-            const url = src[0]?.url || '';
-            next[key] = { ...next[key], news: { sentiment, headline, url, source: 'Finnhub' } };
+        // Build newsData entries for crypto tickers
+        const cryptoNewsUpdate = {};
+        const pos = ['bull', 'surge', 'rally', 'gain', 'rise', 'high', 'pump', 'moon', 'break', 'ath'];
+        const neg = ['bear', 'drop', 'fall', 'crash', 'dump', 'low', 'sell', 'down', 'weak', 'fear'];
+        cryptoTickers.forEach(t => {
+          const relevant = items.filter(item => {
+            const text = (item.headline + ' ' + (item.summary||'')).toLowerCase();
+            return text.includes(t.toLowerCase());
           });
-          return next;
+          const src = relevant.length ? relevant : items.slice(0, 3);
+          if (!src.length) return;
+          let score = 0;
+          src.forEach(item => {
+            const txt = (item.headline + ' ' + (item.summary||'')).toLowerCase();
+            pos.forEach(w => { if (txt.includes(w)) score++; });
+            neg.forEach(w => { if (txt.includes(w)) score--; });
+          });
+          const sentiment = score > 1 ? 0.6 : score < -1 ? -0.6 : score * 0.3;
+          cryptoNewsUpdate[t] = {
+            sentiment,
+            label: sentiment > 0.3 ? 'Bullish' : sentiment < -0.3 ? 'Bearish' : 'Neutral',
+            headline: src[0]?.headline || '',
+            url: src[0]?.url || ''
+          };
         });
+        if (Object.keys(cryptoNewsUpdate).length) {
+          setNewsData(prev => ({ ...(prev||{}), ...cryptoNewsUpdate }));
+        }
       } catch(e) { console.warn('Crypto news:', e.message); }
     })();
 
@@ -2117,14 +2129,18 @@ createRoot(document.getElementById('root')).render(h(App));
       var tickerCell = cells[0];
       var tickerText = tickerCell ? tickerCell.textContent.trim() : '';
       // Only add button if this row's ticker is a user-added one and button not already there
-      if (customTickers.indexOf(tickerText) !== -1 && !row.querySelector('.ct-row-del')) {
+      // Match: textContent may include extra React-rendered text, check if it starts with or equals the ticker
+      var matchedTicker = customTickers.find(function(tk) {
+        return tickerText === tk || tickerText.startsWith(tk + ' ') || tickerText.startsWith(tk + '\n');
+      });
+      if (matchedTicker && !row.querySelector('.ct-row-del')) {
         var btn = document.createElement('button');
         btn.className = 'ct-row-del';
-        btn.title = 'Remove ' + tickerText;
+        btn.title = 'Remove ' + matchedTicker;
         btn.textContent = '✕';
         btn.addEventListener('click', function(e) {
           e.stopPropagation();
-          if (confirm('Remove ' + tickerText + '?')) deleteTicker(tickerText);
+          if (confirm('Remove ' + matchedTicker + '?')) deleteTicker(matchedTicker);
         });
         // Insert after the ticker text in the first cell
         tickerCell.appendChild(btn);
