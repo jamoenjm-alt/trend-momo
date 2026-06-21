@@ -43,6 +43,7 @@ ALL_TICKERS = {
     "IVV":     "IVV",
     "PCT":     "PCT",
     "SOUN":    "SOUN",
+    "SPCX":    "SPCX",
 
     # ── Top 20 US ─────────────────────────────────────────────────────────────
     "AMZN":    "AMZN",
@@ -282,7 +283,6 @@ def main():
     print("=" * 60)
     print()
 
-    # Preserve any prices already in the file (merge, not replace)
     prices = load_existing_static_prices(html_path)
 
     ok_count  = 0
@@ -299,7 +299,6 @@ def main():
             print(f"✓  {len(closes)} closes   last={closes[-1]:,.3f}")
         else:
             err_count += 1
-            # keep previous data if we already had it
             if board_ticker in prices:
                 print("⚠  fetch failed — keeping previous data")
             else:
@@ -321,7 +320,6 @@ def main():
     print("=" * 60)
     print()
 
-    # Summary of what's now in the file
     covered = [t for t in ALL_TICKERS if prices.get(t)]
     missing = [t for t in ALL_TICKERS if not prices.get(t)]
     if missing:
