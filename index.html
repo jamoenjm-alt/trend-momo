@@ -1387,6 +1387,19 @@ function App() {
       try { const res=await fetchT(`https://query1.finance.yahoo.com/v8/finance/chart/${yfSym}?interval=1d&range=2y`,8000); if (!res.ok) return; const json=await res.json(); const result=json?.chart?.result?.[0]; if (!result) return; const closes=result.indicators?.quote?.[0]?.close||[]; const ts=result.timestamp||[]; const pairs=ts.map((t2,i)=>[t2,closes[i]]).filter(([,c])=>c!=null).sort((a,b)=>a[0]-b[0]); if (pairs.length>=21) forexResults[t]=pairs.map(([,c])=>c); } catch {}
     }));
 
+    const fetchBinance = async (ticker) => {
+      // Some coins use different Binance symbols
+      const BN_MAP = { BNB:'BNB', MATIC:'MATIC', WBTC:'WBTC' };
+      try {
+        const sym = (BN_MAP[ticker] || ticker) + 'USDT';
+        const res = await fetchT(`https://api.binance.com/api/v3/klines?symbol=${sym}&interval=1d&limit=500`, 8000);
+        if (!res.ok) return [];
+        const data = await res.json();
+        if (!Array.isArray(data) || !data.length) return [];
+        return data.map(k => parseFloat(k[4])).filter(v => !isNaN(v));
+      } catch(e) { console.warn('Binance', ticker, e.message); return []; }
+    };
+
     const fetchCoinCap = async (coinId) => {
       try { const start=Date.now()-730*24*60*60*1000; const res=await fetchT(`https://api.coincap.io/v2/assets/${coinId}/history?interval=d1&start=${start}&end=${Date.now()}`); if (!res.ok) throw new Error(`CoinCap ${res.status}`); const d=await res.json(); return (d.data||[]).map(p=>parseFloat(p.priceUsd)).filter(v=>!isNaN(v)); }
       catch(e) { console.warn('CoinCap',coinId,e.message); try { const cgMap={bitcoin:'bitcoin',ethereum:'ethereum',solana:'solana',ripple:'ripple','binance-coin':'binancecoin',cardano:'cardano',chainlink:'chainlink','the-open-network':'the-open-network','avalanche-2':'avalanche-2',sui:'sui'}; const cgId=cgMap[coinId]||coinId; const res2=await fetchT(`https://api.coingecko.com/api/v3/coins/${cgId}/market_chart?vs_currency=usd&days=365`); if (!res2.ok) return []; const d2=await res2.json(); return downsampleToDaily(d2.prices||[]); } catch { return []; } }
@@ -1394,25 +1407,30 @@ function App() {
     const cryptoAssets=[...new Set(WATCHLIST.filter(a=>a.cls==='Crypto'&&!staticData[a.ticker]).map(a=>a.ticker))];
     const cryptoMap={};
 
-    // Primary: CoinCap batched (8 per batch, 500ms gap) to avoid rate limits
-    for(let _ci=0;_ci<cryptoAssets.length;_ci+=8){
-      const _batch=cryptoAssets.slice(_ci,_ci+8);
-      const _fetches=await Promise.all(_batch.map(t=>fetchCoinCap(CRYPTO_COINCAP_IDS[t]||t.toLowerCase())));
-      _batch.forEach((t,i)=>{ if(_fetches[i]&&_fetches[i].length>=21) cryptoMap[t]=_fetches[i]; });
-      if(_ci+8<cryptoAssets.length) await new Promise(r=>setTimeout(r,500));
+    // 1st: Binance public API — no key, 1200 req/min, best coverage
+    await Promise.all(cryptoAssets.map(async t=>{
+      const closes=await fetchBinance(t);
+      if(closes.length>=21) cryptoMap[t]=closes;
+    }));
+
+    // 2nd: CoinCap for anything Binance missed (TRX, TON, some alts)
+    const _ccMiss=cryptoAssets.filter(t=>!(cryptoMap[t]&&cryptoMap[t].length>=21));
+    if(_ccMiss.length){
+      const _ccF=await Promise.all(_ccMiss.map(t=>fetchCoinCap(CRYPTO_COINCAP_IDS[t]||t.toLowerCase())));
+      _ccMiss.forEach((t,i)=>{ if(_ccF[i]&&_ccF[i].length>=21) cryptoMap[t]=_ccF[i]; });
     }
 
-    // Fallback: Yahoo Finance (-USD) for anything CoinCap missed
-    const _yfMissed=cryptoAssets.filter(t=>!(cryptoMap[t]&&cryptoMap[t].length>=21));
-    if(_yfMissed.length){
-      await Promise.all(_yfMissed.map(async t=>{
+    // 3rd: Yahoo Finance (-USD) last resort
+    const _yfMiss=cryptoAssets.filter(t=>!(cryptoMap[t]&&cryptoMap[t].length>=21));
+    if(_yfMiss.length){
+      await Promise.all(_yfMiss.map(async t=>{
         try{
           const res=await fetchT(`https://query1.finance.yahoo.com/v8/finance/chart/${t}-USD?range=2y&interval=1d`,8000);
           if(!res.ok) return;
           const d=await res.json();
           const closes=(d.chart?.result?.[0]?.indicators?.quote?.[0]?.close||[]).filter(v=>v!=null&&!isNaN(v));
           if(closes.length>=21) cryptoMap[t]=closes;
-        }catch(e){ console.warn('YF crypto fallback',t,e.message); }
+        }catch(e){}
       }));
     }
 
@@ -1429,43 +1447,50 @@ function App() {
       newData[dataKey(a)]={closes:closes.length?closes:null,sigs:sigs?{...sigs,stability}:null,loading:false};
     }
     // Yahoo Finance fallback for Custom tickers that TD didn't return
-    // Yahoo Finance fallback for user-added tickers (Custom/ASX/Crypto cls) with no data
+    // Fallback for user-added tickers with no data yet
     const customFailed=WATCHLIST.filter(a=>['Custom','ASX','HK'].includes(a.cls)&&!staticData[a.ticker]&&!(newData[dataKey(a)]?.closes));
     if(customFailed.length){
       await Promise.all(customFailed.map(async a=>{
+        let closes=[];
+        // Try 1: Stooq with market suffix (bypasses STOOQ_MAP for custom tickers)
         try{
-          // ASX tickers: append .AX if not already present
-          let sym=a.ticker.replace('.','-');
-          if(a.cls==='ASX'&&!sym.endsWith('.AX')&&!sym.endsWith('-AX')) sym=sym+'.AX';
-          if(a.cls==='HK'&&!sym.includes('.HK')) sym=sym+'.HK';
-          const res=await fetchT(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?range=2y&interval=1d`,8000);
-          if(!res.ok) return;
-          const d=await res.json();
-          const closes=(d.chart?.result?.[0]?.indicators?.quote?.[0]?.close||[]).filter(v=>v!=null&&!isNaN(v));
-          if(closes.length>=21){
-            const sigs=computeSignals(closes);
-            const stability=closes.length>=32?computeStabilityState(closes):'stable';
-            newData[dataKey(a)]={closes,sigs:sigs?{...sigs,stability}:null,loading:false};
+          let stooqSym=a.ticker.toLowerCase();
+          if(a.cls==='ASX') stooqSym+='.au';
+          else if(a.cls==='HK') stooqSym+='.hk';
+          else stooqSym+='.us'; // Default: US market
+          const res=await fetchT(`https://stooq.com/q/d/l/?s=${stooqSym}&i=d`,10000);
+          if(res.ok){
+            const text=await res.text();
+            const lines=text.trim().split('\n').slice(1);
+            if(lines.length>0&&!lines[0].startsWith('No data')){
+              closes=lines.map(l=>parseFloat(l.split(',')[4])).filter(v=>!isNaN(v)&&v>0).reverse();
+            }
           }
-        }catch(e){ console.warn('YF custom fallback',a.ticker,e.message); }
-      }));
-    }
-    // Crypto fallback for user-added Crypto tickers with no data
-    const cryptoCustomFailed=WATCHLIST.filter(a=>a.cls==='Crypto'&&!staticData[a.ticker]&&!(newData[dataKey(a)]?.closes));
-    if(cryptoCustomFailed.length){
-      await Promise.all(cryptoCustomFailed.map(async a=>{
-        try{
-          const sym=a.ticker+'-USD';
-          const res=await fetchT(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?range=2y&interval=1d`,8000);
-          if(!res.ok) return;
-          const d=await res.json();
-          const closes=(d.chart?.result?.[0]?.indicators?.quote?.[0]?.close||[]).filter(v=>v!=null&&!isNaN(v));
-          if(closes.length>=21){
-            const sigs=computeSignals(closes);
-            const stability=closes.length>=32?computeStabilityState(closes):'stable';
-            newData[dataKey(a)]={closes,sigs:sigs?{...sigs,stability}:null,loading:false};
-          }
-        }catch(e){ console.warn('YF crypto custom fallback',a.ticker,e.message); }
+        }catch(e){ console.warn('Stooq custom',a.ticker,e.message); }
+        // Try 2: Yahoo Finance if Stooq failed
+        if(closes.length<21){
+          try{
+            let yfSym=a.ticker.replace('.','-');
+            if(a.cls==='ASX'&&!yfSym.endsWith('.AX')) yfSym+='.AX';
+            else if(a.cls==='HK'&&!yfSym.includes('.HK')) yfSym+='.HK';
+            const res=await fetchT(`https://query1.finance.yahoo.com/v8/finance/chart/${yfSym}?range=2y&interval=1d`,8000);
+            if(res.ok){
+              const d=await res.json();
+              const raw=(d.chart?.result?.[0]?.indicators?.quote?.[0]?.close||[]).filter(v=>v!=null&&!isNaN(v));
+              if(raw.length>=21) closes=raw;
+            }
+          }catch(e){ console.warn('YF custom',a.ticker,e.message); }
+        }
+        // Try 3: Binance for crypto custom tickers
+        if(closes.length<21&&a.cls==='Crypto'){
+          const bnCloses=await fetchBinance(a.ticker);
+          if(bnCloses.length>=21) closes=bnCloses;
+        }
+        if(closes.length>=21){
+          const sigs=computeSignals(closes);
+          const stability=closes.length>=32?computeStabilityState(closes):'stable';
+          newData[dataKey(a)]={closes,sigs:sigs?{...sigs,stability}:null,loading:false};
+        }
       }));
     }
     for (const a of WATCHLIST.filter(a=>(a.cls==='ASX'||a.cls==='HK')&&!staticData[a.ticker])) {
