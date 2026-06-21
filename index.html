@@ -1392,13 +1392,12 @@ function App() {
       catch(e) { console.warn('CoinCap',coinId,e.message); try { const cgMap={bitcoin:'bitcoin',ethereum:'ethereum',solana:'solana',ripple:'ripple','binance-coin':'binancecoin',cardano:'cardano',chainlink:'chainlink','the-open-network':'the-open-network','avalanche-2':'avalanche-2',sui:'sui'}; const cgId=cgMap[coinId]||coinId; const res2=await fetchT(`https://api.coingecko.com/api/v3/coins/${cgId}/market_chart?vs_currency=usd&days=365`); if (!res2.ok) return []; const d2=await res2.json(); return downsampleToDaily(d2.prices||[]); } catch { return []; } }
     };
     const cryptoAssets=[...new Set(WATCHLIST.filter(a=>a.cls==='Crypto'&&!staticData[a.ticker]).map(a=>a.ticker))];
-    const cryptoFetches=await Promise.all(cryptoAssets.map(t=>fetchCoinCap(CRYPTO_COINCAP_IDS[t]||t.toLowerCase())));
-    const cryptoMap=Object.fromEntries(cryptoAssets.map((t,i)=>[t,cryptoFetches[i]||[]]));
+    const cryptoMap={};
 
-    // Yahoo Finance fallback for crypto tickers with no data from CoinCap/CoinGecko
-    const failedCrypto=cryptoAssets.filter(t=>!(cryptoMap[t]&&cryptoMap[t].length>=21));
-    if(failedCrypto.length){
-      await Promise.all(failedCrypto.map(async t=>{
+    // Primary: Yahoo Finance (batched 10 at a time to avoid rate limits)
+    for(let _ci=0;_ci<cryptoAssets.length;_ci+=10){
+      const _batch=cryptoAssets.slice(_ci,_ci+10);
+      await Promise.all(_batch.map(async t=>{
         try{
           const sym=t+'-USD';
           const res=await fetchT(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?range=2y&interval=1d`,8000);
@@ -1406,8 +1405,16 @@ function App() {
           const d=await res.json();
           const closes=(d.chart?.result?.[0]?.indicators?.quote?.[0]?.close||[]).filter(v=>v!=null&&!isNaN(v));
           if(closes.length>=21) cryptoMap[t]=closes;
-        }catch(e){ console.warn('YF crypto fallback',t,e.message); }
+        }catch(e){ console.warn('YF crypto',t,e.message); }
       }));
+      if(_ci+10<cryptoAssets.length) await new Promise(r=>setTimeout(r,300));
+    }
+
+    // Fallback: CoinCap for any Yahoo missed
+    const _coinCapMissed=cryptoAssets.filter(t=>!(cryptoMap[t]&&cryptoMap[t].length>=21));
+    if(_coinCapMissed.length){
+      const _ccFetches=await Promise.all(_coinCapMissed.map(t=>fetchCoinCap(CRYPTO_COINCAP_IDS[t]||t.toLowerCase())));
+      _coinCapMissed.forEach((t,i)=>{ if(_ccFetches[i]&&_ccFetches[i].length>=21) cryptoMap[t]=_ccFetches[i]; });
     }
 
     const avKey = k.alphavantage || AV_KEY_DEFAULT;
@@ -1935,6 +1942,38 @@ createRoot(document.getElementById('root')).render(h(App));
     insertBar();
     if (wireBar() || attempts > 60) clearInterval(iv);
   }, 100);
+})();
+</script>
+<script>
+/* Guaranteed backup: wire Add button after DOM ready */
+(function() {
+  function wireAddBtn() {
+    var btn = document.getElementById('custom-ticker-add');
+    var inp = document.getElementById('custom-ticker-input');
+    if (!btn || !inp || btn.dataset.gwired) return;
+    btn.dataset.gwired = '1';
+    function go() {
+      var t = inp.value.trim().toUpperCase().replace(/[^A-Z0-9.]/g,'');
+      if (!t) return;
+      var list = [];
+      try { list = JSON.parse(localStorage.getItem('customTickers')||'[]'); } catch{}
+      if (list.some(function(x){return x.ticker===t;})) { inp.value=''; return; }
+      var cls = (window._snavFilter && window._snavFilter!=='all') ? window._snavFilter : 'Custom';
+      list.push({ticker:t, name:t, cls:cls});
+      localStorage.setItem('customTickers', JSON.stringify(list));
+      location.reload();
+    }
+    btn.addEventListener('click', go);
+    inp.addEventListener('keydown', function(e){ if(e.key==='Enter') go(); });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wireAddBtn);
+  } else {
+    wireAddBtn();
+  }
+  // Also try after a short delay in case elements load late
+  setTimeout(wireAddBtn, 500);
+  setTimeout(wireAddBtn, 1500);
 })();
 </script>
 </body>
