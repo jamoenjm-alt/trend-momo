@@ -516,6 +516,40 @@
     .tt-header { font-size: 0.6rem !important; padding: 5px 8px !important; }
     .tt-ticker { font-size: 0.65rem !important; padding: 3px 8px 4px !important; }
     .tooltip { padding-bottom: 6px !important; }
+  
+    /* ── Section jump nav ─────────────────────────────────── */
+    #section-nav {
+      position: sticky;
+      top: 0;
+      z-index: 80;
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+      padding: 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      white-space: nowrap;
+    }
+    #section-nav::-webkit-scrollbar { display: none; }
+    .snav-btn {
+      background: none;
+      border: none;
+      color: #64748b;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 8px 10px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .snav-btn:hover { color: #e2e8f0; }
+    .snav-btn.active { color: #60a5fa; border-bottom-color: #3b82f6; }
   </style>
 </head>
 <body>
@@ -1534,6 +1568,128 @@ createRoot(document.getElementById('root')).render(h(App));
   var interval = setInterval(function() {
     attempts++;
     if (wireSignalsPanel() || attempts > 50) clearInterval(interval);
+  }, 100);
+})();
+</script>
+
+<div id="section-nav">
+  <button class="snav-btn" data-cls="Watch">Watchlist</button>
+  <button class="snav-btn" data-cls="Top20">Top 20 US</button>
+  <button class="snav-btn" data-cls="ASX">ASX</button>
+  <button class="snav-btn" data-cls="Index">Indices</button>
+  <button class="snav-btn" data-cls="Crypto">Crypto</button>
+  <button class="snav-btn" data-cls="Commodity">Commodities</button>
+  <button class="snav-btn" data-cls="Forex">Forex</button>
+  <button class="snav-btn" data-cls="HK">Hong Kong</button>
+</div>
+
+<script>
+(function() {
+  // Wait for React to render the section rows, then wire up scroll buttons
+  function wireSectionNav() {
+    var nav = document.getElementById('section-nav');
+    if (!nav) return false;
+    var btns = nav.querySelectorAll('.snav-btn');
+    if (!btns.length) return false;
+
+    // Find section header rows by looking for rows that span the full table
+    // Section headers are rendered as <tr> with a <td colspan> containing the section label
+    // We'll tag them by data-cls when found
+    function findAndTagSections() {
+      // Look for th/td elements that contain only the section label text
+      var allCells = document.querySelectorAll('td[colspan], th[colspan]');
+      var tagged = 0;
+      allCells.forEach(function(cell) {
+        var text = cell.textContent.trim();
+                if (text === 'Watchlist') { cell.closest('tr').id = 'section-Watch'; tagged++; }
+        if (text === 'Top 20 US') { cell.closest('tr').id = 'section-Top20'; tagged++; }
+        if (text === 'ASX') { cell.closest('tr').id = 'section-ASX'; tagged++; }
+        if (text === 'Indices') { cell.closest('tr').id = 'section-Index'; tagged++; }
+        if (text === 'Crypto') { cell.closest('tr').id = 'section-Crypto'; tagged++; }
+        if (text === 'Commodities') { cell.closest('tr').id = 'section-Commodity'; tagged++; }
+        if (text === 'Forex') { cell.closest('tr').id = 'section-Forex'; tagged++; }
+        if (text === 'Hong Kong') { cell.closest('tr').id = 'section-HK'; tagged++; }
+      });
+      return tagged;
+    }
+
+    // Also try finding by text in any table row header
+    function findSectionsByText() {
+      var rows = document.querySelectorAll('tr');
+      var tagged = 0;
+      rows.forEach(function(row) {
+        var text = row.textContent.trim();
+                if (text === 'Watchlist' && !row.id) { row.id = 'section-Watch'; tagged++; }
+        if (text === 'Top 20 US' && !row.id) { row.id = 'section-Top20'; tagged++; }
+        if (text === 'ASX' && !row.id) { row.id = 'section-ASX'; tagged++; }
+        if (text === 'Indices' && !row.id) { row.id = 'section-Index'; tagged++; }
+        if (text === 'Crypto' && !row.id) { row.id = 'section-Crypto'; tagged++; }
+        if (text === 'Commodities' && !row.id) { row.id = 'section-Commodity'; tagged++; }
+        if (text === 'Forex' && !row.id) { row.id = 'section-Forex'; tagged++; }
+        if (text === 'Hong Kong' && !row.id) { row.id = 'section-HK'; tagged++; }
+      });
+      return tagged;
+    }
+
+    var found = findAndTagSections() + findSectionsByText();
+
+    btns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var cls = btn.getAttribute('data-cls');
+        var target = document.getElementById('section-' + cls);
+        if (target) {
+          // Account for sticky nav height
+          var navH = nav.offsetHeight;
+          var topbarH = document.querySelector('.topbar') ? document.querySelector('.topbar').offsetHeight : 0;
+          var offset = topbarH + navH + 4;
+          var y = target.getBoundingClientRect().top + window.scrollY - offset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+          // Highlight active
+          btns.forEach(function(b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+        }
+      });
+    });
+
+    // Highlight active section on scroll
+    window.addEventListener('scroll', function() {
+      var navH = nav.offsetHeight;
+      var topbarH = document.querySelector('.topbar') ? document.querySelector('.topbar').offsetHeight : 0;
+      var offset = topbarH + navH + 20;
+      var active = null;
+            var el_Watch = document.getElementById('section-Watch'); if (el_Watch && el_Watch.getBoundingClientRect().top <= offset) active = 'Watch';
+      var el_Top20 = document.getElementById('section-Top20'); if (el_Top20 && el_Top20.getBoundingClientRect().top <= offset) active = 'Top20';
+      var el_ASX = document.getElementById('section-ASX'); if (el_ASX && el_ASX.getBoundingClientRect().top <= offset) active = 'ASX';
+      var el_Index = document.getElementById('section-Index'); if (el_Index && el_Index.getBoundingClientRect().top <= offset) active = 'Index';
+      var el_Crypto = document.getElementById('section-Crypto'); if (el_Crypto && el_Crypto.getBoundingClientRect().top <= offset) active = 'Crypto';
+      var el_Commodity = document.getElementById('section-Commodity'); if (el_Commodity && el_Commodity.getBoundingClientRect().top <= offset) active = 'Commodity';
+      var el_Forex = document.getElementById('section-Forex'); if (el_Forex && el_Forex.getBoundingClientRect().top <= offset) active = 'Forex';
+      var el_HK = document.getElementById('section-HK'); if (el_HK && el_HK.getBoundingClientRect().top <= offset) active = 'HK';
+      btns.forEach(function(b) {
+        b.classList.toggle('active', b.getAttribute('data-cls') === active);
+      });
+    }, { passive: true });
+
+    return found > 0;
+  }
+
+  // Insert nav right after the topbar
+  function insertNav() {
+    var topbar = document.querySelector('.topbar');
+    if (!topbar) return false;
+    var nav = document.getElementById('section-nav');
+    if (nav && !nav._inserted) {
+      topbar.parentNode.insertBefore(nav, topbar.nextSibling);
+      nav._inserted = true;
+    }
+    return true;
+  }
+
+  var attempts = 0;
+  var iv = setInterval(function() {
+    attempts++;
+    insertNav();
+    if (wireSectionNav() || attempts > 60) clearInterval(iv);
   }, 100);
 })();
 </script>
