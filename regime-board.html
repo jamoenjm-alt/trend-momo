@@ -323,7 +323,11 @@
       margin-bottom: 0px;
     }
     .tt-ticker { color: #f9fafb; font-size: 0.55rem; font-weight: 800; margin-bottom: 3px; display: block; }
-    .tt-table { width: 100%; border-collapse: collapse; }
+    .tt-table { table-layout: fixed; width: 100%; border-collapse: collapse; }
+    .tt-table th:nth-child(1), .tt-table td:nth-child(1) { width: 28%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tt-table th:nth-child(2), .tt-table td:nth-child(2) { width: 20%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tt-table th:nth-child(3), .tt-table td:nth-child(3) { width: 20%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tt-table th:nth-child(4), .tt-table td:nth-child(4) { width: 32%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .tt-table th {
       font-size: 0.42rem;
       font-weight: 600;
