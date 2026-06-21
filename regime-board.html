@@ -300,37 +300,38 @@
       z-index: 9999;
       background: #1f2937;
       border: 1px solid #374151;
-      border-radius: 8px;
-      padding: 14px 16px;
-      min-width: 220px;
+      border-radius: 4px;
+      padding: 4px 6px;
+      min-width: 110px;
+      max-width: 160px;
       pointer-events: none;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
       color: #f9fafb;
     }
     .tt-header {
-      font-size: 0.7rem;
+      font-size: 0.45rem;
       font-weight: 700;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       color: #9ca3af;
-      margin-bottom: 2px;
+      margin-bottom: 0px;
     }
-    .tt-ticker { color: #f9fafb; font-size: 0.95rem; font-weight: 800; margin-bottom: 10px; display: block; }
+    .tt-ticker { color: #f9fafb; font-size: 0.55rem; font-weight: 800; margin-bottom: 3px; display: block; }
     .tt-table { width: 100%; border-collapse: collapse; }
     .tt-table th {
-      font-size: 0.65rem;
+      font-size: 0.42rem;
       font-weight: 600;
-      letter-spacing: 0.07em;
+      letter-spacing: 0.05em;
       color: #9ca3af;
       text-align: left;
-      padding: 0 6px 5px;
+      padding: 0 2px 2px;
       border-bottom: 1px solid #374151;
       background: transparent;
       border-right: none;
     }
     .tt-table td {
-      font-size: 0.75rem;
-      padding: 4px 6px;
+      font-size: 0.45rem;
+      padding: 1px 2px;
       border: none;
       vertical-align: middle;
     }
@@ -338,9 +339,9 @@
     .tt-pct  { font-weight: 700; text-align: right; }
     .tt-bull { color: #4ade80; }
     .tt-bear { color: #f87171; }
-    .tt-bar-cell { width: 60px; }
+    .tt-bar-cell { width: 20px; }
     .tt-bar-track {
-      height: 3px;
+      height: 2px;
       background: #374151;
       border-radius: 2px;
       position: relative;
@@ -352,8 +353,8 @@
       border-radius: 2px;
     }
     .tt-price {
-      margin-top: 10px;
-      padding-top: 8px;
+      margin-top: 3px;
+      padding-top: 3px;
       border-top: 1px solid #374151;
       display: flex;
       justify-content: space-between;
@@ -514,12 +515,12 @@ const WATCHLIST = [
 
 const SECTIONS = [
   { label: 'Top 20 US',       cls: 'Top20'     },
+  { label: 'ASX',             cls: 'ASX'       },
+  { label: 'Global Indices',  cls: 'Index'     },
   { label: 'Crypto',          cls: 'Crypto'    },
   { label: 'Commodities',     cls: 'Commodity' },
-  { label: 'ASX',             cls: 'ASX'       },
-  { label: 'Hong Kong',       cls: 'HK'        },
-  { label: 'Global Indices',  cls: 'Index'     },
   { label: 'Forex',           cls: 'Forex'     },
+  { label: 'Hong Kong',       cls: 'HK'        },
   { label: 'Watchlist',       cls: 'Watch'     },
 ];
 
