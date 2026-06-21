@@ -504,6 +504,13 @@
     .dot-unstable-red { background: #fca5a5; border: 1px solid #f87171; }
     .sp-dot-lr        { background: #fca5a5; border: 1px solid #f87171; }
     .htu-dot-lr       { background: #fca5a5; border: 1px solid #f87171; }
+  
+    /* force How-to-Use regime table to respect its container */
+    table.htu-reg-table { min-width: 0 !important; width: 100% !important; }
+  
+    .htu-badge-list { margin-top: 6px; }
+    .htu-badge-row { display: flex; flex-direction: column; gap: 3px; margin-bottom: 9px; font-size: 0.74rem; color: #374151; line-height: 1.5; }
+    .htu-badge-row .htu-badge { align-self: flex-start; }
   </style>
 </head>
 <body>
@@ -1447,13 +1454,13 @@ createRoot(document.getElementById('root')).render(h(App));
         </div>
         <div class="htu-block">
           <h3>The Regime Badges</h3>
-          <table class="htu-reg-table">
-            <tr><td><span class="htu-badge htu-sb">STRONG BULL</span></td><td>All signals bullish. Highest conviction uptrend.</td></tr>
-            <tr><td><span class="htu-badge htu-wb">WEAK BULL</span></td><td>Mostly bullish. Trend up, moderate conviction.</td></tr>
-            <tr><td><span class="htu-badge htu-sw">SIDEWAYS</span></td><td>Mixed signals. Choppy — wait for clarity.</td></tr>
-            <tr><td><span class="htu-badge htu-wbr">WEAK BEAR</span></td><td>Mostly bearish. Reduce long exposure.</td></tr>
-            <tr><td><span class="htu-badge htu-sbr">STRONG BEAR</span></td><td>All signals bearish. Exit longs.</td></tr>
-          </table>
+          <div class="htu-badge-list">
+            <div class="htu-badge-row"><span class="htu-badge htu-sb">STRONG BULL</span><span>All signals bullish. Highest conviction uptrend.</span></div>
+            <div class="htu-badge-row"><span class="htu-badge htu-wb">WEAK BULL</span><span>Mostly bullish. Trend up, moderate conviction.</span></div>
+            <div class="htu-badge-row"><span class="htu-badge htu-sw">SIDEWAYS</span><span>Mixed signals. Choppy — wait for clarity.</span></div>
+            <div class="htu-badge-row"><span class="htu-badge htu-wbr">WEAK BEAR</span><span>Mostly bearish. Reduce long exposure.</span></div>
+            <div class="htu-badge-row"><span class="htu-badge htu-sbr">STRONG BEAR</span><span>All signals bearish. Exit longs.</span></div>
+          </div>
         </div>
         <div class="htu-block">
           <h3>The Stability Dot</h3>
