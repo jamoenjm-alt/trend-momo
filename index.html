@@ -1394,20 +1394,7 @@ function App() {
     const cryptoAssets=[...new Set(WATCHLIST.filter(a=>a.cls==='Crypto'&&!staticData[a.ticker]).map(a=>a.ticker))];
     const cryptoFetches=await Promise.all(cryptoAssets.map(t=>fetchCoinCap(CRYPTO_COINCAP_IDS[t]||t.toLowerCase())));
     const cryptoMap=Object.fromEntries(cryptoAssets.map((t,i)=>[t,cryptoFetches[i]||[]]));
-    // Yahoo Finance fallback for crypto tickers with no data from CoinCap/CoinGecko
-    const failedCrypto=cryptoAssets.filter(t=>!(cryptoMap[t]&&cryptoMap[t].length>=21));
-    if(failedCrypto.length){
-      await Promise.all(failedCrypto.map(async t=>{
-        try{
-          const sym=t+'-USD';
-          const res=await fetchT(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?range=2y&interval=1d`,8000);
-          if(!res.ok) return;
-          const d=await res.json();
-          const closes=(d.chart?.result?.[0]?.indicators?.quote?.[0]?.close||[]).filter(v=>v!=null&&!isNaN(v));
-          if(closes.length>=21) cryptoMap[t]=closes;
-        }catch(e){ console.warn('YF crypto fallback',t,e.message); }
-      }));
-    }
+
     // Yahoo Finance fallback for crypto tickers with no data from CoinCap/CoinGecko
     const failedCrypto=cryptoAssets.filter(t=>!(cryptoMap[t]&&cryptoMap[t].length>=21));
     if(failedCrypto.length){
