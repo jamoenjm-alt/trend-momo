@@ -1234,10 +1234,13 @@ const AV_KEY_DEFAULT = 'M38DSB85MD33DQMB';
       const r = await fetchT(`https://api.twelvedata.com/time_series?symbol=${sym}&interval=1day&outputsize=300&apikey=${TD_KEY}`, 8000);
       if (r && r.ok) {
         const d = await r.json();
+        console.log('[add] TD response for', sym, ':', d.status || d.code, d.message || (d.values ? d.values.length+'pts' : 'no values'));
         if (d.values && d.values.length >= 21)
           closes = d.values.map(v => parseFloat(v.close)).filter(v => !isNaN(v)).reverse();
+      } else if (r) {
+        console.warn('[add] TD HTTP', r.status, 'for', sym);
       }
-    } catch(e) { console.warn('_fetchTicker TD', sym, e.message); }
+    } catch(e) { console.warn('[add] TD error', sym, e.message); }
     // 2. Binance (crypto, no key)
     if (closes.length < 21) {
       try {
@@ -1258,9 +1261,11 @@ const AV_KEY_DEFAULT = 'M38DSB85MD33DQMB';
         if (r3 && r3.ok) {
           const d3 = await r3.json();
           const ts = d3['Time Series (Daily)'];
+          const info = d3['Information'] || d3['Note'] || (ts ? Object.keys(ts).length+'days' : 'no data');
+          console.log('[add] AV response for', sym, ':', info);
           if (ts) closes = Object.entries(ts).sort((a,b)=>a[0]>b[0]?1:-1).map(e=>parseFloat(e[1]['4. close'])).filter(v=>!isNaN(v));
         }
-      } catch(e) { console.warn('_fetchTicker AV', sym, e.message); }
+      } catch(e) { console.warn('[add] AV error', sym, e.message); }
     }
     return { closes, cls };
   };
@@ -1649,7 +1654,7 @@ function App() {
     setNewsData(avKey ? null : {});
     if (avKey) {
       setNewsLoading(true);
-      (async () => { try { const newsTickers=[...new Set(WATCHLIST.filter(a=>!['Crypto','Commodity','Forex'].includes(a.cls)).map(a=>a.ticker))]; const fhKey=k.finnhub||FH_KEY_DEFAULT; const newsResults=await fetchAllNews(newsTickers,avKey,fhKey); setNewsData(newsResults); } catch(e) { console.warn('News fetch:',e.message); setNewsData({}); } finally { setNewsLoading(false); } })();
+      (async () => { try { const newsTickers=[...new Set(WATCHLIST.filter(a=>!['Crypto','Commodity','Forex'].includes(a.cls)).map(a=>a.ticker))]; const fhKey=k.finnhub||FH_KEY_DEFAULT; const newsResults=await fetchAllNews(newsTickers,avKey,fhKey); setNewsData(prev=>({...(prev||{}),...newsResults})); } catch(e) { console.warn('News fetch:',e.message); setNewsData({}); } finally { setNewsLoading(false); } })();
     }
   }, []);
 
