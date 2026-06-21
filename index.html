@@ -1447,45 +1447,77 @@ function App() {
       newData[dataKey(a)]={closes:closes.length?closes:null,sigs:sigs?{...sigs,stability}:null,loading:false};
     }
     // Yahoo Finance fallback for Custom tickers that TD didn't return
-    // Fallback for user-added tickers with no data yet
-    const customFailed=WATCHLIST.filter(a=>['Custom','ASX','HK'].includes(a.cls)&&!staticData[a.ticker]&&!(newData[dataKey(a)]?.closes));
+    // Universal fallback: tries every available source for ANY user-added ticker
+    const customFailed=WATCHLIST.filter(a=>!staticData[a.ticker]&&!(newData[dataKey(a)]?.closes)&&['Custom','ASX','HK','Crypto','Watch','Top20'].includes(a.cls)&&!cryptoMap[a.ticker]);
     if(customFailed.length){
       await Promise.all(customFailed.map(async a=>{
         let closes=[];
-        // Try 1: Stooq with market suffix (bypasses STOOQ_MAP for custom tickers)
-        try{
-          let stooqSym=a.ticker.toLowerCase();
-          if(a.cls==='ASX') stooqSym+='.au';
-          else if(a.cls==='HK') stooqSym+='.hk';
-          else stooqSym+='.us'; // Default: US market
-          const res=await fetchT(`https://stooq.com/q/d/l/?s=${stooqSym}&i=d`,10000);
-          if(res.ok){
-            const text=await res.text();
-            const lines=text.trim().split('\n').slice(1);
-            if(lines.length>0&&!lines[0].startsWith('No data')){
-              closes=lines.map(l=>parseFloat(l.split(',')[4])).filter(v=>!isNaN(v)&&v>0).reverse();
-            }
-          }
-        }catch(e){ console.warn('Stooq custom',a.ticker,e.message); }
-        // Try 2: Yahoo Finance if Stooq failed
-        if(closes.length<21){
+        const t=a.ticker;
+        const isCrypto=a.cls==='Crypto';
+        const isASX=a.cls==='ASX'||t.endsWith('.AX');
+        const isHK=a.cls==='HK'||t.endsWith('.HK');
+
+        // 1. Binance (crypto, no key, fast)
+        if(isCrypto&&closes.length<21){
+          closes=await fetchBinance(t);
+        }
+
+        // 2. CoinCap (crypto alt)
+        if(isCrypto&&closes.length<21){
+          const cc=await fetchCoinCap(CRYPTO_COINCAP_IDS[t]||t.toLowerCase());
+          if(cc.length>=21) closes=cc;
+        }
+
+        // 3. Yahoo Finance -USD (crypto last resort)
+        if(isCrypto&&closes.length<21){
           try{
-            let yfSym=a.ticker.replace('.','-');
-            if(a.cls==='ASX'&&!yfSym.endsWith('.AX')) yfSym+='.AX';
-            else if(a.cls==='HK'&&!yfSym.includes('.HK')) yfSym+='.HK';
-            const res=await fetchT(`https://query1.finance.yahoo.com/v8/finance/chart/${yfSym}?range=2y&interval=1d`,8000);
+            const res=await fetchT(`https://query1.finance.yahoo.com/v8/finance/chart/${t}-USD?range=2y&interval=1d`,8000);
             if(res.ok){
               const d=await res.json();
               const raw=(d.chart?.result?.[0]?.indicators?.quote?.[0]?.close||[]).filter(v=>v!=null&&!isNaN(v));
               if(raw.length>=21) closes=raw;
             }
-          }catch(e){ console.warn('YF custom',a.ticker,e.message); }
+          }catch{}
         }
-        // Try 3: Binance for crypto custom tickers
-        if(closes.length<21&&a.cls==='Crypto'){
-          const bnCloses=await fetchBinance(a.ticker);
-          if(bnCloses.length>=21) closes=bnCloses;
+
+        // 4. Alpha Vantage — US stock (works for most global exchanges too)
+        if(!isCrypto&&closes.length<21&&avKey){
+          try{
+            const res=await fetchT(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${t}&outputsize=full&apikey=${avKey}`,15000);
+            if(res.ok){
+              const json=await res.json();
+              const ts=json['Time Series (Daily)'];
+              if(ts) closes=Object.entries(ts).sort(([a],[b])=>a>b?1:-1).map(([,v])=>parseFloat(v['4. close'])).filter(v=>!isNaN(v));
+            }
+          }catch(e){ console.warn('AV fallback',t,e.message); }
         }
+
+        // 5. Alpha Vantage with .AUS suffix (ASX tickers)
+        if(isASX&&closes.length<21&&avKey){
+          try{
+            const avSym=t.replace('.AX','')+'.AUS';
+            const res=await fetchT(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${avSym}&outputsize=full&apikey=${avKey}`,15000);
+            if(res.ok){
+              const json=await res.json();
+              const ts=json['Time Series (Daily)'];
+              if(ts) closes=Object.entries(ts).sort(([a],[b])=>a>b?1:-1).map(([,v])=>parseFloat(v['4. close'])).filter(v=>!isNaN(v));
+            }
+          }catch{}
+        }
+
+        // 6. Alpha Vantage with .HKG suffix (HK tickers)
+        if(isHK&&closes.length<21&&avKey){
+          try{
+            const avSym=t.replace('.HK','')+'.HKG';
+            const res=await fetchT(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${avSym}&outputsize=full&apikey=${avKey}`,15000);
+            if(res.ok){
+              const json=await res.json();
+              const ts=json['Time Series (Daily)'];
+              if(ts) closes=Object.entries(ts).sort(([a],[b])=>a>b?1:-1).map(([,v])=>parseFloat(v['4. close'])).filter(v=>!isNaN(v));
+            }
+          }catch{}
+        }
+
         if(closes.length>=21){
           const sigs=computeSignals(closes);
           const stability=closes.length>=32?computeStabilityState(closes):'stable';
@@ -1497,6 +1529,48 @@ function App() {
       if (!newData[dataKey(a)]?.closes) { const closes=await fetchStooq(a.ticker); if (closes.length>=21) { const sigs=computeSignals(closes); const stability=closes.length>=32?computeStabilityState(closes):'stable'; newData[dataKey(a)]={closes,sigs:sigs?{...sigs,stability}:null,loading:false}; } }
     }
     setData(newData); setLastFetch(new Date());
+
+    // Crypto news via Finnhub (fire-and-forget, same key already in app)
+    (async () => {
+      try {
+        const fhK = typeof FH_KEY_DEFAULT !== 'undefined' ? FH_KEY_DEFAULT : '';
+        if (!fhK) return;
+        const res = await fetchT(`https://finnhub.io/api/v1/news?category=crypto&token=${fhK}`, 8000);
+        if (!res.ok) return;
+        const items = await res.json();
+        if (!Array.isArray(items) || !items.length) return;
+        // Build per-ticker sentiment from recent headlines mentioning the ticker name/symbol
+        const cryptoTickers = WATCHLIST.filter(a => a.cls === 'Crypto').map(a => a.ticker);
+        setData(prev => {
+          const next = { ...prev };
+          cryptoTickers.forEach(t => {
+            const key = t + '__Crypto';
+            if (!next[key]) return;
+            // Find articles mentioning this ticker or its name
+            const relevant = items.filter(item => {
+              const text = (item.headline + ' ' + (item.summary||'')).toLowerCase();
+              return text.includes(t.toLowerCase());
+            });
+            const src = relevant.length ? relevant : items.slice(0, 3);
+            if (!src.length) return;
+            // Simple sentiment: positive words vs negative
+            const pos = ['bull', 'surge', 'rally', 'gain', 'rise', 'high', 'pump', 'moon', 'break', 'ath'];
+            const neg = ['bear', 'drop', 'fall', 'crash', 'dump', 'low', 'sell', 'down', 'weak', 'fear'];
+            let score = 0;
+            src.forEach(item => {
+              const txt = (item.headline + ' ' + (item.summary||'')).toLowerCase();
+              pos.forEach(w => { if (txt.includes(w)) score++; });
+              neg.forEach(w => { if (txt.includes(w)) score--; });
+            });
+            const sentiment = score > 1 ? 0.6 : score < -1 ? -0.6 : score * 0.3;
+            const headline = src[0]?.headline || '';
+            const url = src[0]?.url || '';
+            next[key] = { ...next[key], news: { sentiment, headline, url, source: 'Finnhub' } };
+          });
+          return next;
+        });
+      } catch(e) { console.warn('Crypto news:', e.message); }
+    })();
 
     const AV_INTL_MAP=[{ticker:'MQG',avSym:'MQG.AUS'},{ticker:'A2M',avSym:'A2M.AUS'},{ticker:'ANZ',avSym:'ANZ.AUS'},{ticker:'CBA',avSym:'CBA.AUS'},{ticker:'BHP',avSym:'BHP.AUS'},{ticker:'WBC',avSym:'WBC.AUS'},{ticker:'NAB',avSym:'NAB.AUS'},{ticker:'WES',avSym:'WES.AUS'},{ticker:'CSL',avSym:'CSL.AUS'},{ticker:'WDS',avSym:'WDS.AUS'},{ticker:'FMG',avSym:'FMG.AUS'},{ticker:'1211.HK',avSym:'1211.HKG'}];
     if (avKey) {
