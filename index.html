@@ -882,19 +882,47 @@ async function fetchAVNews(tickers, avKey) {
 }
 
 // Orchestrate: AV first (more accurate), fill gaps with Yahoo Finance
-async function fetchAllNews(tickers, avKey) {
+async function fetchFinnhubNews(ticker, key) {
+  if (!key) return null;
+  const sym = ticker === 'BRK.B' ? 'BRK-B' : ticker;
+  const to   = new Date().toISOString().slice(0, 10);
+  const from = new Date(Date.now() - 7 * 864e5).toISOString().slice(0, 10);
+  try {
+    const res = await fetchT(
+      `https://finnhub.io/api/v1/company-news?symbol=${sym}&from=${from}&to=${to}&token=${key}`,
+      8000
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (!Array.isArray(json) || !json.length) return 'No News';
+    const titles = json.slice(0, 20).map(a => a.headline || '').filter(Boolean);
+    return scoreHeadlines(titles);
+  } catch { return null; }
+}
+
+async function fetchAllNews(tickers, avKey, fhKey) {
   const results = {};
 
-  // Step 1: Try Alpha Vantage (25 calls/day cap — may be exhausted)
-  if (avKey) {
-    const avResults = await fetchAVNews(tickers, avKey);
+  // Step 1: Finnhub — CORS-enabled, 60 req/min free, best coverage
+  if (fhKey) {
+    for (const t of tickers) {
+      const r = await fetchFinnhubNews(t, fhKey);
+      if (r) results[t] = r;
+      await new Promise(r => setTimeout(r, 300)); // ~3/sec, well under 60/min
+    }
+  }
+
+  // Step 2: Alpha Vantage for any still missing (25 calls/day cap)
+  const avMissing = tickers.filter(t => !results[t]);
+  if (avKey && avMissing.length) {
+    const avResults = await fetchAVNews(avMissing, avKey);
     Object.assign(results, avResults);
   }
 
-  // Step 2: Yahoo Finance for any ticker AV missed (no key, no rate limit)
-  const missing = tickers.filter(t => !results[t]);
-  if (missing.length) {
-    await Promise.all(missing.map(async (t) => {
+  // Step 3: Yahoo Finance fallback
+  const yfMissing = tickers.filter(t => !results[t]);
+  if (yfMissing.length) {
+    await Promise.all(yfMissing.map(async (t) => {
       const r = await fetchYFNews(t);
       results[t] = r || 'No News';
     }));
@@ -904,13 +932,14 @@ async function fetchAllNews(tickers, avKey) {
 }
 
 // @@STATIC_PRICES_START@@
-// All prices last updated — run update-prices.py
+// Prices not yet loaded — run: python update-prices.py
 window.STATIC_PRICES = {};
 // @@STATIC_PRICES_END@@
 
 
 const TD_KEY = 'd1bf517795d040938e812582ae1587ea';
 const AV_KEY_DEFAULT = 'M38DSB85MD33DQMB';
+const FH_KEY_DEFAULT = '';
 
 const YF_SYMBOL_MAP = {
   'BRK.B':  'BRK-B',
@@ -1045,12 +1074,14 @@ function TrendLadder({ asset, sigs, x, y }) {
 function KeyConfig({ keys, onSave }) {
   const [td, setTd] = useState(keys.twelvedata || '');
   const [av, setAv] = useState(keys.alphavantage || '');
+  const [fh, setFh] = useState(keys.finnhub || '');
   return h('div', { className: 'key-panel' },
     h('h3', null, '⚙ API Key Configuration'),
-    h('p', null, 'Crypto via CoinCap — no key needed. US stocks: free Twelve Data key. News: free Alpha Vantage key.'),
+    h('p', null, 'Crypto via CoinCap — no key needed. US stocks: free Twelve Data key. News: Finnhub key recommended (60 req/min free).'),
     h('div', { className: 'key-row' }, h('label', null, 'Twelve Data API key'), h('input', { type: 'text', placeholder: 'Paste Twelve Data key…', value: td, onChange: e => setTd(e.target.value), spellCheck: false })),
-    h('div', { className: 'key-row' }, h('label', null, 'Alpha Vantage key (News)'), h('input', { type: 'text', placeholder: 'alphavantage.co free key', value: av, onChange: e => setAv(e.target.value), spellCheck: false })),
-    h('button', { className: 'key-save', onClick: () => onSave({ twelvedata: td.trim(), alphavantage: av.trim() }) }, 'Save & Load Data')
+    h('div', { className: 'key-row' }, h('label', null, 'Finnhub key (News — recommended)'), h('input', { type: 'text', placeholder: 'finnhub.io free key', value: fh, onChange: e => setFh(e.target.value), spellCheck: false })),
+    h('div', { className: 'key-row' }, h('label', null, 'Alpha Vantage key (News fallback)'), h('input', { type: 'text', placeholder: 'alphavantage.co free key', value: av, onChange: e => setAv(e.target.value), spellCheck: false })),
+    h('button', { className: 'key-save', onClick: () => onSave({ twelvedata: td.trim(), alphavantage: av.trim(), finnhub: fh.trim() }) }, 'Save & Load Data')
   );
 }
 
@@ -1125,7 +1156,7 @@ function App() {
     setNewsData(avKey ? null : {});
     if (avKey) {
       setNewsLoading(true);
-      (async () => { try { const newsTickers=[...new Set(WATCHLIST.filter(a=>!['Crypto','Commodity','Forex'].includes(a.cls)).map(a=>a.ticker))]; const newsResults=await fetchAllNews(newsTickers,avKey); setNewsData(newsResults); } catch(e) { console.warn('News fetch:',e.message); setNewsData({}); } finally { setNewsLoading(false); } })();
+      (async () => { try { const newsTickers=[...new Set(WATCHLIST.filter(a=>!['Crypto','Commodity','Forex'].includes(a.cls)).map(a=>a.ticker))]; const fhKey=k.finnhub||FH_KEY_DEFAULT; const newsResults=await fetchAllNews(newsTickers,avKey,fhKey); setNewsData(newsResults); } catch(e) { console.warn('News fetch:',e.message); setNewsData({}); } finally { setNewsLoading(false); } })();
     }
   }, []);
 

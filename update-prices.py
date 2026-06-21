@@ -126,10 +126,11 @@ REQUEST_PAUSE = 0.4
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-def fetch_yahoo(yahoo_symbol: str, days: int = HISTORY_DAYS) -> list:
+def fetch_yahoo(yahoo_symbol: str, days: int = HISTORY_DAYS, retries: int = 3) -> list:
     """
     Fetch daily close prices from Yahoo Finance v8 API.
     Returns list of floats (oldest first), or [] on error.
+    Retries up to `retries` times with exponential backoff on connection errors.
     """
     end   = int(datetime.now(timezone.utc).timestamp())
     start = int((datetime.now(timezone.utc) - timedelta(days=days)).timestamp())
@@ -147,36 +148,44 @@ def fetch_yahoo(yahoo_symbol: str, days: int = HISTORY_DAYS) -> list:
         "Accept":          "application/json",
         "Accept-Language": "en-US,en;q=0.9",
     }
-    req = urllib.request.Request(url, headers=headers)
-    try:
-        with urllib.request.urlopen(req, timeout=20) as resp:
-            raw = json.loads(resp.read().decode("utf-8"))
 
-        result = raw.get("chart", {}).get("result", [None])[0]
-        if not result:
-            err = raw.get("chart", {}).get("error", {})
-            print(f"no data ({err.get('description', 'empty response')})")
-            return []
+    for attempt in range(retries):
+        if attempt > 0:
+            wait = 2 ** attempt  # 2s, 4s
+            time.sleep(wait)
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                raw = json.loads(resp.read().decode("utf-8"))
 
-        closes     = result["indicators"]["quote"][0].get("close", [])
-        timestamps = result.get("timestamp", [])
+            result = raw.get("chart", {}).get("result", [None])[0]
+            if not result:
+                err = raw.get("chart", {}).get("error", {})
+                print(f"no data ({err.get('description', 'empty response')})")
+                return []
 
-        # Pair, filter nulls, sort oldest → newest
-        pairs = sorted(
-            ((ts, c) for ts, c in zip(timestamps, closes) if c is not None),
-            key=lambda x: x[0],
-        )
-        return [round(c, 4) for _, c in pairs]
+            closes     = result["indicators"]["quote"][0].get("close", [])
+            timestamps = result.get("timestamp", [])
 
-    except Exception as e:
-        print(f"ERROR: {e}")
-        return []
+            pairs = sorted(
+                ((ts, c) for ts, c in zip(timestamps, closes) if c is not None),
+                key=lambda x: x[0],
+            )
+            return [round(c, 4) for _, c in pairs]
+
+        except Exception as e:
+            if attempt < retries - 1:
+                print(f"retry {attempt+1}...", end=" ", flush=True)
+            else:
+                print(f"ERROR: {e}")
+    return []
 
 
 def inject_into_html(prices: dict, html_path: str):
     """
     Replace the @@STATIC_PRICES_START@@ … @@STATIC_PRICES_END@@ block
     in regime-board.html with the latest prices dict.
+    Uses plain string splitting (not regex) to avoid corruption of the React tail.
     """
     with open(html_path, "r", encoding="utf-8") as f:
         content = f.read()
@@ -184,30 +193,42 @@ def inject_into_html(prices: dict, html_path: str):
     marker_start = "// @@STATIC_PRICES_START@@"
     marker_end   = "// @@STATIC_PRICES_END@@"
 
-    if marker_start not in content:
-        print("\n✗  Could not find injection marker in regime-board.html.")
-        print("   The HTML file may have been incorrectly modified.")
+    start_idx = content.find(marker_start)
+    end_idx   = content.find(marker_end)
+
+    if start_idx == -1:
+        print("\n✗  START marker not found in regime-board.html.")
         sys.exit(1)
+    if end_idx == -1:
+        print("\n✗  END marker not found in regime-board.html.")
+        print("   Run the rebuild script or contact support.")
+        sys.exit(1)
+
+    before = content[:start_idx]
+    after  = content[end_idx + len(marker_end):]
 
     ts       = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     json_str = json.dumps(prices, separators=(",", ":"))
 
-    new_block = (
-        f"{marker_start}\n"
-        f"// All prices last updated {ts} by update-prices.py\n"
-        f"window.STATIC_PRICES = {json_str};\n"
-        f"{marker_end}"
-    )
-
-    updated = re.sub(
-        rf"{re.escape(marker_start)}.*?{re.escape(marker_end)}",
-        new_block,
-        content,
-        flags=re.DOTALL,
+    updated = (
+        before +
+        marker_start + "\n" +
+        f"// All prices last updated {ts} by update-prices.py\n" +
+        f"window.STATIC_PRICES = {json_str};\n" +
+        marker_end +
+        after
     )
 
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(updated)
+
+
+def sync_index(html_path: str):
+    """Copy regime-board.html to index.html so GitHub Pages serves the latest version."""
+    import shutil
+    index_path = os.path.join(os.path.dirname(html_path), "index.html")
+    shutil.copy2(html_path, index_path)
+    print(f"  ✓  index.html synced")
 
 
 def load_existing_static_prices(html_path: str) -> dict:
@@ -273,6 +294,7 @@ def main():
         prices = load_existing_static_prices(html_path)
         prices[board_name] = closes
         inject_into_html(prices, html_path)
+        sync_index(html_path)
         print(f"\n✓  {board_name} injected into regime-board.html")
         return
 
@@ -311,12 +333,13 @@ def main():
         sys.exit(1)
 
     inject_into_html(prices, html_path)
+    sync_index(html_path)
 
     print()
     print("=" * 60)
     ts = datetime.now().strftime("%H:%M:%S")
     print(f"  ✓  Done at {ts}  ({ok_count} ok, {err_count} failed)")
-    print(f"  regime-board.html updated — open it in your browser.")
+    print(f"  regime-board.html + index.html updated.")
     print("=" * 60)
     print()
 
