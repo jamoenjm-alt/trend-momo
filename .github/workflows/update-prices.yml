@@ -1,0 +1,30 @@
+name: Daily Price Update
+
+on:
+  schedule:
+    - cron: '0 22 * * *'   # 22:00 UTC = 8am AEST / 10pm London
+  workflow_dispatch:         # allows manual trigger from GitHub UI
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Fetch prices and bake into HTML
+        run: python update-prices.py
+
+      - name: Commit updated HTML
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add regime-board.html
+          git diff --cached --quiet || git commit -m "chore: daily price update $(date -u '+%Y-%m-%d')"
+          git push
