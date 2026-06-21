@@ -1928,7 +1928,8 @@ createRoot(document.getElementById('root')).render(h(App));
         return;
       }
       // Add directly — data fetch will show NO DATA if ticker is invalid
-      list.push({ ticker: ticker, name: ticker });
+      var activeCls = (window._snavFilter && window._snavFilter !== 'all') ? window._snavFilter : 'Custom';
+      list.push({ ticker: ticker, name: ticker, cls: activeCls });
       saveCustomTickers(list);
       location.reload();
     }
