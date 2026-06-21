@@ -478,14 +478,14 @@
     #how-to-use summary .htu-arrow { font-size: 0.6rem; opacity: 0.5; transition: transform 0.2s; }
     #how-to-use[open] summary .htu-arrow { transform: rotate(90deg); }
     .htu-body { padding: 16px 18px 20px; }
-    .htu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 18px; }
-    .htu-block { font-size: 0.77rem; line-height: 1.65; color: #374151; }
-    .htu-block h3 { font-size: 0.68rem; font-weight: 700; color: #1e3a8a; margin-bottom: 7px; letter-spacing: 0.07em; text-transform: uppercase; border-bottom: 1px solid #dde5f0; padding-bottom: 4px; }
+    .htu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
+    .htu-block { font-size: 0.77rem; line-height: 1.65; color: #374151; min-width: 0; overflow: hidden; }
+    .htu-block h3 { font-size: 0.65rem; font-weight: 800; color: #1e3a8a; margin: 0 0 8px; letter-spacing: 0.07em; text-transform: uppercase; border-bottom: 1px solid #dde5f0; padding-bottom: 5px; }
     .htu-block p { margin-bottom: 5px; }
     .htu-wide { grid-column: 1 / -1; }
-    .htu-reg-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+    .htu-reg-table { width: 100%; border-collapse: collapse; margin-top: 5px; table-layout: fixed; }
     .htu-reg-table td { padding: 4px 8px; vertical-align: middle; font-size: 0.74rem; }
-    .htu-reg-table td:first-child { width: 120px; }
+    .htu-reg-table td:first-child { width: 110px; }
     .htu-badge { display: inline-block; border-radius: 4px; font-weight: 800; font-size: 0.6rem; letter-spacing: 0.04em; padding: 2px 8px; text-align: center; white-space: nowrap; }
     .htu-sb  { background: #15803d; color: #fff; }
     .htu-wb  { background: #bbf7d0; color: #14532d; }
@@ -499,6 +499,11 @@
     .htu-dot-vu { background: #dc2626; }
     .htu-dot-row { display: flex; align-items: flex-start; margin-bottom: 5px; gap: 4px; }
     .htu-dot-row .htu-sdot { margin-top: 3px; }
+  
+    /* ── light red (unstable-red) — 5th stability dot state ── */
+    .dot-unstable-red { background: #fca5a5; border: 1px solid #f87171; }
+    .sp-dot-lr        { background: #fca5a5; border: 1px solid #f87171; }
+    .htu-dot-lr       { background: #fca5a5; border: 1px solid #f87171; }
   </style>
 </head>
 <body>
@@ -1435,7 +1440,7 @@ createRoot(document.getElementById('root')).render(h(App));
         </div>
         <div class="htu-block">
           <h3>The Four Signal Columns</h3>
-          <p><strong>Coal Mine Canary</strong> — Earliest warning (3/10 &amp; 5/15 day MAs). Turns first. Expect false alarms.</p>
+          <p><strong>1–2 Week (Canary)</strong> — Earliest warning (3/10 &amp; 5/15 day MAs). Turns first. Expect false alarms.</p>
           <p><strong>ST Trend Momo</strong> — Short-term trend over weeks (42–63 day MAs). Strong signal a move is happening now.</p>
           <p><strong>LT Trend Momo</strong> — Long-term trend over months (84–252 day MAs). Slowest to change, most reliable. Most important column.</p>
           <p><strong>All Indicators</strong> — Average of every MA pair. Overall momentum health score.</p>
@@ -1456,6 +1461,7 @@ createRoot(document.getElementById('root')).render(h(App));
           <div class="htu-dot-row"><span class="htu-sdot htu-dot-vs"></span><span><strong>Dark green</strong> — Unchanged 30+ days. Established trend. Best entries.</span></div>
           <div class="htu-dot-row"><span class="htu-sdot htu-dot-s"></span><span><strong>Light green</strong> — Unchanged 10–30 days. Trend holding.</span></div>
           <div class="htu-dot-row"><span class="htu-sdot htu-dot-u"></span><span><strong>Yellow</strong> — Changed recently. Watch closely.</span></div>
+          <div class="htu-dot-row"><span class="htu-sdot htu-dot-lr"></span><span><strong>Light red</strong> — High flip rate. Reduce exposure, tighten stops.</span></div>
           <div class="htu-dot-row"><span class="htu-sdot htu-dot-vu"></span><span><strong>Red</strong> — Multiple flips in 30 days. Choppy — avoid trading.</span></div>
         </div>
         <div class="htu-block">
