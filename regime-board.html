@@ -1223,6 +1223,7 @@ window.STATIC_PRICES = {"AAPL":[210.14,211.21,212.5,213.32,205.35,198.89,198.51,
 
 const TD_KEY = 'd1bf517795d040938e812582ae1587ea';
 const AV_KEY_DEFAULT = 'M38DSB85MD33DQMB';
+  window._KEYS={td:TD_KEY,av:AV_KEY_DEFAULT};
 const FH_KEY_DEFAULT = 'd8rm9ghr01qnkitoq79gd8rm9ghr01qnkitoq7a0';
 
 const YF_SYMBOL_MAP = {
@@ -2043,8 +2044,8 @@ createRoot(document.getElementById('root')).render(h(App));
     if (!btn || !input || btn._wired) return false;
     btn._wired = true;
 
-    function doAdd() {
-      var ticker = input.value.trim().toUpperCase().replace(/[^A-Z0-9.]/g, '');
+    async function doAdd() {
+      var ticker = input.value.trim().toUpperCase().replace(/[^A-Z0-9.\-]/g, '');
       if (!ticker) return;
       var list = getCustomTickers();
       if (list.find(function(t) { return t.ticker === ticker; })) {
@@ -2052,11 +2053,65 @@ createRoot(document.getElementById('root')).render(h(App));
         setTimeout(function() { status.textContent = ''; }, 2000);
         return;
       }
-      // Add directly — data fetch will show NO DATA if ticker is invalid
       var activeCls = (window._snavFilter && window._snavFilter !== 'all') ? window._snavFilter : 'Custom';
+      var keys = window._KEYS || {};
+      var tdKey = keys.td || '';
+      var avKey = keys.av || '';
+      var closes = [];
+      btn.disabled = true;
+      status.textContent = 'Fetching ' + ticker + '...';
+      function ft(url, ms) {
+        var c = new AbortController();
+        var id = setTimeout(function(){c.abort();}, ms||8000);
+        return fetch(url, {signal:c.signal}).finally(function(){clearTimeout(id);});
+      }
+      // 1. Twelve Data — best for US + global stocks (800 credits/day, fresh since static prices bypass it)
+      if (tdKey && closes.length < 21) {
+        try {
+          var r = await ft('https://api.twelvedata.com/time_series?symbol='+ticker+'&interval=1day&outputsize=300&apikey='+tdKey);
+          if (r.ok) {
+            var d = await r.json();
+            if (d.values && d.values.length >= 21)
+              closes = d.values.map(function(v){return parseFloat(v.close);}).filter(function(v){return !isNaN(v);}).reverse();
+          }
+        } catch(e) { console.warn('TD add',ticker,e.message); }
+      }
+      // 2. Binance — crypto (TICKERUSDT, no key, 1200 req/min)
+      if (closes.length < 21) {
+        try {
+          var r2 = await ft('https://api.binance.com/api/v3/klines?symbol='+ticker+'USDT&interval=1d&limit=300');
+          if (r2.ok) {
+            var d2 = await r2.json();
+            if (Array.isArray(d2) && d2.length >= 21) {
+              closes = d2.map(function(k){return parseFloat(k[4]);}).filter(function(v){return !isNaN(v);});
+              activeCls = 'Crypto';
+            }
+          }
+        } catch(e) {}
+      }
+      // 3. Alpha Vantage — US/global stocks fallback
+      if (closes.length < 21 && avKey) {
+        try {
+          var r3 = await ft('https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol='+ticker+'&outputsize=full&apikey='+avKey, 15000);
+          if (r3.ok) {
+            var d3 = await r3.json();
+            var ts = d3['Time Series (Daily)'];
+            if (ts) closes = Object.entries(ts).sort(function(a,b){return a[0]>b[0]?1:-1;}).map(function(e){return parseFloat(e[1]['4. close']);}).filter(function(v){return !isNaN(v);});
+          }
+        } catch(e) { console.warn('AV add',ticker,e.message); }
+      }
+      btn.disabled = false;
+      if (closes.length < 21) {
+        status.textContent = '\u2717 No data found for ' + ticker;
+        setTimeout(function() { status.textContent = ''; }, 5000);
+        return;
+      }
+      // Cache so page reload shows indicators immediately
+      try { localStorage.setItem('pc_'+ticker, JSON.stringify({c:closes.slice(-400), ts:Date.now()})); } catch {}
       list.push({ ticker: ticker, name: ticker, cls: activeCls });
       saveCustomTickers(list);
-      location.reload();
+      status.textContent = '\u2713 ' + ticker + ' added!';
+      setTimeout(function(){ location.reload(); }, 300);
     }
 
     btn.addEventListener('click', doAdd);
@@ -2083,16 +2138,53 @@ createRoot(document.getElementById('root')).render(h(App));
     var inp = document.getElementById('custom-ticker-input');
     if (!btn || !inp || btn.dataset.gwired) return;
     btn.dataset.gwired = '1';
-    function go() {
-      var t = inp.value.trim().toUpperCase().replace(/[^A-Z0-9.]/g,'');
+    async function go() {
+      var t = inp.value.trim().toUpperCase().replace(/[^A-Z0-9.\-]/g,'');
       if (!t) return;
       var list = [];
       try { list = JSON.parse(localStorage.getItem('customTickers')||'[]'); } catch{}
       if (list.some(function(x){return x.ticker===t;})) { inp.value=''; return; }
       var cls = (window._snavFilter && window._snavFilter!=='all') ? window._snavFilter : 'Custom';
+      var keys = window._KEYS || {};
+      var tdKey = keys.td || '';
+      var avKey = keys.av || '';
+      var closes = [];
+      btn.disabled = true;
+      var statusEl = document.getElementById('custom-ticker-status');
+      if(statusEl) statusEl.textContent = 'Fetching '+t+'...';
+      function ft(url, ms) {
+        var c = new AbortController();
+        var id = setTimeout(function(){c.abort();}, ms||8000);
+        return fetch(url, {signal:c.signal}).finally(function(){clearTimeout(id);});
+      }
+      if (tdKey && closes.length < 21) {
+        try {
+          var r = await ft('https://api.twelvedata.com/time_series?symbol='+t+'&interval=1day&outputsize=300&apikey='+tdKey);
+          if (r.ok) { var d = await r.json(); if (d.values && d.values.length >= 21) closes = d.values.map(function(v){return parseFloat(v.close);}).filter(function(v){return !isNaN(v);}).reverse(); }
+        } catch(e) {}
+      }
+      if (closes.length < 21) {
+        try {
+          var r2 = await ft('https://api.binance.com/api/v3/klines?symbol='+t+'USDT&interval=1d&limit=300');
+          if (r2.ok) { var d2 = await r2.json(); if (Array.isArray(d2) && d2.length >= 21) { closes = d2.map(function(k){return parseFloat(k[4]);}).filter(function(v){return !isNaN(v);}); cls='Crypto'; } }
+        } catch(e) {}
+      }
+      if (closes.length < 21 && avKey) {
+        try {
+          var r3 = await ft('https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol='+t+'&outputsize=full&apikey='+avKey, 15000);
+          if (r3.ok) { var d3 = await r3.json(); var ts = d3['Time Series (Daily)']; if (ts) closes = Object.entries(ts).sort(function(a,b){return a[0]>b[0]?1:-1;}).map(function(e){return parseFloat(e[1]['4. close']);}).filter(function(v){return !isNaN(v);}); }
+        } catch(e) {}
+      }
+      btn.disabled = false;
+      if (closes.length < 21) {
+        if(statusEl) { statusEl.textContent='\u2717 No data found for '+t; setTimeout(function(){statusEl.textContent='';},5000); }
+        return;
+      }
+      try { localStorage.setItem('pc_'+t, JSON.stringify({c:closes.slice(-400), ts:Date.now()})); } catch {}
       list.push({ticker:t, name:t, cls:cls});
       localStorage.setItem('customTickers', JSON.stringify(list));
-      location.reload();
+      if(statusEl) statusEl.textContent = '\u2713 '+t+' added!';
+      setTimeout(function(){ location.reload(); }, 300);
     }
     btn.addEventListener('click', go);
     inp.addEventListener('keydown', function(e){ if(e.key==='Enter') go(); });
