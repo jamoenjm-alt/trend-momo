@@ -618,6 +618,27 @@
     }
     .ct-chip button:hover { color: #ef4444; }
     #custom-ticker-status { font-size: 0.68rem; color: #64748b; white-space: nowrap; }
+  
+    /* ── Custom ticker row delete button ─────────────────────── */
+    .ct-row-del {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      margin-left: 6px;
+      background: none;
+      border: 1px solid #475569;
+      border-radius: 3px;
+      color: #475569;
+      font-size: 0.55rem;
+      line-height: 1;
+      cursor: pointer;
+      vertical-align: middle;
+      padding: 0;
+      flex-shrink: 0;
+    }
+    .ct-row-del:hover { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,0.1); }
   </style>
 </head>
 <body>
@@ -2072,6 +2093,52 @@ createRoot(document.getElementById('root')).render(h(App));
   // Also try after a short delay in case elements load late
   setTimeout(wireAddBtn, 500);
   setTimeout(wireAddBtn, 1500);
+})();
+</script>
+
+<script>
+/* Add ✕ delete buttons to user-added custom ticker rows */
+(function() {
+  function getCustomTickers() {
+    try { return JSON.parse(localStorage.getItem('customTickers') || '[]'); } catch { return []; }
+  }
+  function deleteTicker(ticker) {
+    var list = getCustomTickers().filter(function(t) { return t.ticker !== ticker; });
+    localStorage.setItem('customTickers', JSON.stringify(list));
+    location.reload();
+  }
+  function addDeleteButtons() {
+    var customTickers = getCustomTickers().map(function(t) { return t.ticker; });
+    if (!customTickers.length) return;
+    var rows = document.querySelectorAll('tr');
+    rows.forEach(function(row) {
+      var cells = row.querySelectorAll('td');
+      if (!cells.length) return;
+      var tickerCell = cells[0];
+      var tickerText = tickerCell ? tickerCell.textContent.trim() : '';
+      // Only add button if this row's ticker is a user-added one and button not already there
+      if (customTickers.indexOf(tickerText) !== -1 && !row.querySelector('.ct-row-del')) {
+        var btn = document.createElement('button');
+        btn.className = 'ct-row-del';
+        btn.title = 'Remove ' + tickerText;
+        btn.textContent = '✕';
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (confirm('Remove ' + tickerText + '?')) deleteTicker(tickerText);
+        });
+        // Insert after the ticker text in the first cell
+        tickerCell.appendChild(btn);
+      }
+    });
+  }
+  // Poll until rows are rendered
+  var attempts = 0;
+  var iv = setInterval(function() {
+    attempts++;
+    addDeleteButtons();
+    if (attempts > 80) clearInterval(iv);
+    // Keep re-running — React may re-render rows as data loads
+  }, 200);
 })();
 </script>
 </body>
