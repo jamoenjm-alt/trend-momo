@@ -550,6 +550,74 @@
     .snav-btn:hover { background: #293548; color: #e2e8f0; border-color: #475569; }
     .snav-btn.active { background: #1d4ed8; border-color: #3b82f6; color: #fff; font-weight: 700; }
     .snav-btn[data-cls="all"] { border-color: #475569; }
+  
+    /* ── My Tickers search bar ─────────────────────────────── */
+    #custom-ticker-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+    }
+    #custom-ticker-bar label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    #custom-ticker-input {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 6px;
+      width: 110px;
+      text-transform: uppercase;
+      outline: none;
+    }
+    #custom-ticker-input:focus { border-color: #3b82f6; }
+    #custom-ticker-input::placeholder { color: #475569; text-transform: none; font-weight: 400; }
+    #custom-ticker-add {
+      background: #1d4ed8;
+      border: none;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+    }
+    #custom-ticker-add:hover { background: #2563eb; }
+    #custom-ticker-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+    .ct-chip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 5px;
+      padding: 3px 8px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #93c5fd;
+    }
+    .ct-chip button {
+      background: none;
+      border: none;
+      color: #475569;
+      cursor: pointer;
+      font-size: 0.7rem;
+      padding: 0;
+      line-height: 1;
+    }
+    .ct-chip button:hover { color: #ef4444; }
+    #custom-ticker-status { font-size: 0.68rem; color: #64748b; white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -611,6 +679,41 @@ const WATCHLIST = [
   { ticker: 'TON',  name: 'Toncoin',            cls: 'Crypto'    },
   { ticker: 'AVAX', name: 'Avalanche',          cls: 'Crypto'    },
   { ticker: 'SUI',  name: 'Sui',                cls: 'Crypto'    },
+  { ticker: 'DOGE', name: 'Dogecoin',           cls: 'Crypto'    },
+  { ticker: 'DOT',  name: 'Polkadot',           cls: 'Crypto'    },
+  { ticker: 'TRX',  name: 'Tron',               cls: 'Crypto'    },
+  { ticker: 'MATIC',name: 'Polygon',            cls: 'Crypto'    },
+  { ticker: 'LTC',  name: 'Litecoin',           cls: 'Crypto'    },
+  { ticker: 'BCH',  name: 'Bitcoin Cash',       cls: 'Crypto'    },
+  { ticker: 'APT',  name: 'Aptos',              cls: 'Crypto'    },
+  { ticker: 'NEAR', name: 'Near Protocol',      cls: 'Crypto'    },
+  { ticker: 'ARB',  name: 'Arbitrum',           cls: 'Crypto'    },
+  { ticker: 'ATOM', name: 'Cosmos',             cls: 'Crypto'    },
+  { ticker: 'OP',   name: 'Optimism',           cls: 'Crypto'    },
+  { ticker: 'INJ',  name: 'Injective',          cls: 'Crypto'    },
+  { ticker: 'HBAR', name: 'Hedera',             cls: 'Crypto'    },
+  { ticker: 'FIL',  name: 'Filecoin',           cls: 'Crypto'    },
+  { ticker: 'AAVE', name: 'Aave',               cls: 'Crypto'    },
+  { ticker: 'VET',  name: 'VeChain',            cls: 'Crypto'    },
+  { ticker: 'XLM',  name: 'Stellar',            cls: 'Crypto'    },
+  { ticker: 'ETC',  name: 'Ethereum Classic',   cls: 'Crypto'    },
+  { ticker: 'ALGO', name: 'Algorand',           cls: 'Crypto'    },
+  { ticker: 'UNI',  name: 'Uniswap',            cls: 'Crypto'    },
+  { ticker: 'ICP',  name: 'Internet Computer',  cls: 'Crypto'    },
+  { ticker: 'GRT',  name: 'The Graph',          cls: 'Crypto'    },
+  { ticker: 'SAND', name: 'The Sandbox',        cls: 'Crypto'    },
+  { ticker: 'MANA', name: 'Decentraland',       cls: 'Crypto'    },
+  { ticker: 'MKR',  name: 'Maker',              cls: 'Crypto'    },
+  { ticker: 'RUNE', name: 'THORChain',          cls: 'Crypto'    },
+  { ticker: 'LDO',  name: 'Lido DAO',           cls: 'Crypto'    },
+  { ticker: 'STX',  name: 'Stacks',             cls: 'Crypto'    },
+  { ticker: 'FTM',  name: 'Fantom',             cls: 'Crypto'    },
+  { ticker: 'SEI',  name: 'Sei',                cls: 'Crypto'    },
+  { ticker: 'EGLD', name: 'MultiversX',         cls: 'Crypto'    },
+  { ticker: 'DYDX', name: 'dYdX',               cls: 'Crypto'    },
+  { ticker: 'PEPE', name: 'Pepe',               cls: 'Crypto'    },
+  { ticker: 'FLOKI',name: 'Floki',              cls: 'Crypto'    },
+  { ticker: 'WIF',  name: 'Dogwifhat',          cls: 'Crypto'    },
   // Commodities (via ETF proxies)
   { ticker: 'GLD',     name: 'Gold (GLD ETF)',         cls: 'Commodity' },
   { ticker: 'SLV',     name: 'Silver (SLV ETF)',       cls: 'Commodity' },
@@ -648,6 +751,18 @@ const WATCHLIST = [
   { ticker: 'USDCAD', name: 'USD / Canadian Dollar', cls: 'Forex'    },
   { ticker: 'DXY',    name: 'US Dollar Index',           cls: 'Forex'    },
 ];
+
+// ── Custom tickers from localStorage ──────────────────────────────────
+(function() {
+  try {
+    var ct = JSON.parse(localStorage.getItem('customTickers') || '[]');
+    ct.forEach(function(t) {
+      if (!WATCHLIST.find(function(a) { return a.ticker === t.ticker; })) {
+        WATCHLIST.push({ ticker: t.ticker, name: t.name || t.ticker, cls: 'Custom' });
+      }
+    });
+  } catch(e) {}
+})();
 
 const SECTIONS = [
   { label: 'Watchlist',       cls: 'Watch'     },
@@ -924,9 +1039,21 @@ async function fetchStooq(ticker) {
 // ── Fetch with timeout (prevents hanging forever) ────────────────────────────
 // CoinCap asset IDs for crypto tickers
 const CRYPTO_COINCAP_IDS = {
-  BTC: 'bitcoin', ETH: 'ethereum', SOL: 'solana', XRP: 'ripple',
-  BNB: 'binance-coin', ADA: 'cardano', LINK: 'chainlink',
-  TON: 'the-open-network', AVAX: 'avalanche-2', SUI: 'sui',
+  BTC: 'bitcoin',          ETH: 'ethereum',          SOL: 'solana',
+  XRP: 'ripple',           BNB: 'binance-coin',      ADA: 'cardano',
+  LINK: 'chainlink',       TON: 'the-open-network',  AVAX: 'avalanche-2',
+  SUI: 'sui',              DOGE: 'dogecoin',          DOT: 'polkadot',
+  TRX: 'tron',             MATIC: 'matic-network',   LTC: 'litecoin',
+  BCH: 'bitcoin-cash',     APT: 'aptos',             NEAR: 'near-protocol',
+  ARB: 'arbitrum',         ATOM: 'cosmos',            OP: 'optimism',
+  INJ: 'injective-protocol', HBAR: 'hedera-hashgraph', FIL: 'filecoin',
+  AAVE: 'aave',            VET: 'vechain',            XLM: 'stellar',
+  ETC: 'ethereum-classic', ALGO: 'algorand',          UNI: 'uniswap',
+  ICP: 'internet-computer', GRT: 'the-graph',         SAND: 'the-sandbox',
+  MANA: 'decentraland',    MKR: 'maker',              RUNE: 'thorchain',
+  LDO: 'lido-dao',         STX: 'blockstack',         FTM: 'fantom',
+  SEI: 'sei-network',      EGLD: 'elrond-erd-2',      DYDX: 'dydx',
+  PEPE: 'pepe',            FLOKI: 'floki',             WIF: 'dogwifcoin',
 };
 
 async function fetchT(url, ms = 10000) {
@@ -1238,7 +1365,7 @@ function App() {
     const staticData = {};
     for (const a of WATCHLIST) { if (window.STATIC_PRICES?.[a.ticker]?.length) staticData[a.ticker] = window.STATIC_PRICES[a.ticker]; }
 
-    const tdTickers = [...new Set(WATCHLIST.filter(a => ['Watch','Top20','Commodity','Index'].includes(a.cls)).filter(a => !staticData[a.ticker]).map(a => a.ticker))];
+    const tdTickers = [...new Set(WATCHLIST.filter(a => ['Watch','Top20','Commodity','Index','Custom'].includes(a.cls)).filter(a => !staticData[a.ticker]).map(a => a.ticker))];
     const tdResults = {};
     for (let i = 0; i < tdTickers.length; i += 8) {
       const batch = tdTickers.slice(i, i+8);
@@ -1274,7 +1401,7 @@ function App() {
       let closes = [];
       if (staticData[a.ticker]) closes=staticData[a.ticker];
       else if (a.cls==='Crypto') closes=cryptoMap[a.ticker]||[];
-      else if (['Watch','Top20','Commodity','Index'].includes(a.cls)) closes=tdResults[a.ticker]||[];
+      else if (['Watch','Top20','Commodity','Index','Custom'].includes(a.cls)) closes=tdResults[a.ticker]||[];
       else if (a.cls==='Forex') closes=forexResults[a.ticker]||[];
       const sigs=closes.length>=21?computeSignals(closes):null;
       const stability=closes.length>=32?computeStabilityState(closes):'stable';
@@ -1666,5 +1793,104 @@ createRoot(document.getElementById('root')).render(h(App));
 })();
 </script>
 
+
+<div id="custom-ticker-bar">
+  <label>+ Add Ticker</label>
+  <input id="custom-ticker-input" type="text" placeholder="e.g. PLTR" maxlength="10" />
+  <button id="custom-ticker-add">Add</button>
+  <div id="custom-ticker-chips"></div>
+  <span id="custom-ticker-status"></span>
+</div>
+
+<script>
+(function() {
+  function getCustomTickers() {
+    try { return JSON.parse(localStorage.getItem('customTickers') || '[]'); } catch { return []; }
+  }
+  function saveCustomTickers(list) {
+    localStorage.setItem('customTickers', JSON.stringify(list));
+  }
+  function removeTicker(ticker) {
+    var list = getCustomTickers().filter(function(t) { return t.ticker !== ticker; });
+    saveCustomTickers(list);
+    location.reload();
+  }
+  function renderChips() {
+    var container = document.getElementById('custom-ticker-chips');
+    if (!container) return;
+    var list = getCustomTickers();
+    container.innerHTML = '';
+    list.forEach(function(t) {
+      var chip = document.createElement('div');
+      chip.className = 'ct-chip';
+      chip.innerHTML = '<span>' + t.ticker + '</span><button title="Remove" onclick="(function(){var l=JSON.parse(localStorage.getItem('customTickers')||'[]').filter(function(x){return x.ticker!=='' + t.ticker + ''});localStorage.setItem('customTickers',JSON.stringify(l));location.reload();})()">✕</button>';
+      container.appendChild(chip);
+    });
+  }
+
+  function insertBar() {
+    var sectionNav = document.getElementById('section-nav');
+    var bar = document.getElementById('custom-ticker-bar');
+    if (!bar) return false;
+    if (sectionNav && sectionNav.parentNode && !bar._inserted) {
+      sectionNav.parentNode.insertBefore(bar, sectionNav.nextSibling);
+      bar._inserted = true;
+    }
+    return true;
+  }
+
+  function wireBar() {
+    var btn = document.getElementById('custom-ticker-add');
+    var input = document.getElementById('custom-ticker-input');
+    var status = document.getElementById('custom-ticker-status');
+    if (!btn || !input || btn._wired) return false;
+    btn._wired = true;
+
+    function doAdd() {
+      var ticker = input.value.trim().toUpperCase().replace(/[^A-Z0-9.]/g, '');
+      if (!ticker) return;
+      var list = getCustomTickers();
+      if (list.find(function(t) { return t.ticker === ticker; })) {
+        status.textContent = ticker + ' already added';
+        setTimeout(function() { status.textContent = ''; }, 2000);
+        return;
+      }
+      // Quick validate via Yahoo Finance search
+      status.textContent = 'Checking ' + ticker + '...';
+      fetch('https://query1.finance.yahoo.com/v1/finance/search?q=' + ticker + '&quotesCount=1&newsCount=0')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          var quote = d.quotes && d.quotes[0];
+          var name = (quote && (quote.shortname || quote.longname)) || ticker;
+          list.push({ ticker: ticker, name: name });
+          saveCustomTickers(list);
+          status.textContent = '';
+          location.reload();
+        })
+        .catch(function() {
+          // Add anyway even if search fails
+          list.push({ ticker: ticker, name: ticker });
+          saveCustomTickers(list);
+          status.textContent = '';
+          location.reload();
+        });
+    }
+
+    btn.addEventListener('click', doAdd);
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') doAdd();
+    });
+    renderChips();
+    return true;
+  }
+
+  var attempts = 0;
+  var iv = setInterval(function() {
+    attempts++;
+    insertBar();
+    if (wireBar() || attempts > 60) clearInterval(iv);
+  }, 100);
+})();
+</script>
 </body>
 </html>
