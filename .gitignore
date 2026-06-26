@@ -1,0 +1,18 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Keep paid research & personal notes OUT of the public GitHub repo.
+#  The remote (trend-momo) is public via GitHub Pages — anything committed here
+#  is published. The folders below must never be pushed.
+# ─────────────────────────────────────────────────────────────────────────────
+research/
+archive-dev-scripts/
+
+# Catch-alls in case a file lands loose at the root
+*.pdf
+Screenshot*.png
+
+# Scratch / logs / caches
+__pycache__/
+*.log
+update-log.txt
+err.txt
+desktop.ini

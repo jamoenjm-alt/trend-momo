@@ -63,17 +63,9 @@ ALL_TICKERS = {
     "WMT":     "WMT",
     "HD":      "HD",
 
-    # ── Crypto ────────────────────────────────────────────────────────────────
-    "BTC":     "BTC-USD",
-    "ETH":     "ETH-USD",
-    "SOL":     "SOL-USD",
-    "XRP":     "XRP-USD",
-    "BNB":     "BNB-USD",
-    "ADA":     "ADA-USD",
-    "LINK":    "LINK-USD",
-    "TON":     "TON-USD",
-    "AVAX":    "AVAX-USD",
-    "SUI":     "SUI-USD",
+    # ── Crypto is fetched from CoinGecko (see CRYPTO_CG below), NOT Yahoo ───────
+    #    CoinGecko ids are canonical, so a bad id yields no data (honest N/A) rather
+    #    than Yahoo's silent wrong-token problem (e.g. plain TON-USD = wrong coin).
 
     # ── Commodities (ETFs) ────────────────────────────────────────────────────
     "GLD":     "GLD",
@@ -179,6 +171,87 @@ def fetch_yahoo(yahoo_symbol: str, days: int = HISTORY_DAYS, retries: int = 3) -
             else:
                 print(f"ERROR: {e}")
     return []
+
+
+# ── All watchlist crypto → CoinGecko coin ids ────────────────────────────────
+# CoinGecko ids are unambiguous; this is the same source the board's live path uses.
+CRYPTO_CG = {
+    "BTC": "bitcoin", "ETH": "ethereum", "SOL": "solana", "XRP": "ripple",
+    "BNB": "binancecoin", "ADA": "cardano", "LINK": "chainlink",
+    "TON": "the-open-network", "AVAX": "avalanche-2", "SUI": "sui",
+    "DOGE": "dogecoin", "DOT": "polkadot", "TRX": "tron", "MATIC": "matic-network",
+    "LTC": "litecoin", "BCH": "bitcoin-cash", "APT": "aptos", "NEAR": "near",
+    "ARB": "arbitrum", "ATOM": "cosmos", "OP": "optimism",
+    "INJ": "injective-protocol", "HBAR": "hedera-hashgraph", "FIL": "filecoin",
+    "AAVE": "aave", "VET": "vechain", "XLM": "stellar", "ETC": "ethereum-classic",
+    "ALGO": "algorand", "UNI": "uniswap", "ICP": "internet-computer",
+    "GRT": "the-graph", "SAND": "the-sandbox", "MANA": "decentraland",
+    "MKR": "maker", "RUNE": "thorchain", "LDO": "lido-dao", "STX": "blockstack",
+    "FTM": "fantom", "SEI": "sei-network", "EGLD": "elrond-erd-2",
+    "DYDX": "dydx-chain", "PEPE": "pepe", "FLOKI": "floki", "WIF": "dogwifcoin",
+}
+
+# CoinGecko free tier is rate-limited — pause longer between calls than Yahoo.
+CG_PAUSE = 3.0
+
+def fetch_coingecko(cg_id, days=365, retries=3):
+    """Daily close prices (oldest first) from CoinGecko, or [] on error."""
+    url = (f"https://api.coingecko.com/api/v3/coins/{cg_id}/market_chart"
+           f"?vs_currency=usd&days={days}")   # days>=90 returns daily granularity
+    headers = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
+    for attempt in range(retries):
+        if attempt > 0:
+            time.sleep(5 * attempt)   # back off (CoinGecko 429s under load)
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=25) as resp:
+                raw = json.loads(resp.read().decode("utf-8"))
+            prices = raw.get("prices", [])
+            return [round(float(p[1]), 6) for p in prices if p and p[1] is not None]
+        except Exception as e:
+            if attempt < retries - 1:
+                print(f"retry {attempt+1}...", end=" ", flush=True)
+            else:
+                print(f"ERROR: {e}")
+    return []
+
+# US stocks whose trailing P/E we auto-refresh from stockanalysis (overrides the
+# curated PE_RATIOS in the HTML; falls back to the curated value if a fetch fails).
+PE_STOCKS = ["PLTR","AAPL","MSFT","TSLA","NVDA","ASML","AMZN","GOOGL","META","BRK.B",
+             "AVGO","JPM","LLY","V","UNH","ORCL","MA","XOM","NFLX","COST","WMT","HD"]
+
+def fetch_pe(ticker):
+    """Current trailing P/E from stockanalysis, or None on error / not meaningful."""
+    url = f"https://stockanalysis.com/api/symbol/s/{ticker.lower()}/overview"
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", "Accept": "application/json"}
+    try:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            j = json.loads(resp.read().decode("utf-8"))
+        pe = (j.get("data") or {}).get("peRatio")
+        if pe in (None, "", "-", "n/a", "N/A"):
+            return None
+        v = float(str(pe).replace(",", ""))
+        return round(v, 1) if 0 < v < 100000 else None
+    except Exception:
+        return None
+
+def inject_live_pe(pe_dict, html_path):
+    """Replace the @@LIVE_PE@@ block with freshly fetched trailing P/E values."""
+    with open(html_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    ms, me = "// @@LIVE_PE_START@@", "// @@LIVE_PE_END@@"
+    i, j = content.find(ms), content.find(me)
+    if i == -1 or j == -1:
+        print("  (LIVE_PE markers not found - skipping P/E inject)")
+        return False
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M")
+    body = (ms + "\n" +
+            f"// trailing P/E auto-refreshed {ts} from stockanalysis\n" +
+            f"window.LIVE_PE = {json.dumps(pe_dict, separators=(',', ':'))};\n" + me)
+    with open(html_path, "w", encoding="utf-8") as f:
+        f.write(content[:i] + body + content[j + len(me):])
+    return True
 
 
 def inject_into_html(prices: dict, html_path: str):
@@ -328,11 +401,50 @@ def main():
 
         time.sleep(REQUEST_PAUSE)
 
+    # ── Crypto via CoinGecko (staggered to respect free-tier rate limits) ──────
+    # Major coins refresh EVERY run; the long-tail alts are split across two days
+    # (each alt ~every 2nd day). Coins skipped today keep their previous data, so
+    # nothing goes blank — we just maximise how much stays freshly updated.
+    cg_items = list(CRYPTO_CG.items())
+    CRYPTO_DAILY = 12                                   # first N (majors) every day
+    core = cg_items[:CRYPTO_DAILY]
+    alts = cg_items[CRYPTO_DAILY:]
+    todays_alts = alts[datetime.now().toordinal() % 2 :: 2]   # alternating half
+    todays_crypto = core + todays_alts
+    print()
+    print(f"  Fetching {len(todays_crypto)} of {len(CRYPTO_CG)} cryptos from CoinGecko")
+    print(f"  (majors daily + half the alts; the other half refreshes next run)")
+    for board_ticker, cg_id in todays_crypto:
+        print(f"  → {board_ticker:8s} ({cg_id:22s})", end="  ", flush=True)
+        closes = fetch_coingecko(cg_id)
+        if closes and len(closes) >= 21:
+            prices[board_ticker] = closes
+            ok_count += 1
+            print(f"✓  {len(closes)} closes   last={closes[-1]:,.4f}")
+        else:
+            err_count += 1
+            print("⚠  kept previous" if board_ticker in prices else "✗  no data")
+        time.sleep(CG_PAUSE)
+
+    # -- Trailing P/E from stockanalysis (auto-refresh; curated PE_RATIOS is fallback) --
+    print()
+    print(f"  Fetching trailing P/E for {len(PE_STOCKS)} stocks from stockanalysis")
+    pe_out = {}
+    for t in PE_STOCKS:
+        v = fetch_pe(t)
+        if v is not None:
+            pe_out[t] = v
+        print(f"  -> {t:8} P/E {v if v is not None else '- (keeping curated)'}")
+        time.sleep(0.3)
+    print(f"  P/E refreshed for {len(pe_out)} / {len(PE_STOCKS)} stocks")
+
     if ok_count == 0:
         print("\n✗  Nothing fetched. Check your internet connection.")
         sys.exit(1)
 
     inject_into_html(prices, html_path)
+    if pe_out:
+        inject_live_pe(pe_out, html_path)
     sync_index(html_path)
 
     print()
@@ -343,8 +455,8 @@ def main():
     print("=" * 60)
     print()
 
-    covered = [t for t in ALL_TICKERS if prices.get(t)]
-    missing = [t for t in ALL_TICKERS if not prices.get(t)]
+    all_keys = list(ALL_TICKERS) + list(CRYPTO_CG)
+    missing = [t for t in all_keys if not prices.get(t)]
     if missing:
         print(f"  Missing: {', '.join(missing)}")
         print("  Run again or use --csv to import missing tickers manually.\n")
