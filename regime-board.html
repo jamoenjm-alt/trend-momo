@@ -779,7 +779,10 @@
       color: #475569;
       padding: 6px 0;
     }
-  </style>
+      .div-tf { font-size:0.58rem; font-weight:800; padding:1px 5px; border-radius:3px; margin-right:5px; letter-spacing:0.03em; }
+    .div-tf-weekly { background:#1e3a8a; color:#fff; }
+    .div-tf-daily { background:#dbeafe; color:#1e3a8a; }
+</style>
 </head>
 <body>
 
@@ -1688,6 +1691,87 @@ function ReversalWatch({ data }) {
   );
 }
 
+// ── RSI (Wilder) + bullish/bearish divergence detection (daily & weekly) ─────
+function rsiSeries(closes, period) {
+  period = period || 14;
+  const out = new Array(closes.length).fill(null);
+  if (closes.length < period + 1) return out;
+  let gain = 0, loss = 0;
+  for (let i = 1; i <= period; i++) { const ch = closes[i] - closes[i-1]; if (ch >= 0) gain += ch; else loss -= ch; }
+  let avgG = gain / period, avgL = loss / period;
+  out[period] = avgL === 0 ? 100 : 100 - 100 / (1 + avgG / avgL);
+  for (let i = period + 1; i < closes.length; i++) {
+    const ch = closes[i] - closes[i-1];
+    avgG = (avgG * (period - 1) + (ch > 0 ? ch : 0)) / period;
+    avgL = (avgL * (period - 1) + (ch < 0 ? -ch : 0)) / period;
+    out[i] = avgL === 0 ? 100 : 100 - 100 / (1 + avgG / avgL);
+  }
+  return out;
+}
+function divPivots(arr, k) {
+  const highs = [], lows = [];
+  for (let i = k; i < arr.length - k; i++) {
+    let isH = true, isL = true;
+    for (let j = i - k; j <= i + k; j++) { if (j === i) continue; if (arr[j] >= arr[i]) isH = false; if (arr[j] <= arr[i]) isL = false; }
+    if (isH) highs.push(i);
+    if (isL) lows.push(i);
+  }
+  return { highs, lows };
+}
+function toWeekly(closes) { const w = []; for (let i = closes.length - 1; i >= 0; i -= 5) w.unshift(closes[i]); return w; }
+function detectDivergence(closes) {
+  if (!closes || closes.length < 40) return null;
+  const r = rsiSeries(closes, 14), k = 5, last = closes.length - 1;
+  const piv = divPivots(closes, k);
+  const recentOK = (i) => i >= last - (k + 6);
+  let best = null;
+  const lows = piv.lows.filter(i => r[i] != null);
+  if (lows.length >= 2) {
+    const a = lows[lows.length-2], b = lows[lows.length-1];
+    if (recentOK(b) && closes[b] < closes[a] && r[b] > r[a] + 2) best = { dir:'bull', strength: Math.round(r[b]-r[a]), idx: b };
+  }
+  const highs = piv.highs.filter(i => r[i] != null);
+  if (highs.length >= 2) {
+    const a = highs[highs.length-2], b = highs[highs.length-1];
+    if (recentOK(b) && closes[b] > closes[a] && r[b] + 2 < r[a] && (!best || b > best.idx)) best = { dir:'bear', strength: Math.round(r[a]-r[b]), idx: b };
+  }
+  return best;
+}
+function computeAllDivergences(data) {
+  const out = [];
+  for (const a of WATCHLIST) {
+    const rec = data[a.ticker + '__' + a.cls];
+    const closes = rec && rec.closes;
+    if (!closes || closes.length < 60) continue;
+    const d = detectDivergence(closes);
+    if (d) out.push({ ticker: a.ticker, tf: 'Daily', dir: d.dir, strength: d.strength });
+    const wk = detectDivergence(toWeekly(closes));
+    if (wk) out.push({ ticker: a.ticker, tf: 'Weekly', dir: wk.dir, strength: wk.strength });
+  }
+  return out;
+}
+function DivergenceWatch({ data }) {
+  const divs = computeAllDivergences(data);
+  const sortFn = (x, y) => (x.tf === y.tf ? y.strength - x.strength : (x.tf === 'Weekly' ? -1 : 1));
+  const bulls = divs.filter(d => d.dir === 'bull').sort(sortFn).slice(0, 8);
+  const bears = divs.filter(d => d.dir === 'bear').sort(sortFn).slice(0, 8);
+  const sCls = (sv) => sv >= 15 ? 'rev-strong' : sv >= 8 ? 'rev-building' : 'rev-emerging';
+  const sLbl = (sv) => sv >= 15 ? 'Strong' : sv >= 8 ? 'Building' : 'Emerging';
+  const row = (d) => h('div', { key: d.ticker + d.tf, className: 'reversal-row' },
+    h('span', { className: 'reversal-ticker' }, d.ticker),
+    h('span', { className: 'reversal-arrow' }, h('span', { className: 'div-tf div-tf-' + d.tf.toLowerCase() }, d.tf), ' RSI div'),
+    h('span', { className: 'reversal-strength ' + sCls(d.strength) }, sLbl(d.strength)),
+  );
+  return h('div', { className: 'reversal-wrap' },
+    h('div', { className: 'reversal-col reversal-col-bull' },
+      h('div', { className: 'reversal-col-title' }, '↑ Bullish Divergence'),
+      bulls.length ? bulls.map(row) : h('div', { className: 'reversal-empty' }, 'None detected')),
+    h('div', { className: 'reversal-col reversal-col-bear' },
+      h('div', { className: 'reversal-col-title' }, '↓ Bearish Divergence'),
+      bears.length ? bears.map(row) : h('div', { className: 'reversal-empty' }, 'None detected')),
+  );
+}
+
 function ReversalsPage({ data }) {
   const revs = computeReversals(data);
   const up = revs.filter(r => r.direction === 'bull').length;
@@ -1698,6 +1782,11 @@ function ReversalsPage({ data }) {
       h('p', null, 'Tickers whose overall trend regime has shifted over the last 14 trading days \u2014 early signs of momentum turning. ' + up + ' turning up, ' + dn + ' turning down. Strength shows how big the shift is.'),
     ),
     h(ReversalWatch, { data }),
+    h('div', { className: 'outlook-head', style: { marginTop: 26 } },
+      h('h2', null, 'RSI Divergences'),
+      h('p', null, 'Momentum diverging from price on daily and weekly charts (RSI-14). Bullish = price makes a lower low while RSI makes a higher low; bearish = price a higher high while RSI a lower high. Weekly signals carry more weight.'),
+    ),
+    h(DivergenceWatch, { data }),
   );
 }
 
