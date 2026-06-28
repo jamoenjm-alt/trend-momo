@@ -754,10 +754,22 @@
     }
     .reversal-row:last-child { border-bottom: none; }
     .reversal-ticker {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1px;
       font-size: 0.72rem;
       font-weight: 700;
       color: var(--text);
-      min-width: 44px;
+      min-width: 52px;
+    }
+    .at-sub {
+      font-size: 0.52rem;
+      font-weight: 600;
+      color: #94a3b8;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      line-height: 1;
     }
     .reversal-arrow {
       font-size: 0.62rem;
@@ -784,14 +796,7 @@
     .div-tf-daily { background:#dbeafe; color:#1e3a8a; }
 
     /* ── Asset type badge (Reversal & Divergence panels) ──────── */
-    .atbadge { display:inline-block; font-size:0.52rem; font-weight:800; letter-spacing:0.04em; padding:1px 4px; border-radius:3px; margin-left:4px; vertical-align:middle; line-height:1.4; }
-    .atbadge-crypto  { background:#7c3aed; color:#ede9fe; }
-    .atbadge-equity  { background:#1e40af; color:#dbeafe; }
-    .atbadge-asx     { background:#065f46; color:#d1fae5; }
-    .atbadge-etf     { background:#374151; color:#e5e7eb; }
-    .atbadge-forex   { background:#92400e; color:#fef3c7; }
-    .atbadge-cmdty   { background:#78350f; color:#fef3c7; }
-    .atbadge-hk      { background:#9f1239; color:#ffe4e6; }
+    /* .atbadge styles removed — replaced by .at-sub muted label */
   </style>
 </head>
 <body>
@@ -1088,8 +1093,7 @@ function assetBadge(ticker) {
   const cls = TICKER_CLS_MAP[ticker] || '';
   const labelMap = { Crypto:'Crypto', ASX:'ASX', Index:'ETF', Forex:'Forex', Commodity:'Cmdty', HK:'HK' };
   const label = labelMap[cls] || 'Equity';
-  const cssMap = { Crypto:'crypto', ASX:'asx', ETF:'etf', Forex:'forex', Cmdty:'cmdty', HK:'hk', Equity:'equity' };
-  return h('span', { className: 'atbadge atbadge-' + cssMap[label] }, label);
+  return h('span', { className: 'at-sub' }, label);
 }
 
 // ── Signal maths ───────────────────────────────────────────────
@@ -2824,4 +2828,4 @@ createRoot(document.getElementById('root')).render(h(App));
     try { return JSON.parse(localStorage.getItem('customTickers') || '[]'); } catch { return []; }
   }
   function deleteTicker(ticker) {
-    var list = getCustomTickers().filter(functio
+    var list = getCustomTickers().filter(functio                                                                                                                                                                                                                                                                                                                                                                                                                        
