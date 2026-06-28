@@ -782,7 +782,17 @@
       .div-tf { font-size:0.58rem; font-weight:800; padding:1px 5px; border-radius:3px; margin-right:5px; letter-spacing:0.03em; }
     .div-tf-weekly { background:#1e3a8a; color:#fff; }
     .div-tf-daily { background:#dbeafe; color:#1e3a8a; }
-</style>
+
+    /* ── Asset type badge (Reversal & Divergence panels) ──────── */
+    .atbadge { display:inline-block; font-size:0.52rem; font-weight:800; letter-spacing:0.04em; padding:1px 4px; border-radius:3px; margin-left:4px; vertical-align:middle; line-height:1.4; }
+    .atbadge-crypto  { background:#7c3aed; color:#ede9fe; }
+    .atbadge-equity  { background:#1e40af; color:#dbeafe; }
+    .atbadge-asx     { background:#065f46; color:#d1fae5; }
+    .atbadge-etf     { background:#374151; color:#e5e7eb; }
+    .atbadge-forex   { background:#92400e; color:#fef3c7; }
+    .atbadge-cmdty   { background:#78350f; color:#fef3c7; }
+    .atbadge-hk      { background:#9f1239; color:#ffe4e6; }
+  </style>
 </head>
 <body>
 
@@ -1069,6 +1079,18 @@ const PE_RATIOS = {
 
 
 
+
+
+// ── Ticker → asset class lookup for badge display ───────────────────────────
+const TICKER_CLS_MAP = {};
+for (const a of WATCHLIST) { if (!TICKER_CLS_MAP[a.ticker]) TICKER_CLS_MAP[a.ticker] = a.cls; }
+function assetBadge(ticker) {
+  const cls = TICKER_CLS_MAP[ticker] || '';
+  const labelMap = { Crypto:'Crypto', ASX:'ASX', Index:'ETF', Forex:'Forex', Commodity:'Cmdty', HK:'HK' };
+  const label = labelMap[cls] || 'Equity';
+  const cssMap = { Crypto:'crypto', ASX:'asx', ETF:'etf', Forex:'forex', Cmdty:'cmdty', HK:'hk', Equity:'equity' };
+  return h('span', { className: 'atbadge atbadge-' + cssMap[label] }, label);
+}
 
 // ── Signal maths ───────────────────────────────────────────────
 
@@ -1675,7 +1697,7 @@ function ReversalWatch({ data }) {
   const bulls = reversals.filter(r => r.direction === 'bull').slice(0, 6);
   const bears = reversals.filter(r => r.direction === 'bear').slice(0, 6);
   const makeRow = (r) => h('div', { key: r.ticker, className: 'reversal-row' },
-    h('span', { className: 'reversal-ticker' }, r.ticker),
+    h('span', { className: 'reversal-ticker' }, r.ticker, assetBadge(r.ticker)),
     h('span', { className: 'reversal-arrow' }, r.prevLabel + ' → ' + r.nowLabel),
     h('span', { className: 'reversal-strength ' + r.strCls }, r.strength),
   );
@@ -1779,7 +1801,7 @@ function DivergenceWatch({ data }) {
   const sCls = (sv) => sv >= 15 ? 'rev-strong' : sv >= 8 ? 'rev-building' : 'rev-emerging';
   const sLbl = (sv) => sv >= 15 ? 'Strong' : sv >= 8 ? 'Building' : 'Emerging';
   const row = (d) => h('div', { key: d.ticker + d.tf, className: 'reversal-row' },
-    h('span', { className: 'reversal-ticker' }, d.ticker),
+    h('span', { className: 'reversal-ticker' }, d.ticker, assetBadge(d.ticker)),
     h('span', { className: 'reversal-arrow' }, h('span', { className: 'div-tf div-tf-' + d.tf.toLowerCase() }, d.tf), ' RSI div'),
     h('span', { className: 'reversal-strength ' + sCls(d.strength) }, sLbl(d.strength)),
   );
