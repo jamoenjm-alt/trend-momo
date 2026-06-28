@@ -1724,21 +1724,35 @@ function divPivots(arr, k) {
 }
 function toWeekly(closes) { const w = []; for (let i = closes.length - 1; i >= 0; i -= 5) w.unshift(closes[i]); return w; }
 function toWeeklyAgg(arr, mode) { const out = []; for (let end = arr.length - 1; end >= 0; end -= 5) { let v = arr[end]; for (let j = Math.max(0, end - 4); j <= end; j++) { if (mode === 'max' && arr[j] > v) v = arr[j]; else if (mode === 'min' && arr[j] < v) v = arr[j]; } out.unshift(v); } return out; }
+function pivotsLR(arr, lbL, lbR) {
+  const highs = [], lows = [];
+  for (let i = lbL; i < arr.length - lbR; i++) {
+    let isH = true, isL = true;
+    for (let j = i - lbL; j <= i + lbR; j++) { if (j === i) continue; if (arr[j] >= arr[i]) isH = false; if (arr[j] <= arr[i]) isL = false; }
+    if (isH) highs.push(i); if (isL) lows.push(i);
+  }
+  return { highs, lows };
+}
+// TradingView "RSI Divergence Indicator" method: pivots on the RSI line; price checked at those bars.
 function detectDivergence(closes, highs, lows) {
-  if (!closes || closes.length < 40) return null;
-  const r = rsiSeries(closes, 14), k = 5, last = closes.length - 1;
-  const hi = (highs && highs.length === closes.length) ? highs : closes;   // candle highs for bearish swings
-  const lo = (lows && lows.length === closes.length) ? lows : closes;      // candle lows for bullish swings
-  const pivHi = divPivots(hi, k).highs.filter(i => r[i] != null);
-  const pivLo = divPivots(lo, k).lows.filter(i => r[i] != null);
-  const recentOK = (i) => i >= last - (k + 6);
+  const lbL = 5, lbR = 5, gapLo = 5, gapHi = 60;
+  if (!closes || closes.length < lbL + lbR + 12) return null;
+  const hi = (highs && highs.length === closes.length) ? highs : closes;
+  const lo = (lows && lows.length === closes.length) ? lows : closes;
+  const osc = rsiSeries(closes, 14);
+  const piv = pivotsLR(osc, lbL, lbR);
+  const last = closes.length - 1;
+  const freshOK = (i) => (last - i) <= lbR + 5;
   let best = null;
-  if (pivLo.length >= 2) { const a = pivLo[pivLo.length-2], b = pivLo[pivLo.length-1];
-    if (recentOK(b) && lo[b] < lo[a] && r[b] > r[a] + 2) best = { dir:'bull', strength: Math.round(r[b]-r[a]), idx: b }; }
-  if (pivHi.length >= 2) { const a = pivHi[pivHi.length-2], b = pivHi[pivHi.length-1];
-    if (recentOK(b) && hi[b] > hi[a] && r[b] + 2 < r[a] && (!best || b > best.idx)) best = { dir:'bear', strength: Math.round(r[a]-r[b]), idx: b }; }
+  const oL = piv.lows.filter(i => osc[i] != null);
+  if (oL.length >= 2) { const b = oL[oL.length-1], a = oL[oL.length-2], gap = b - a;
+    if (freshOK(b) && gap >= gapLo && gap <= gapHi && osc[b] > osc[a] && lo[b] < lo[a]) best = { dir:'bull', strength: Math.round(osc[b]-osc[a]), idx: b }; }
+  const oH = piv.highs.filter(i => osc[i] != null);
+  if (oH.length >= 2) { const b = oH[oH.length-1], a = oH[oH.length-2], gap = b - a;
+    if (freshOK(b) && gap >= gapLo && gap <= gapHi && osc[b] < osc[a] && hi[b] > hi[a] && (!best || b > best.idx)) best = { dir:'bear', strength: Math.round(osc[a]-osc[b]), idx: b }; }
   return best;
 }
+
 function computeAllDivergences(data) {
   const out = [];
   const OHLC = (typeof window !== 'undefined') ? window.STATIC_OHLC : null;

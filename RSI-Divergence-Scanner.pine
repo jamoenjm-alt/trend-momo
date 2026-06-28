@@ -1,0 +1,78 @@
+//@version=5
+// ============================================================================
+//  RSI Divergence Scanner  —  for Softail23
+//  Detects Regular + Hidden bullish/bearish RSI divergences on the chart's
+//  current timeframe (use Daily and Weekly by switching the chart TF).
+//  Plots clean labels AND fires alerts so you can scan a whole watchlist.
+//  Mirrors TradingView's official divergence pivot logic (real candles).
+// ============================================================================
+indicator("RSI Divergence Scanner", shorttitle="RSI Div", overlay=false)
+
+// ── Inputs ──────────────────────────────────────────────────────────────────
+rsiLen     = input.int(14, "RSI Length", minval=1)
+lbL        = input.int(5,  "Pivot lookback LEFT",  minval=1, tooltip="Bars to the left of a swing")
+lbR        = input.int(5,  "Pivot lookback RIGHT", minval=1, tooltip="Bars to the right (confirmation delay)")
+rangeUpper = input.int(60, "Max bars between the two pivots", minval=5)
+rangeLower = input.int(5,  "Min bars between the two pivots", minval=1)
+showReg    = input.bool(true,  "Show REGULAR divergence (reversal)")
+showHid    = input.bool(false, "Show HIDDEN divergence (continuation)")
+wantBull   = input.bool(true,  "Bullish")
+wantBear   = input.bool(true,  "Bearish")
+
+osc = ta.rsi(close, rsiLen)
+
+// ── Plot the RSI + zones ──────────────────────────────────────────────────────
+plot(osc, "RSI", color.new(color.purple, 0), 2)
+hline(70, "Overbought", color.new(color.gray, 60))
+hline(50, "Mid",        color.new(color.gray, 85))
+hline(30, "Oversold",   color.new(color.gray, 60))
+
+// ── Pivots on the oscillator ──────────────────────────────────────────────────
+ph = ta.pivothigh(osc, lbL, lbR)
+pl = ta.pivotlow(osc,  lbL, lbR)
+plFound = not na(pl)
+phFound = not na(ph)
+
+_inRange(cond) =>
+    bars = ta.barssince(cond == true)
+    rangeLower <= bars and bars <= rangeUpper
+
+// ── REGULAR BULLISH:  price Lower-Low, RSI Higher-Low ────────────────────────
+oscHL    = osc[lbR] > ta.valuewhen(plFound, osc[lbR], 1) and _inRange(plFound[1])
+priceLL  = low[lbR] < ta.valuewhen(plFound, low[lbR], 1)
+bull     = wantBull and showReg and plFound and priceLL and oscHL
+
+// ── REGULAR BEARISH:  price Higher-High, RSI Lower-High ──────────────────────
+oscLH    = osc[lbR] < ta.valuewhen(phFound, osc[lbR], 1) and _inRange(phFound[1])
+priceHH  = high[lbR] > ta.valuewhen(phFound, high[lbR], 1)
+bear     = wantBear and showReg and phFound and priceHH and oscLH
+
+// ── HIDDEN BULLISH:  price Higher-Low, RSI Lower-Low (trend continuation) ────
+oscLL    = osc[lbR] < ta.valuewhen(plFound, osc[lbR], 1) and _inRange(plFound[1])
+priceHL  = low[lbR] > ta.valuewhen(plFound, low[lbR], 1)
+hBull    = wantBull and showHid and plFound and priceHL and oscLL
+
+// ── HIDDEN BEARISH:  price Lower-High, RSI Higher-High ───────────────────────
+oscHH    = osc[lbR] > ta.valuewhen(phFound, osc[lbR], 1) and _inRange(phFound[1])
+priceLH  = high[lbR] < ta.valuewhen(phFound, high[lbR], 1)
+hBear    = wantBear and showHid and phFound and priceLH and oscHH
+
+// ── Connecting lines on the RSI between the two pivots ───────────────────────
+bullCol = color.new(color.green,  0)
+bearCol = color.new(color.red,    0)
+plot(bull  ? osc[lbR] : na, "Bull line", bullCol, 2, plot.style_line, offset=-lbR)
+plot(hBull ? osc[lbR] : na, "HBull line", color.new(color.lime, 0), 2, plot.style_line, offset=-lbR)
+plot(bear  ? osc[lbR] : na, "Bear line", bearCol, 2, plot.style_line, offset=-lbR)
+plot(hBear ? osc[lbR] : na, "HBear line", color.new(color.orange, 0), 2, plot.style_line, offset=-lbR)
+
+// ── Labels ───────────────────────────────────────────────────────────────────
+plotshape(bull  ? osc[lbR] : na, "Reg Bull", shape.labelup,   location.absolute, bullCol,                 offset=-lbR, text="Bull",  textcolor=color.white, size=size.tiny)
+plotshape(hBull ? osc[lbR] : na, "Hid Bull", shape.labelup,   location.absolute, color.new(color.lime,0), offset=-lbR, text="H",     textcolor=color.black, size=size.tiny)
+plotshape(bear  ? osc[lbR] : na, "Reg Bear", shape.labeldown, location.absolute, bearCol,                 offset=-lbR, text="Bear",  textcolor=color.white, size=size.tiny)
+plotshape(hBear ? osc[lbR] : na, "Hid Bear", shape.labeldown, location.absolute, color.new(color.orange,0),offset=-lbR, text="H",    textcolor=color.black, size=size.tiny)
+
+// ── ALERTS — set these on every symbol in your watchlist to "scan" ───────────
+alertcondition(bull,  "Regular Bullish Divergence", "REGULAR BULLISH RSI divergence: {{ticker}} {{interval}}")
+alertcondition(bear,  "Regular Bearish Divergence", "REGULAR BEARISH RSI divergence: {{ticker}} {{interval}}")
+alertcondition(hBull, "Hidden Bullish Divergence",  "HIDDEN BULLISH RSI divergence: {{ticker}} {{interval}}")
+alertcondition(hBear, "Hidden Bearish Divergence",  "HIDDEN BEARISH RSI divergence: {{ticker}} {{interval}}")

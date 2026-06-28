@@ -197,12 +197,16 @@ CRYPTO_CG = {
 }
 
 # CoinGecko free tier is rate-limited — pause longer between calls than Yahoo.
-CG_PAUSE = 3.0
+CG_KEY = ""   # <-- paste a FREE CoinGecko Demo API key here (coingecko.com/en/api/pricing -> Demo)
+              #     to stop the 429 rate-limit errors. Leave "" to use the throttled public tier.
+CG_PAUSE = 4.0
 
 def fetch_coingecko(cg_id, days=365, retries=3):
     """Daily close prices (oldest first) from CoinGecko, or [] on error."""
     url = (f"https://api.coingecko.com/api/v3/coins/{cg_id}/market_chart"
            f"?vs_currency=usd&days={days}")   # days>=90 returns daily granularity
+    if CG_KEY:
+        url += f"&x_cg_demo_api_key={CG_KEY}"
     headers = {"User-Agent": "Mozilla/5.0", "Accept": "application/json"}
     for attempt in range(retries):
         if attempt > 0:
