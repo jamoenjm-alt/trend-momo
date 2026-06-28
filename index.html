@@ -1424,6 +1424,9 @@ window.STATIC_PRICES = {"AAPL":[198.89,198.51,196.25,197.49,198.53,210.79,212.93
 // trailing P/E auto-refreshed 2026-06-27 08:16 from stockanalysis
 window.LIVE_PE = {"PLTR":127.0,"AAPL":34.4,"MSFT":22.2,"TSLA":369.3,"NVDA":29.5,"ASML":60.0,"AMZN":27.8,"GOOGL":25.7,"META":20.0,"BRK.B":14.8,"AVGO":60.8,"JPM":15.8,"LLY":42.9,"V":29.3,"UNH":32.3,"ORCL":25.5,"MA":28.9,"XOM":23.0,"NFLX":23.8,"COST":47.9,"WMT":40.7,"HD":24.8};
 // @@LIVE_PE_END@@
+// @@STATIC_OHLC_START@@
+window.STATIC_OHLC = {};
+// @@STATIC_OHLC_END@@
 
 
 const TD_KEY = 'd1bf517795d040938e812582ae1587ea';
@@ -1719,33 +1722,36 @@ function divPivots(arr, k) {
   return { highs, lows };
 }
 function toWeekly(closes) { const w = []; for (let i = closes.length - 1; i >= 0; i -= 5) w.unshift(closes[i]); return w; }
-function detectDivergence(closes) {
+function toWeeklyAgg(arr, mode) { const out = []; for (let end = arr.length - 1; end >= 0; end -= 5) { let v = arr[end]; for (let j = Math.max(0, end - 4); j <= end; j++) { if (mode === 'max' && arr[j] > v) v = arr[j]; else if (mode === 'min' && arr[j] < v) v = arr[j]; } out.unshift(v); } return out; }
+function detectDivergence(closes, highs, lows) {
   if (!closes || closes.length < 40) return null;
   const r = rsiSeries(closes, 14), k = 5, last = closes.length - 1;
-  const piv = divPivots(closes, k);
+  const hi = (highs && highs.length === closes.length) ? highs : closes;   // candle highs for bearish swings
+  const lo = (lows && lows.length === closes.length) ? lows : closes;      // candle lows for bullish swings
+  const pivHi = divPivots(hi, k).highs.filter(i => r[i] != null);
+  const pivLo = divPivots(lo, k).lows.filter(i => r[i] != null);
   const recentOK = (i) => i >= last - (k + 6);
   let best = null;
-  const lows = piv.lows.filter(i => r[i] != null);
-  if (lows.length >= 2) {
-    const a = lows[lows.length-2], b = lows[lows.length-1];
-    if (recentOK(b) && closes[b] < closes[a] && r[b] > r[a] + 2) best = { dir:'bull', strength: Math.round(r[b]-r[a]), idx: b };
-  }
-  const highs = piv.highs.filter(i => r[i] != null);
-  if (highs.length >= 2) {
-    const a = highs[highs.length-2], b = highs[highs.length-1];
-    if (recentOK(b) && closes[b] > closes[a] && r[b] + 2 < r[a] && (!best || b > best.idx)) best = { dir:'bear', strength: Math.round(r[a]-r[b]), idx: b };
-  }
+  if (pivLo.length >= 2) { const a = pivLo[pivLo.length-2], b = pivLo[pivLo.length-1];
+    if (recentOK(b) && lo[b] < lo[a] && r[b] > r[a] + 2) best = { dir:'bull', strength: Math.round(r[b]-r[a]), idx: b }; }
+  if (pivHi.length >= 2) { const a = pivHi[pivHi.length-2], b = pivHi[pivHi.length-1];
+    if (recentOK(b) && hi[b] > hi[a] && r[b] + 2 < r[a] && (!best || b > best.idx)) best = { dir:'bear', strength: Math.round(r[a]-r[b]), idx: b }; }
   return best;
 }
 function computeAllDivergences(data) {
   const out = [];
+  const OHLC = (typeof window !== 'undefined') ? window.STATIC_OHLC : null;
   for (const a of WATCHLIST) {
     const rec = data[a.ticker + '__' + a.cls];
-    const closes = rec && rec.closes;
+    let closes = rec && rec.closes;
     if (!closes || closes.length < 60) continue;
-    const d = detectDivergence(closes);
+    const o = OHLC && OHLC[a.ticker];
+    let h = o && o.h, l = o && o.l;
+    if (h && l && h.length === l.length && h.length < closes.length) closes = closes.slice(-h.length); // align to OHLC window
+    const d = detectDivergence(closes, h, l);
     if (d) out.push({ ticker: a.ticker, tf: 'Daily', dir: d.dir, strength: d.strength });
-    const wk = detectDivergence(toWeekly(closes));
+    const wc = toWeekly(closes), wh = h ? toWeeklyAgg(h, 'max') : null, wl = l ? toWeeklyAgg(l, 'min') : null;
+    const wk = detectDivergence(wc, wh, wl);
     if (wk) out.push({ ticker: a.ticker, tf: 'Weekly', dir: wk.dir, strength: wk.strength });
   }
   return out;
@@ -2228,7 +2234,7 @@ function App() {
   function handleMouseMove(e) { if (tooltip) setTooltip(t=>t?{...t,x:e.clientX,y:e.clientY}:null); }
 
   const now=lastFetch||new Date();
-  const dateStr=now.toISOString().slice(0,10);
+  const dateStr=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
   const timeStr=now.toTimeString().slice(0,8);
   const tz=(()=>{ const off=-now.getTimezoneOffset(); const hh=String(Math.floor(Math.abs(off)/60)).padStart(2,'0'); const mm=String(Math.abs(off)%60).padStart(2,'0'); return 'UTC'+(off>=0?'+':'-')+hh+':'+mm; })();
   const filtered=search.trim()?WATCHLIST.filter(a=>a.ticker.toLowerCase().includes(search.toLowerCase())||a.name.toLowerCase().includes(search.toLowerCase())):WATCHLIST;

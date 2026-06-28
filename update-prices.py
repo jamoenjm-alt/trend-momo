@@ -154,23 +154,28 @@ def fetch_yahoo(yahoo_symbol: str, days: int = HISTORY_DAYS, retries: int = 3) -
             if not result:
                 err = raw.get("chart", {}).get("error", {})
                 print(f"no data ({err.get('description', 'empty response')})")
-                return []
+                return [], [], []
 
-            closes     = result["indicators"]["quote"][0].get("close", [])
+            q = result["indicators"]["quote"][0]
+            closes_raw = q.get("close", [])
+            highs_raw  = q.get("high", []);  highs_raw += [None] * (len(closes_raw) - len(highs_raw))
+            lows_raw   = q.get("low", []);   lows_raw  += [None] * (len(closes_raw) - len(lows_raw))
             timestamps = result.get("timestamp", [])
-
-            pairs = sorted(
-                ((ts, c) for ts, c in zip(timestamps, closes) if c is not None),
+            rows = sorted(
+                ((ts, c, h, l) for ts, c, h, l in zip(timestamps, closes_raw, highs_raw, lows_raw) if c is not None),
                 key=lambda x: x[0],
             )
-            return [round(c, 4) for _, c in pairs]
+            closes = [round(c, 4) for _, c, _, _ in rows]
+            highs  = [round(h if h is not None else c, 4) for _, c, h, _ in rows]
+            lows   = [round(l if l is not None else c, 4) for _, c, _, l in rows]
+            return closes, highs, lows
 
         except Exception as e:
             if attempt < retries - 1:
                 print(f"retry {attempt+1}...", end=" ", flush=True)
             else:
                 print(f"ERROR: {e}")
-    return []
+    return [], [], []
 
 
 # ── All watchlist crypto → CoinGecko coin ids ────────────────────────────────
@@ -249,6 +254,20 @@ def inject_live_pe(pe_dict, html_path):
     body = (ms + "\n" +
             f"// trailing P/E auto-refreshed {ts} from stockanalysis\n" +
             f"window.LIVE_PE = {json.dumps(pe_dict, separators=(',', ':'))};\n" + me)
+    with open(html_path, "w", encoding="utf-8") as f:
+        f.write(content[:i] + body + content[j + len(me):])
+    return True
+
+
+def inject_ohlc(ohlc_dict, html_path):
+    with open(html_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    ms, me = "// @@STATIC_OHLC_START@@", "// @@STATIC_OHLC_END@@"
+    i, j = content.find(ms), content.find(me)
+    if i == -1 or j == -1:
+        print("  (STATIC_OHLC markers not found - skipping)")
+        return False
+    body = ms + "\n" + f"window.STATIC_OHLC = {json.dumps(ohlc_dict, separators=(',', ':'))};\n" + me
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(content[:i] + body + content[j + len(me):])
     return True
@@ -379,6 +398,7 @@ def main():
     print()
 
     prices = load_existing_static_prices(html_path)
+    ohlc = {}
 
     ok_count  = 0
     err_count = 0
@@ -387,9 +407,10 @@ def main():
         label = f"{board_ticker:10s} ({yahoo_symbol})"
         print(f"  → {label:28s}", end="  ", flush=True)
 
-        closes = fetch_yahoo(yahoo_symbol)
+        closes, highs, lows = fetch_yahoo(yahoo_symbol)
         if closes:
             prices[board_ticker] = closes
+            ohlc[board_ticker] = {"h": highs[-200:], "l": lows[-200:]}
             ok_count += 1
             print(f"✓  {len(closes)} closes   last={closes[-1]:,.3f}")
         else:
@@ -445,6 +466,8 @@ def main():
     inject_into_html(prices, html_path)
     if pe_out:
         inject_live_pe(pe_out, html_path)
+    if ohlc:
+        inject_ohlc(ohlc, html_path)
     sync_index(html_path)
 
     print()
