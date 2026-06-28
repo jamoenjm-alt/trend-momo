@@ -1760,6 +1760,9 @@ function pivotsLR(arr, lbL, lbR) {
   return { highs, lows };
 }
 // TradingView "RSI Divergence Indicator" method: pivots on the RSI line; price checked at those bars.
+// Composite strength = (rsiDelta + pricePct×0.3) × extremityMult × gapMult
+// extremityMult: deeper oversold/overbought territory = stronger signal
+// gapMult: longer divergence formation = more confirmed
 function detectDivergence(closes, highs, lows) {
   const lbL = 5, lbR = 5, gapLo = 5, gapHi = 60;
   if (!closes || closes.length < lbL + lbR + 12) return null;
@@ -1769,13 +1772,31 @@ function detectDivergence(closes, highs, lows) {
   const piv = pivotsLR(osc, lbL, lbR);
   const last = closes.length - 1;
   const freshOK = (i) => (last - i) <= lbR + 5;
+  function compositeStrength(dir, rsiA, rsiB, priceA, priceB, gap) {
+    const rsiDelta = Math.abs(rsiB - rsiA);
+    const pricePct = Math.abs(priceB - priceA) / (Math.abs(Math.min(priceA, priceB)) || 1) * 100;
+    let extMult = 1.0;
+    if (dir === 'bull') {
+      if (rsiB < 25) extMult = 2.5; else if (rsiB < 30) extMult = 2.0; else if (rsiB < 40) extMult = 1.5;
+    } else {
+      if (rsiB > 75) extMult = 2.5; else if (rsiB > 70) extMult = 2.0; else if (rsiB > 60) extMult = 1.5;
+    }
+    const gapMult = gap >= 20 ? 1.4 : gap >= 10 ? 1.2 : 1.0;
+    return (rsiDelta + pricePct * 0.3) * extMult * gapMult;
+  }
   let best = null;
   const oL = piv.lows.filter(i => osc[i] != null);
   if (oL.length >= 2) { const b = oL[oL.length-1], a = oL[oL.length-2], gap = b - a;
-    if (freshOK(b) && gap >= gapLo && gap <= gapHi && osc[b] > osc[a] && lo[b] < lo[a]) best = { dir:'bull', strength: Math.round(osc[b]-osc[a]), idx: b }; }
+    if (freshOK(b) && gap >= gapLo && gap <= gapHi && osc[b] > osc[a] && lo[b] < lo[a]) {
+      best = { dir:'bull', strength: compositeStrength('bull', osc[a], osc[b], closes[a], closes[b], gap), idx: b };
+    }
+  }
   const oH = piv.highs.filter(i => osc[i] != null);
   if (oH.length >= 2) { const b = oH[oH.length-1], a = oH[oH.length-2], gap = b - a;
-    if (freshOK(b) && gap >= gapLo && gap <= gapHi && osc[b] < osc[a] && hi[b] > hi[a] && (!best || b > best.idx)) best = { dir:'bear', strength: Math.round(osc[a]-osc[b]), idx: b }; }
+    if (freshOK(b) && gap >= gapLo && gap <= gapHi && osc[b] < osc[a] && hi[b] > hi[a] && (!best || b > best.idx)) {
+      best = { dir:'bear', strength: compositeStrength('bear', osc[a], osc[b], closes[a], closes[b], gap), idx: b };
+    }
+  }
   return best;
 }
 
@@ -1802,8 +1823,9 @@ function DivergenceWatch({ data }) {
   const sortFn = (x, y) => (x.tf === y.tf ? y.strength - x.strength : (x.tf === 'Weekly' ? -1 : 1));
   const bulls = divs.filter(d => d.dir === 'bull').sort(sortFn).slice(0, 8);
   const bears = divs.filter(d => d.dir === 'bear').sort(sortFn).slice(0, 8);
-  const sCls = (sv) => sv >= 15 ? 'rev-strong' : sv >= 8 ? 'rev-building' : 'rev-emerging';
-  const sLbl = (sv) => sv >= 15 ? 'Strong' : sv >= 8 ? 'Building' : 'Emerging';
+  // Thresholds calibrated to composite score (RSI delta × extremity × gap multipliers)
+  const sCls = (sv) => sv >= 25 ? 'rev-strong' : sv >= 12 ? 'rev-building' : 'rev-emerging';
+  const sLbl = (sv) => sv >= 25 ? 'Strong' : sv >= 12 ? 'Building' : 'Emerging';
   const row = (d) => h('div', { key: d.ticker + d.tf, className: 'reversal-row' },
     h('span', { className: 'reversal-ticker' }, d.ticker, assetBadge(d.ticker)),
     h('span', { className: 'reversal-arrow' }, h('span', { className: 'div-tf div-tf-' + d.tf.toLowerCase() }, d.tf), ' RSI div'),
@@ -2808,24 +2830,4 @@ createRoot(document.getElementById('root')).render(h(App));
       setTimeout(function(){ location.reload(); }, 300);
     }
     btn.addEventListener('click', go);
-    inp.addEventListener('keydown', function(e){ if(e.key==='Enter') go(); });
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', wireAddBtn);
-  } else {
-    wireAddBtn();
-  }
-  // Also try after a short delay in case elements load late
-  setTimeout(wireAddBtn, 500);
-  setTimeout(wireAddBtn, 1500);
-})();
-</script>
-
-<script>
-/* Add ✕ delete buttons to user-added custom ticker rows */
-(function() {
-  function getCustomTickers() {
-    try { return JSON.parse(localStorage.getItem('customTickers') || '[]'); } catch { return []; }
-  }
-  function deleteTicker(ticker) {
-    var list = getCustomTickers().filter(functio                                                                                                                                                                                                                                                                                                                                                                                                                        
+    inp.addEventListener('keydown', fu
