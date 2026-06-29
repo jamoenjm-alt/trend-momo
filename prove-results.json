@@ -1,0 +1,113 @@
+{
+ "FULL": [
+  {
+   "strategy": "SPY buy&hold",
+   "CAGR": 11.9,
+   "total": 243.0,
+   "maxDD": -22.3,
+   "sharpe": 0.92
+  },
+  {
+   "strategy": "ewhold",
+   "CAGR": 14.2,
+   "total": 327.0,
+   "maxDD": -20.2,
+   "sharpe": 1.14
+  },
+  {
+   "strategy": "csmom",
+   "CAGR": 30.7,
+   "total": 1783.0,
+   "maxDD": -19.7,
+   "sharpe": 1.43
+  },
+  {
+   "strategy": "dualmom",
+   "CAGR": 30.7,
+   "total": 1783.0,
+   "maxDD": -19.7,
+   "sharpe": 1.43
+  },
+  {
+   "strategy": "trendmom",
+   "CAGR": 25.2,
+   "total": 1079.0,
+   "maxDD": -20.9,
+   "sharpe": 1.29
+  }
+ ],
+ "H1": [
+  {
+   "strategy": "SPY buy&hold",
+   "CAGR": 12.8,
+   "total": 70.0,
+   "maxDD": -20.4,
+   "sharpe": 0.89
+  },
+  {
+   "strategy": "ewhold",
+   "CAGR": 16.4,
+   "total": 95.0,
+   "maxDD": -20.2,
+   "sharpe": 1.07
+  },
+  {
+   "strategy": "csmom",
+   "CAGR": 31.2,
+   "total": 230.0,
+   "maxDD": -19.7,
+   "sharpe": 1.46
+  },
+  {
+   "strategy": "dualmom",
+   "CAGR": 31.2,
+   "total": 230.0,
+   "maxDD": -19.7,
+   "sharpe": 1.46
+  },
+  {
+   "strategy": "trendmom",
+   "CAGR": 24.5,
+   "total": 162.0,
+   "maxDD": -20.9,
+   "sharpe": 1.31
+  }
+ ],
+ "H2": [
+  {
+   "strategy": "SPY buy&hold",
+   "CAGR": 13.3,
+   "total": 98.0,
+   "maxDD": -22.3,
+   "sharpe": 0.92
+  },
+  {
+   "strategy": "ewhold",
+   "CAGR": 14.4,
+   "total": 109.0,
+   "maxDD": -16.7,
+   "sharpe": 1.1
+  },
+  {
+   "strategy": "csmom",
+   "CAGR": 29.4,
+   "total": 310.0,
+   "maxDD": -15.6,
+   "sharpe": 1.09
+  },
+  {
+   "strategy": "dualmom",
+   "CAGR": 29.4,
+   "total": 310.0,
+   "maxDD": -15.6,
+   "sharpe": 1.09
+  },
+  {
+   "strategy": "trendmom",
+   "CAGR": 9.8,
+   "total": 67.0,
+   "maxDD": -23.7,
+   "sharpe": 0.65
+  }
+ ]
+}

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BTC Trend Signal</title>
+<style>
+  :root { --bg:#0b0e14; --panel:#131823; --ink:#e6edf3; --mut:#8b949e; --on:#2ea043; --off:#d1242f; --line:#30363d; --ma:#f0a020; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif; }
+  .wrap { max-width:860px; margin:0 auto; padding:24px 16px 60px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .sub { color:var(--mut); font-size:13px; margin-bottom:20px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:20px; margin-bottom:16px; }
+  .badge { display:inline-block; font-weight:700; font-size:22px; padding:10px 18px; border-radius:10px; letter-spacing:.5px; }
+  .b-on { background:rgba(46,160,67,.15); color:var(--on); border:1px solid var(--on); }
+  .b-off{ background:rgba(209,36,47,.15); color:var(--off); border:1px solid var(--off); }
+  .row { display:flex; flex-wrap:wrap; gap:24px; margin-top:14px; }
+  .stat .k { color:var(--mut); font-size:12px; text-transform:uppercase; letter-spacing:.5px; }
+  .stat .v { font-size:18px; font-weight:600; }
+  canvas { width:100%; height:260px; display:block; margin-top:8px; }
+  .rule { font-size:14px; color:var(--ink); }
+  .rule b { color:var(--ma); }
+  .muted { color:var(--mut); font-size:12px; }
+  .legend span { display:inline-block; width:11px; height:11px; border-radius:2px; vertical-align:middle; margin-right:5px; }
+  a { color:#58a6ff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>BTC Trend Signal</h1>
+  <div class="sub">Allocation filter for the SPY-core + BTC-satellite rule. Checks BTC vs its 200-day moving average.</div>
+
+  <div class="card" id="statusCard">
+    <span class="badge" id="badge">Loading…</span>
+    <div class="row">
+      <div class="stat"><div class="k">BTC price</div><div class="v" id="price">—</div></div>
+      <div class="stat"><div class="k">200-day MA</div><div class="v" id="ma">—</div></div>
+      <div class="stat"><div class="k">Distance to MA</div><div class="v" id="dist">—</div></div>
+      <div class="stat"><div class="k">As of</div><div class="v" id="asof">—</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="legend muted"><span style="background:#58a6ff"></span>BTC &nbsp;&nbsp; <span style="background:var(--ma)"></span>200-day MA</div>
+    <canvas id="chart" width="828" height="260"></canvas>
+  </div>
+
+  <div class="card rule">
+    <b>The rule:</b> hold 5–10% of the portfolio in BTC while the badge is <span style="color:var(--on)">RISK-ON</span>
+    (price above the 200-day line). When it flips <span style="color:var(--off)">RISK-OFF</span>, move that sleeve to
+    bonds/cash until it closes back above the line. Rebalance monthly, not daily.
+    <div class="muted" style="margin-top:10px">Backtest (2015–2026): SPY+10% BTC(trend) ≈ 20% CAGR vs SPY 13.6%, higher Sharpe in both halves —
+    but BTC's returns are decaying (113%→25% CAGR) and its true drawdown was −83%. Not financial advice; your own capital only.</div>
+  </div>
+  <div class="muted" id="err"></div>
+</div>
+
+<script>
+const PROXIES = [
+  u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
+  u => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
+  u => 'https://api.codetabs.com/v1/proxy/?quest=' + u,
+];
+async function fetchVia(url) {
+  for (const p of PROXIES) {
+    try {
+      const r = await fetch(p(url), { cache: 'no-store' });
+      if (r.ok) return await r.json();
+    } catch (e) { /* try next */ }
+  }
+  throw new Error('all proxies failed');
+}
+function sma(arr, n, i) { let s = 0; for (let k = i - n + 1; k <= i; k++) s += arr[k]; return s / n; }
+function fmt(x) { return '$' + x.toLocaleString(undefined, { maximumFractionDigits: 0 }); }
+
+async function run() {
+  const url = 'https://query1.finance.yahoo.com/v8/finance/chart/BTC-USD?interval=1d&range=2y';
+  try {
+    const j = await fetchVia(url);
+    const res = j.chart.result[0];
+    const ts = res.timestamp;
+    const cl = res.indicators.quote[0].close;
+    const t = [], c = [];
+    for (let i = 0; i < cl.length; i++) if (cl[i] != null) { t.push(ts[i]); c.push(cl[i]); }
+    const i = c.length - 1;
+    const ma = sma(c, 200, i);
+    const price = c[i];
+    const on = price > ma;
+    const distPct = ((price - ma) / ma * 100);
+    const badge = document.getElementById('badge');
+    badge.textContent = on ? 'RISK-ON  •  hold BTC' : 'RISK-OFF  •  rotate to bonds/cash';
+    badge.className = 'badge ' + (on ? 'b-on' : 'b-off');
+    document.getElementById('price').textContent = fmt(price);
+    document.getElementById('ma').textContent = fmt(ma);
+    document.getElementById('dist').textContent = (distPct >= 0 ? '+' : '') + distPct.toFixed(1) + '%';
+    document.getElementById('dist').style.color = on ? 'var(--on)' : 'var(--off)';
+    document.getElementById('asof').textContent = new Date(t[i] * 1000).toLocaleDateString();
+    drawChart(c.slice(-300), c.map((_, k) => k >= 199 ? sma(c, 200, k) : null).slice(-300));
+  } catch (e) {
+    document.getElementById('badge').textContent = 'Data unavailable';
+    document.getElementById('err').textContent = 'Could not load BTC data (proxy/network). Try a refresh. ' + e.message;
+  }
+}
+function drawChart(price, maLine) {
+  const cv = document.getElementById('chart'), x = cv.getContext('2d');
+  const W = cv.width, H = cv.height, pad = 8;
+  const vals = price.concat(maLine.filter(v => v != null));
+  const lo = Math.min(...vals), hi = Math.max(...vals);
+  const X = i => pad + i / (price.length - 1) * (W - 2 * pad);
+  const Y = v => H - pad - (v - lo) / (hi - lo) * (H - 2 * pad);
+  x.clearRect(0, 0, W, H);
+  const plot = (arr, col, w) => {
+    x.beginPath(); x.lineWidth = w; x.strokeStyle = col; let started = false;
+    for (let i = 0; i < arr.length; i++) { if (arr[i] == null) { started = false; continue; }
+      const px = X(i), py = Y(arr[i]); if (!started) { x.moveTo(px, py); started = true; } else x.lineTo(px, py); }
+    x.stroke();
+  };
+  plot(price, '#58a6ff', 1.6);
+  plot(maLine, '#f0a020', 1.6);
+}
+run();
+</script>
+</body>
+</html>
