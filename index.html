@@ -1773,16 +1773,17 @@ function detectDivergence(closes, highs, lows) {
   const last = closes.length - 1;
   const freshOK = (i) => (last - i) <= lbR + 5;
   function compositeStrength(dir, rsiA, rsiB, priceA, priceB, gap) {
-    const rsiDelta = Math.abs(rsiB - rsiA);
-    const pricePct = Math.abs(priceB - priceA) / (Math.abs(Math.min(priceA, priceB)) || 1) * 100;
-    let extMult = 1.0;
-    if (dir === 'bull') {
-      if (rsiB < 25) extMult = 2.5; else if (rsiB < 30) extMult = 2.0; else if (rsiB < 40) extMult = 1.5;
-    } else {
-      if (rsiB > 75) extMult = 2.5; else if (rsiB > 70) extMult = 2.0; else if (rsiB > 60) extMult = 1.5;
-    }
-    const gapMult = gap >= 20 ? 1.4 : gap >= 10 ? 1.2 : 1.0;
-    return (rsiDelta + pricePct * 0.3) * extMult * gapMult;
+    // Additive formula: each factor contributes independently
+    // Extremity: deeper oversold/overbought = stronger signal (0–25 pts)
+    const extScore = dir === 'bull' ? Math.max(0, 50 - rsiB) : Math.max(0, rsiB - 50);
+    // Duration: longer formation = more confirmed (0–15 pts)
+    const gapScore = Math.min(gap * 0.5, 15);
+    // RSI delta: raw divergence magnitude (0–8 pts)
+    const rsiScore = Math.min(Math.abs(rsiB - rsiA) * 0.5, 8);
+    // Price divergence bonus (0–10 pts)
+    const pricePct = (priceA && priceB) ? Math.abs(priceB - priceA) / (Math.abs(Math.min(priceA, priceB)) || 1) * 100 : 0;
+    const priceScore = Math.min(pricePct * 0.2, 10);
+    return extScore + gapScore + rsiScore + priceScore;
   }
   let best = null;
   const oL = piv.lows.filter(i => osc[i] != null);
@@ -1823,9 +1824,8 @@ function DivergenceWatch({ data }) {
   const sortFn = (x, y) => (x.tf === y.tf ? y.strength - x.strength : (x.tf === 'Weekly' ? -1 : 1));
   const bulls = divs.filter(d => d.dir === 'bull').sort(sortFn).slice(0, 8);
   const bears = divs.filter(d => d.dir === 'bear').sort(sortFn).slice(0, 8);
-  // Thresholds calibrated to composite score (RSI delta × extremity × gap multipliers)
-  const sCls = (sv) => sv >= 25 ? 'rev-strong' : sv >= 12 ? 'rev-building' : 'rev-emerging';
-  const sLbl = (sv) => sv >= 25 ? 'Strong' : sv >= 12 ? 'Building' : 'Emerging';
+  const sCls = (sv) => sv >= 22 ? 'rev-strong' : sv >= 11 ? 'rev-building' : 'rev-emerging';
+  const sLbl = (sv) => sv >= 22 ? 'Strong' : sv >= 11 ? 'Building' : 'Emerging';
   const row = (d) => h('div', { key: d.ticker + d.tf, className: 'reversal-row' },
     h('span', { className: 'reversal-ticker' }, d.ticker, assetBadge(d.ticker)),
     h('span', { className: 'reversal-arrow' }, h('span', { className: 'div-tf div-tf-' + d.tf.toLowerCase() }, d.tf), ' RSI div'),
@@ -2318,6 +2318,7 @@ function App() {
         h('a', { href:'#', className: view==='outlook'?'nav-active':'', onClick:(e)=>{e.preventDefault(); setView('outlook');} }, 'Market Outlook'),
         h('a', { href:'#', className: view==='guide'?'nav-active':'', onClick:(e)=>{e.preventDefault(); setView('guide');} }, 'Guide'),
       ),
+      h('a', { href: 'https://jamoenjm-alt.github.io/trend-momo/', target: '_blank', rel: 'noopener', style: { color:'#4ade80', fontSize:'0.78rem', fontWeight:600, marginRight:8, textDecoration:'none' } }, '🌐 Live Site'),
       h('span', { className: 'banner-link', onClick: () => setShowConfig(s=>!s) }, '⚙ Keys'),
     ),
     h('div', { className: 'page-banner' }, h('h1', null, 'Trend Momo')),
@@ -2823,11 +2824,4 @@ createRoot(document.getElementById('root')).render(h(App));
         return;
       }
       if (result.cls) cls = result.cls;
-      try { localStorage.setItem('pc_'+t, JSON.stringify({c:result.closes.slice(-400), ts:Date.now()})); } catch {}
-      list.push({ticker:t, name:t, cls:cls});
-      localStorage.setItem('customTickers', JSON.stringify(list));
-      if(statusEl) statusEl.textContent = '\u2713 '+t+' added!';
-      setTimeout(function(){ location.reload(); }, 300);
-    }
-    btn.addEventListener('click', go);
-    inp.addEventListener('keydown', fu
+      try { localStorage.setItem('pc_'+t, JSON.stringify({c:result.closes.slice(-400), ts:Date.now()})); } catch 
