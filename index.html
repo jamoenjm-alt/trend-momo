@@ -831,6 +831,8 @@
     .alpha-neg { color:#b91c1c; font-weight:700; }
     .table-wrap thead th[title] { cursor: help; }
     .banner-disclaimer { font-size:0.62rem; color:#94a3b8; margin-top:2px; font-weight:400; }
+    .jr-exp { background:#f1f5f9; color:#1e40af; border:1px solid var(--border); border-radius:6px; padding:5px 12px; font-weight:700; cursor:pointer; font-size:0.72rem; display:inline-flex; align-items:center; gap:4px; }
+    .jr-exp:hover { background:#e2e8f0; }
 
     /* ── Asset type badge (Reversal & Divergence panels) ──────── */
     /* .atbadge styles removed — replaced by .at-sub muted label */
@@ -2021,6 +2023,33 @@ function retSince(ticker, dateStr) {
   return P[P.length - 1] / P[i] - 1;
 }
 
+function exportUserData() {
+  let ct = [];
+  try { ct = JSON.parse(localStorage.getItem('customTickers') || '[]'); } catch (e) {}
+  const payload = { app: 'trend-momo', exported: new Date().toISOString(), customTickers: ct, tradeJournal: loadJournal() };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'trend-momo-my-data.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+function importUserData(file, done) {
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const d = JSON.parse(r.result);
+      if (Array.isArray(d.customTickers)) localStorage.setItem('customTickers', JSON.stringify(d.customTickers));
+      if (Array.isArray(d.tradeJournal)) localStorage.setItem('tradeJournal', JSON.stringify(d.tradeJournal));
+      done(Array.isArray(d.customTickers) || Array.isArray(d.tradeJournal));
+    } catch (e) { done(false); }
+  };
+  r.onerror = () => done(false);
+  r.readAsText(file);
+}
+
 function JournalPage() {
   const [trades, setTrades] = useState(loadJournal());
   const [jdate, setJdate] = useState(new Date().toISOString().slice(0, 10));
@@ -2069,7 +2098,13 @@ function JournalPage() {
         'Weighted alpha vs SPY: ',
         h('span', { className: wAlpha >= 0 ? 'alpha-pos' : 'alpha-neg' }, pct(wAlpha / wAmt) + '  (' + (wAlpha >= 0 ? '+$' : '-$') + Math.abs(wAlpha).toFixed(0) + ')'),
         h('div', { style: { fontWeight: 400, fontSize: '0.68rem', color: '#94a3b8', marginTop: 4 } },
-          'Approximate: business-day matching against baked closes (~14 months of history). Tickers must exist on the board. If this number stays negative across months, the market is telling you to trade less and hold the index.')) : null));
+          'Approximate: business-day matching against baked closes (~14 months of history). Tickers must exist on the board. If this number stays negative across months, the market is telling you to trade less and hold the index.')) : null,
+      h('div', { style: { marginTop: 14, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' } },
+        h('button', { className: 'jr-exp', onClick: exportUserData }, '⬇ Export my data'),
+        h('label', { className: 'jr-exp', style: { cursor: 'pointer' } }, '⬆ Import',
+          h('input', { type: 'file', accept: '.json,application/json', style: { display: 'none' },
+            onChange: e => { const f = e.target.files && e.target.files[0]; if (f) importUserData(f, ok => { if (ok) location.reload(); else alert('Could not read that file — expected an export from this site.'); }); } })),
+        h('span', { style: { fontSize: '0.66rem', color: '#94a3b8' } }, 'Moves your custom tickers + journal between devices via a file on your computer — nothing is uploaded.'))));
 }
 
 function WhatChanged({ data }) {
