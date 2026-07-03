@@ -5,6 +5,9 @@ REM Safe to re-run. Everything logs to claude-session-log.txt.
 REM ---------------------------------------------------------------------------
 cd /d "%~dp0"
 
+REM Windows consoles default to cp1252; the scripts print unicode arrows.
+set PYTHONIOENCODING=utf-8
+
 echo ============================================================ > claude-session-log.txt
 echo Session apply started: %DATE% %TIME% >> claude-session-log.txt
 
