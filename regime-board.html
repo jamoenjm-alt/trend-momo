@@ -829,6 +829,7 @@
     .chg-strip { background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:8px 12px; margin-bottom:12px; font-size:0.74rem; color:#1e3a8a; line-height:1.6; }
     .alpha-pos { color:#15803d; font-weight:700; }
     .alpha-neg { color:#b91c1c; font-weight:700; }
+    .table-wrap thead th[title] { cursor: help; }
 
     /* ── Asset type badge (Reversal & Divergence panels) ──────── */
     /* .atbadge styles removed — replaced by .at-sub muted label */
@@ -2650,19 +2651,19 @@ function App() {
       h('div', { className: 'table-wrap' },
         h('table', null,
           h('thead', null, h('tr', null,
-            h('th', null, 'Ticker'),
-            h('th', null, 'Description'),
-            h('th', null, h('div', null, '1–2 Week'),    h('div', { style: sub }, '10/3 · 15/5 MAs')),
-            h('th', null, h('div', null, '1–3 Month'),   h('div', { style: sub }, '42/10 · 50/15 · 63/21')),
-            h('th', null, h('div', null, '3–9 Month'),   h('div', { style: sub }, '84/21 · 126/42 · 168/42')),
-            h('th', null, h('div', null, 'All Signals'), h('div', { style: sub }, 'all 10 MA pairs')),
-            h('th', null, h('div', null, 'Balance Sheet'), h('div', { style: sub }, 'score /10')),
-            h('th', null, h('div', null, 'P/E Ratio'),   h('div', { style: sub }, 'trailing')),
-            h('th', null, h('div', null, 'News'),        h('div', { style: sub }, 'sentiment')),
-            h('th', null, h('div', null, 'Buy Score'),   h('div', { style: sub }, 'out of 10')),
-            h('th', null, h('div', null, 'Value Score'), h('div', { style: sub }, 'P/E-adjusted')),
-            h('th', null, h('div', null, 'Fear / Greed'), h('div', { style: sub }, '0–100')),
-            h('th', null, h('div', null, 'Rel Vol'), h('div', { style: sub }, 'vs 20-day avg')),
+            h('th', { title: 'Exchange symbol. The small badge shows the asset class (Equity, ETF, Crypto, ASX…).' }, 'Ticker'),
+            h('th', { title: 'Company or asset name.' }, 'Description'),
+            h('th', { title: 'Fastest trend check: price vs short moving averages (10/3 and 15/5 day pairs). Flips often — an early warning, never a trade trigger on its own.' }, h('div', null, '1–2 Week'),    h('div', { style: sub }, '10/3 · 15/5 MAs')),
+            h('th', { title: 'Medium-term trend: three MA pairs (42/10, 50/15, 63/21 days). Green here means the multi-week trend is up.' }, h('div', null, '1–3 Month'),   h('div', { style: sub }, '42/10 · 50/15 · 63/21')),
+            h('th', { title: 'Long-term trend: slow MA pairs (84/21, 126/42, 168/42 days). The regime that matters most if you hold for months.' }, h('div', null, '3–9 Month'),   h('div', { style: sub }, '84/21 · 126/42 · 168/42')),
+            h('th', { title: 'Average of all 10 MA pairs, fast to slow — the overall trend regime. The coloured dot shows how stable that regime has been over the last ~30 days (green ring = very stable, red ring = flipping a lot).' }, h('div', null, 'All Signals'), h('div', { style: sub }, 'all 10 MA pairs')),
+            h('th', { title: 'Hand-curated fundamental quality score out of 10 (debt, cash flow, moat). Updated periodically, not live. Hover a cell for the one-line thesis.' }, h('div', null, 'Balance Sheet'), h('div', { style: sub }, 'score /10')),
+            h('th', { title: 'Trailing price-to-earnings ratio. Auto-refreshed daily for major US names, curated for the rest. Rough guide: under ~15 cheap, 15–36 normal, over ~36 expensive. Not applicable to crypto, forex, commodities.' }, h('div', null, 'P/E Ratio'),   h('div', { style: sub }, 'trailing')),
+            h('th', { title: 'Recent headline sentiment from Alpha Vantage. Best-effort: the free API is rate-limited, so this column can be empty or stale.' }, h('div', null, 'News'),        h('div', { style: sub }, 'sentiment')),
+            h('th', { title: 'Weighted trend composite 0–10 (long-term trend counts most) plus a stability bonus. Honest note: backtested 2010–2026 — high scores did NOT out-earn low scores, so this is context, not a buy signal. See The Plan tab for what actually passed testing.' }, h('div', null, 'Buy Score'),   h('div', { style: sub }, 'out of 10')),
+            h('th', { title: 'Buy Score nudged by valuation: cheap P/E (<15) adds up to +1.5, expensive (>36) subtracts up to 2.5. Same caveat as Buy Score: context, not a trigger.' }, h('div', null, 'Value Score'), h('div', { style: sub }, 'P/E-adjusted')),
+            h('th', { title: '0 = extreme fear, 100 = extreme greed. Derived from this board’s own trend score, nudged by news and P/E. Backtest: buying max fear out-earned buying max greed 3-to-1 — but neither beat simply holding SPY. Read it as a contrarian thermometer.' }, h('div', null, 'Fear / Greed'), h('div', { style: sub }, '0–100')),
+            h('th', { title: 'Today’s volume vs its own 20-day average. 1.5×+ = real participation behind the move; 0.7× or less = quiet drift. Volume confirms — it does not predict.' }, h('div', null, 'Rel Vol'), h('div', { style: sub }, 'vs 20-day avg')),
           )),
           h('tbody', null,
             SECTIONS.filter(function(sec){ return snavFilter === 'all' || sec.cls === snavFilter; }).map(function(sec) {
