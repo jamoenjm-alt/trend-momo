@@ -118,10 +118,10 @@ REQUEST_PAUSE = 0.4
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-def fetch_yahoo(yahoo_symbol: str, days: int = HISTORY_DAYS, retries: int = 3) -> list:
+def fetch_yahoo(yahoo_symbol: str, days: int = HISTORY_DAYS, retries: int = 3, interval: str = "1d") -> tuple:
     """
-    Fetch daily close prices from Yahoo Finance v8 API.
-    Returns list of floats (oldest first), or [] on error.
+    Fetch daily (or weekly, interval="1wk") closes/highs/lows/volumes from Yahoo Finance v8 API.
+    Returns (closes, highs, lows, volumes) — lists of floats oldest first, or ([], [], [], []) on error.
     Retries up to `retries` times with exponential backoff on connection errors.
     """
     end   = int(datetime.now(timezone.utc).timestamp())
@@ -129,7 +129,7 @@ def fetch_yahoo(yahoo_symbol: str, days: int = HISTORY_DAYS, retries: int = 3) -
     encoded = urllib.parse.quote(yahoo_symbol)
     url = (
         f"https://query1.finance.yahoo.com/v8/finance/chart/{encoded}"
-        f"?interval=1d&period1={start}&period2={end}&events=history"
+        f"?interval={interval}&period1={start}&period2={end}&events=history"
     )
     headers = {
         "User-Agent": (
@@ -154,28 +154,30 @@ def fetch_yahoo(yahoo_symbol: str, days: int = HISTORY_DAYS, retries: int = 3) -
             if not result:
                 err = raw.get("chart", {}).get("error", {})
                 print(f"no data ({err.get('description', 'empty response')})")
-                return [], [], []
+                return [], [], [], []
 
             q = result["indicators"]["quote"][0]
             closes_raw = q.get("close", [])
-            highs_raw  = q.get("high", []);  highs_raw += [None] * (len(closes_raw) - len(highs_raw))
-            lows_raw   = q.get("low", []);   lows_raw  += [None] * (len(closes_raw) - len(lows_raw))
+            highs_raw  = q.get("high", []);   highs_raw += [None] * (len(closes_raw) - len(highs_raw))
+            lows_raw   = q.get("low", []);    lows_raw  += [None] * (len(closes_raw) - len(lows_raw))
+            vols_raw   = q.get("volume", []); vols_raw  += [None] * (len(closes_raw) - len(vols_raw))
             timestamps = result.get("timestamp", [])
             rows = sorted(
-                ((ts, c, h, l) for ts, c, h, l in zip(timestamps, closes_raw, highs_raw, lows_raw) if c is not None),
+                ((ts, c, h, l, v) for ts, c, h, l, v in zip(timestamps, closes_raw, highs_raw, lows_raw, vols_raw) if c is not None),
                 key=lambda x: x[0],
             )
-            closes = [round(c, 4) for _, c, _, _ in rows]
-            highs  = [round(h if h is not None else c, 4) for _, c, h, _ in rows]
-            lows   = [round(l if l is not None else c, 4) for _, c, _, l in rows]
-            return closes, highs, lows
+            closes = [round(c, 4) for _, c, _, _, _ in rows]
+            highs  = [round(h if h is not None else c, 4) for _, c, h, _, _ in rows]
+            lows   = [round(l if l is not None else c, 4) for _, c, _, l, _ in rows]
+            vols   = [int(v) if v is not None else 0 for _, _, _, _, v in rows]
+            return closes, highs, lows, vols
 
         except Exception as e:
             if attempt < retries - 1:
                 print(f"retry {attempt+1}...", end=" ", flush=True)
             else:
                 print(f"ERROR: {e}")
-    return [], [], []
+    return [], [], [], []
 
 
 # ── All watchlist crypto → CoinGecko coin ids ────────────────────────────────
@@ -272,6 +274,21 @@ def inject_ohlc(ohlc_dict, html_path):
         print("  (STATIC_OHLC markers not found - skipping)")
         return False
     body = ms + "\n" + f"window.STATIC_OHLC = {json.dumps(ohlc_dict, separators=(',', ':'))};\n" + me
+    with open(html_path, "w", encoding="utf-8") as f:
+        f.write(content[:i] + body + content[j + len(me):])
+    return True
+
+
+def inject_weekly(weekly_dict, html_path):
+    """Replace the @@STATIC_WEEKLY@@ block with true weekly OHLC (interval=1wk from Yahoo)."""
+    with open(html_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    ms, me = "// @@STATIC_WEEKLY_START@@", "// @@STATIC_WEEKLY_END@@"
+    i, j = content.find(ms), content.find(me)
+    if i == -1 or j == -1:
+        print("  (STATIC_WEEKLY markers not found - skipping)")
+        return False
+    body = ms + "\n" + f"window.STATIC_WEEKLY = {json.dumps(weekly_dict, separators=(',', ':'))};\n" + me
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(content[:i] + body + content[j + len(me):])
     return True
@@ -403,6 +420,7 @@ def main():
 
     prices = load_existing_static_prices(html_path)
     ohlc = {}
+    weekly = {}
 
     ok_count  = 0
     err_count = 0
@@ -411,10 +429,10 @@ def main():
         label = f"{board_ticker:10s} ({yahoo_symbol})"
         print(f"  → {label:28s}", end="  ", flush=True)
 
-        closes, highs, lows = fetch_yahoo(yahoo_symbol)
+        closes, highs, lows, vols = fetch_yahoo(yahoo_symbol)
         if closes:
             prices[board_ticker] = closes
-            ohlc[board_ticker] = {"h": highs[-200:], "l": lows[-200:]}
+            ohlc[board_ticker] = {"h": highs[-200:], "l": lows[-200:], "v": vols[-200:]}
             ok_count += 1
             print(f"✓  {len(closes)} closes   last={closes[-1]:,.3f}")
         else:
@@ -424,6 +442,12 @@ def main():
             else:
                 print("✗  no data")
 
+        time.sleep(REQUEST_PAUSE)
+
+        # True weekly bars (interval=1wk) for honest weekly RSI divergences.
+        wc, wh, wl, _wv = fetch_yahoo(yahoo_symbol, days=1500, interval="1wk")
+        if wc and len(wc) >= 30:
+            weekly[board_ticker] = {"c": wc[-200:], "h": wh[-200:], "l": wl[-200:]}
         time.sleep(REQUEST_PAUSE)
 
     # ── Crypto via CoinGecko (staggered to respect free-tier rate limits) ──────
@@ -472,6 +496,8 @@ def main():
         inject_live_pe(pe_out, html_path)
     if ohlc:
         inject_ohlc(ohlc, html_path)
+    if weekly:
+        inject_weekly(weekly, html_path)
     sync_index(html_path)
 
     print()

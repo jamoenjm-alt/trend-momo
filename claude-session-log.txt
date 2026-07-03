@@ -1,0 +1,10 @@
+============================================================ 
+Session apply started: Fri 03/07/2026 14:33:50.66 
+From https://github.com/jamoenjm-alt/trend-momo
+   6c28bdf..517fddb  main       -> origin/main
+error: Your local changes to the following files would be overwritten by merge:
+	index.html
+	regime-board.html
+Please commit your changes or stash them before you merge.
+Aborting
+Updating 6c28bdf..517fddb
