@@ -8,3 +8,67 @@ error: Your local changes to the following files would be overwritten by merge:
 Please commit your changes or stash them before you merge.
 Aborting
 Updating 6c28bdf..517fddb
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CLAUDE.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'RSI-Divergence-Scanner.pine', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'add-asset-badges.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'add-reversal-watch.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backtest-results.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'btc-allocation-rule.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'btc-signal.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'git-push.bat', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'patch-divergence.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'prove.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'prove2.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'prove3.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'update-prices-daily.bat', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'update-prices.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'water-backtest.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'water-strategy.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'water-sweep.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'water.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'PROJECT-BRIEF.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backtest-buyscore.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'claude-apply-session.bat', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'claude-session-log.txt', LF will be replaced by CRLF the next time Git touches it
+[main 6cb4286] feat: divergence horizons+backtest caveat, S/R tags, rel-vol column, BTC signal page, weekly OHLC pipeline; fix: restore file tail truncated since 5a1efe4
+ 7 files changed, 988 insertions(+), 29 deletions(-)
+ create mode 100644 PROJECT-BRIEF.md
+ create mode 100644 backtest-buyscore.py
+ create mode 100644 claude-apply-session.bat
+ create mode 100644 claude-session-log.txt
+--- price bake --- 
+============================================================
+  Trend Momo — Price Update
+  Fetching 56 tickers from Yahoo Finance
+============================================================
+
+Traceback (most recent call last):
+  File "C:\Users\jwmit\Claude\Projects\STOCK TRACKER WEBSITE\update-prices.py", line 519, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\jwmit\Claude\Projects\STOCK TRACKER WEBSITE\update-prices.py", line 430, in main
+    print(f"  \u2192 {label:28s}", end="  ", flush=True)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jwmit\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 2: character maps to <undefined>
+python not found, trying py ... 
+============================================================
+  Trend Momo — Price Update
+  Fetching 56 tickers from Yahoo Finance
+============================================================
+
+Traceback (most recent call last):
+  File "C:\Users\jwmit\Claude\Projects\STOCK TRACKER WEBSITE\update-prices.py", line 519, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\jwmit\Claude\Projects\STOCK TRACKER WEBSITE\update-prices.py", line 430, in main
+    print(f"  \u2192 {label:28s}", end="  ", flush=True)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jwmit\AppData\Local\Programs\Python\Python313\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u2192' in position 2: character maps to <undefined>
