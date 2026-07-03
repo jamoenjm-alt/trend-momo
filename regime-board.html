@@ -830,6 +830,7 @@
     .alpha-pos { color:#15803d; font-weight:700; }
     .alpha-neg { color:#b91c1c; font-weight:700; }
     .table-wrap thead th[title] { cursor: help; }
+    .banner-disclaimer { font-size:0.62rem; color:#94a3b8; margin-top:2px; font-weight:400; }
 
     /* ── Asset type badge (Reversal & Divergence panels) ──────── */
     /* .atbadge styles removed — replaced by .at-sub muted label */
@@ -2002,71 +2003,7 @@ function BtcSignalPage({ data }) {
   );
 }
 
-// ── The Plan / Journal / What-Changed (session additions) ────────────────────
-const TESTED_STRATEGIES = [
-  ['SPY core + 5–10% BTC held only above its 200-day MA', 'PASS', 'Beat SPY on return and Sharpe in both halves (2015–2026). The only survivor.'],
-  ['Top-5 buyScore momentum rotation (ETFs)', 'FAIL', '2.7% CAGR vs SPY 14.4% (2010–2026, net of costs), lagged 15 of 17 years'],
-  ['Max-fear rotation (buy the 5 lowest scores)', 'FAIL', '8.0% CAGR vs SPY 14.4% — beats momentum 3×, still loses to holding'],
-  ['Buy fear ≤2 / sell greed ≥8', 'FAIL', '5.2% CAGR vs SPY 14.4%'],
-  ['Dual Momentum (GEM, published rules)', 'FAIL', '7.3% CAGR vs SPY 14.4%, identical max drawdown — the published gold standard failed too'],
-  ['RSI divergence as a trade trigger', 'FAIL', 'Bullish divergence resolved higher only ~27% of the time — anti-predictive'],
-  ['"Water" rotation strategy', 'FAIL', '15.4% CAGR vs buy-and-hold 18.3%, worse drawdown'],
-];
-
-function nextRebalanceDate() {
-  const now = new Date();
-  const d = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
-  return d.toDateString();
-}
-
-function PlanPage({ data }) {
-  let closes = null;
-  for (const k in data) { if (k.indexOf('BTC__') === 0 && data[k] && data[k].closes) { closes = data[k].closes; break; } }
-  let on = null, dist = null;
-  if (closes && closes.length >= 200) {
-    const price = closes[closes.length - 1];
-    let s = 0; for (let i = closes.length - 200; i < closes.length; i++) s += closes[i];
-    const ma = s / 200; on = price > ma; dist = (price - ma) / ma * 100;
-  }
-  return h('div', { className: 'outlook' },
-    h('div', { className: 'outlook-head' },
-      h('h2', null, 'The Plan'),
-      h('p', null, 'The only rules that survived backtesting. Everything else on this site is context — useful for understanding the market, not for triggering trades.')),
-    h('div', { className: 'btc-card' },
-      h('h3', { className: 'plan-h' }, 'Allocation rule'),
-      h('div', { className: 'plan-rule' },
-        h('div', null, '• Core: S&P 500 index fund. Buy on schedule. Never time it.'),
-        h('div', null, '• Satellite: 5–10% BTC, held ONLY while BTC closes above its 200-day MA.'),
-        h('div', null, '• When the BTC signal is RISK-OFF, the sleeve sits in bonds/cash.'),
-        h('div', null, '• Rebalance monthly, first weekday. Never intra-month, never on a feeling.'))),
-    h('div', { className: 'btc-card' },
-      h('h3', { className: 'plan-h' }, 'Status'),
-      h('div', { className: 'btc-stats' },
-        h('div', null, h('div', { className: 'btc-k' }, 'BTC signal'),
-          h('div', { className: 'btc-v', style: { color: on == null ? '#64748b' : on ? '#15803d' : '#b91c1c' } }, on == null ? 'no data' : on ? 'RISK-ON' : 'RISK-OFF')),
-        h('div', null, h('div', { className: 'btc-k' }, 'Distance to 200d MA'),
-          h('div', { className: 'btc-v' }, dist == null ? '–' : (dist >= 0 ? '+' : '') + dist.toFixed(1) + '%')),
-        h('div', null, h('div', { className: 'btc-k' }, 'Next rebalance'),
-          h('div', { className: 'btc-v' }, nextRebalanceDate())))),
-    h('div', { className: 'btc-card' },
-      h('h3', { className: 'plan-h' }, 'Strategy scoreboard — everything we backtested'),
-      h('div', { className: 'plan-note' }, 'Pre-registered bar: beat SPY on Sharpe, net of 15bps costs, in the full period AND both halves. No tuning after seeing results. Full write-ups live in the repo (backtest-*-results.md).'),
-      h('table', { className: 'score-table' },
-        h('thead', null, h('tr', null, h('th', null, 'Strategy'), h('th', null, 'Verdict'), h('th', null, 'Result'))),
-        h('tbody', null, TESTED_STRATEGIES.map((r, i) => h('tr', { key: i },
-          h('td', null, r[0]),
-          h('td', null, h('span', { className: 'verdict ' + (r[1] === 'PASS' ? 'v-pass' : 'v-fail') }, r[1])),
-          h('td', null, r[2])))))),
-    h('div', { className: 'btc-card' },
-      h('h3', { className: 'plan-h' }, 'Monthly checklist'),
-      h('div', { className: 'plan-rule' },
-        h('div', null, '1. Check the BTC Signal tab. Flip = move the sleeve. No flip = do nothing.'),
-        h('div', null, '2. Rebalance core/satellite back to target weights.'),
-        h('div', null, '3. Log every trade in the Journal — especially the ones you’re not proud of.'),
-        h('div', null, '4. Close the site. Checking daily creates trades; trades created underperformance in every test we ran.'))));
-}
-
+// ── Journal / What-Changed (session additions) ──────────────────────────────
 function loadJournal() { try { return JSON.parse(localStorage.getItem('tradeJournal') || '[]'); } catch (e) { return []; } }
 function bdaysBetween(dateStr) {
   const then = new Date(dateStr + 'T00:00:00');
@@ -2109,7 +2046,7 @@ function JournalPage() {
   return h('div', { className: 'outlook' },
     h('div', { className: 'outlook-head' },
       h('h2', null, 'Trade Journal'),
-      h('p', null, 'Log every real trade. Each position is benchmarked against putting the same money into SPY on the same day. Weighted alpha is the only honest measure of whether your trading adds value over the plan.')),
+      h('p', null, 'Log every real trade — it stays private in this browser, nothing is uploaded. Each position is benchmarked against putting the same money into SPY on the same day. Weighted alpha is the only honest measure of whether your trading adds value over simply holding the index.')),
     h('div', { className: 'btc-card' },
       h('div', { className: 'journal-form' },
         h('input', { type: 'date', value: jdate, onChange: e => setJdate(e.target.value) }),
@@ -2132,7 +2069,7 @@ function JournalPage() {
         'Weighted alpha vs SPY: ',
         h('span', { className: wAlpha >= 0 ? 'alpha-pos' : 'alpha-neg' }, pct(wAlpha / wAmt) + '  (' + (wAlpha >= 0 ? '+$' : '-$') + Math.abs(wAlpha).toFixed(0) + ')'),
         h('div', { style: { fontWeight: 400, fontSize: '0.68rem', color: '#94a3b8', marginTop: 4 } },
-          'Approximate: business-day matching against baked closes (~14 months of history). Tickers must exist on the board. If this number stays negative across months, the market is telling you to trade less and hold the plan.')) : null));
+          'Approximate: business-day matching against baked closes (~14 months of history). Tickers must exist on the board. If this number stays negative across months, the market is telling you to trade less and hold the index.')) : null));
 }
 
 function WhatChanged({ data }) {
@@ -2612,7 +2549,6 @@ function App() {
       h('div', { className: 'topbar-logo' }, h('svg', { viewBox: '0 0 40 40', fill: 'none' }, h('circle', { cx:20,cy:20,r:19,stroke:'#4ade80',strokeWidth:2 }), h('text', { x:20,y:26,textAnchor:'middle',fontSize:18,fill:'#4ade80',fontWeight:'bold' }, String.fromCodePoint(0x1F334))), 'Regime Board'),
       h('div', { className: 'topbar-nav' },
         h('a', { href:'#', className: view==='signals'?'nav-active':'', onClick:(e)=>{e.preventDefault(); setView('signals');} }, 'Trend Momentum'),
-        h('a', { href:'#', className: view==='plan'?'nav-active':'', onClick:(e)=>{e.preventDefault(); setView('plan');} }, 'The Plan'),
         h('a', { href:'#', className: view==='journal'?'nav-active':'', onClick:(e)=>{e.preventDefault(); setView('journal');} }, 'Journal'),
         h('a', { href:'#', className: view==='reversals'?'nav-active':'', onClick:(e)=>{e.preventDefault(); setView('reversals');} }, 'Reversals'),
         h('a', { href:'#', className: view==='btc'?'nav-active':'', onClick:(e)=>{e.preventDefault(); setView('btc');} }, 'BTC Signal'),
@@ -2621,10 +2557,10 @@ function App() {
       ),
       h('span', { className: 'banner-link', onClick: () => setShowConfig(s=>!s) }, '⚙ Keys'),
     ),
-    h('div', { className: 'page-banner' }, h('h1', null, 'Trend Momo')),
+    h('div', { className: 'page-banner' }, h('h1', null, 'Trend Momo'), h('div', { className: 'banner-disclaimer' }, 'General information only — not financial advice. Signals are context, not recommendations. Backtested strategies mostly failed to beat the index; see the Guide.')),
     h('div', { className: 'main', onMouseMove: handleMouseMove },
       showConfig && h(KeyConfig, { keys, onSave: handleSave }),
-      ['guide','plan','journal'].indexOf(view) === -1 && h('div', { className: 'toolbar' },
+      ['guide','journal'].indexOf(view) === -1 && h('div', { className: 'toolbar' },
         h('div', { className: 'toolbar-left' },
           h('div', { className: 'timestamp-badge' }, h('span', { className:'label' }, 'LAST UPDATE:'), h('span', { className:'ts-icon' }, '📅'), h('span', null, dateStr), h('span', { className:'ts-icon' }, '🕐'), h('span', null, timeStr), h('span', { className:'utc-badge' }, tz)),
           h('button', { className:'refresh-btn', onClick:()=>loadAll(keys) }, '↻ Refresh'),
@@ -2640,8 +2576,6 @@ function App() {
         ? h(ReversalsPage, { data })
         : view === 'btc'
         ? h(BtcSignalPage, { data })
-        : view === 'plan'
-        ? h(PlanPage, { data })
         : view === 'journal'
         ? h(JournalPage)
         : view === 'guide'
@@ -2660,7 +2594,7 @@ function App() {
             h('th', { title: 'Hand-curated fundamental quality score out of 10 (debt, cash flow, moat). Updated periodically, not live. Hover a cell for the one-line thesis.' }, h('div', null, 'Balance Sheet'), h('div', { style: sub }, 'score /10')),
             h('th', { title: 'Trailing price-to-earnings ratio. Auto-refreshed daily for major US names, curated for the rest. Rough guide: under ~15 cheap, 15–36 normal, over ~36 expensive. Not applicable to crypto, forex, commodities.' }, h('div', null, 'P/E Ratio'),   h('div', { style: sub }, 'trailing')),
             h('th', { title: 'Recent headline sentiment from Alpha Vantage. Best-effort: the free API is rate-limited, so this column can be empty or stale.' }, h('div', null, 'News'),        h('div', { style: sub }, 'sentiment')),
-            h('th', { title: 'Weighted trend composite 0–10 (long-term trend counts most) plus a stability bonus. Honest note: backtested 2010–2026 — high scores did NOT out-earn low scores, so this is context, not a buy signal. See The Plan tab for what actually passed testing.' }, h('div', null, 'Buy Score'),   h('div', { style: sub }, 'out of 10')),
+            h('th', { title: 'Weighted trend composite 0–10 (long-term trend counts most) plus a stability bonus. Honest note: backtested 2010–2026 — high scores did NOT out-earn low scores, so this is context, not a buy signal.' }, h('div', null, 'Buy Score'),   h('div', { style: sub }, 'out of 10')),
             h('th', { title: 'Buy Score nudged by valuation: cheap P/E (<15) adds up to +1.5, expensive (>36) subtracts up to 2.5. Same caveat as Buy Score: context, not a trigger.' }, h('div', null, 'Value Score'), h('div', { style: sub }, 'P/E-adjusted')),
             h('th', { title: '0 = extreme fear, 100 = extreme greed. Derived from this board’s own trend score, nudged by news and P/E. Backtest: buying max fear out-earned buying max greed 3-to-1 — but neither beat simply holding SPY. Read it as a contrarian thermometer.' }, h('div', null, 'Fear / Greed'), h('div', { style: sub }, '0–100')),
             h('th', { title: 'Today’s volume vs its own 20-day average. 1.5×+ = real participation behind the move; 0.7× or less = quiet drift. Volume confirms — it does not predict.' }, h('div', null, 'Rel Vol'), h('div', { style: sub }, 'vs 20-day avg')),
@@ -2717,7 +2651,7 @@ createRoot(document.getElementById('root')).render(h(App));
       <div class="sp-card neutral">
         <h3>⚖️ What Our Backtests Actually Found (2010–2026)</h3>
         <p>Every signal on this board was tested against simply holding the S&amp;P 500 — point-in-time, net of costs, no lookahead. Results: <strong>top-score momentum rotation lost</strong> (2.7% vs 14.4% CAGR), <strong>buying max fear beat buying max greed 3-to-1</strong> (8.0% vs 2.7%) but still lost to holding, the published <strong>Dual Momentum strategy lost</strong> (7.3%), and bullish <strong>RSI divergence resolved higher only ~27%</strong> of the time.</p>
-        <p>The one strategy that passed: <strong>SPY core + 5–10% BTC held only above its 200-day MA</strong>. It lives on The Plan tab, with the full scoreboard of everything that failed.</p>
+        <p>The one approach that passed the bar: <strong>a broad index core with a small BTC sleeve held only above its 200-day MA</strong> (the BTC Signal tab shows that trend filter live). Full test write-ups are in the repo (backtest-*-results.md).</p>
         <p>So read every cell here as <em>context for understanding the market</em> — not as a trade trigger. A board that shows you its own failed tests is worth more than one that pretends its signals are magic.</p>
       </div>
 
