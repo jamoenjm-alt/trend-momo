@@ -1,3 +1,147 @@
 ============================================================ 
 Session apply started: Fri 03/07/2026 14:39:25.36 
 Already up to date.
+warning: in the working copy of 'claude-apply-session.bat', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'claude-session-log.txt', LF will be replaced by CRLF the next time Git touches it
+[main e0e3e49] feat: divergence horizons+backtest caveat, S/R tags, rel-vol column, BTC signal page, weekly OHLC pipeline; fix: restore file tail truncated since 5a1efe4
+ 4 files changed, 7 insertions(+), 73 deletions(-)
+ create mode 100644 backtest-etf-data.json
+ create mode 100644 claude-session-done.txt
+--- price bake --- 
+============================================================
+  Trend Momo — Price Update
+  Fetching 56 tickers from Yahoo Finance
+============================================================
+
+  → AAPL       (AAPL)             ✓  288 closes   last=308.630
+  → MSFT       (MSFT)             ✓  288 closes   last=390.490
+  → TSLA       (TSLA)             ✓  288 closes   last=393.450
+  → NVDA       (NVDA)             ✓  288 closes   last=194.830
+  → ASML       (ASML)             ✓  288 closes   last=1,769.320
+  → IVV        (IVV)              ✓  288 closes   last=748.430
+  → PCT        (PCT)              ✓  288 closes   last=7.610
+  → SOUN       (SOUN)             ✓  288 closes   last=6.550
+  → SPCX       (SPCX)             ✓  14 closes   last=162.000
+  → AMZN       (AMZN)             ✓  288 closes   last=242.670
+  → GOOGL      (GOOGL)            ✓  288 closes   last=359.910
+  → META       (META)             ✓  288 closes   last=582.900
+  → BRK.B      (BRK-B)            ✓  288 closes   last=507.780
+  → AVGO       (AVGO)             ✓  288 closes   last=360.450
+  → JPM        (JPM)              ✓  288 closes   last=334.470
+  → LLY        (LLY)              ✓  288 closes   last=1,213.910
+  → V          (V)                ✓  288 closes   last=362.130
+  → UNH        (UNH)              ✓  288 closes   last=425.360
+  → ORCL       (ORCL)             ✓  288 closes   last=140.270
+  → MA         (MA)               ✓  288 closes   last=539.390
+  → XOM        (XOM)              ✓  288 closes   last=137.090
+  → NFLX       (NFLX)             ✓  288 closes   last=77.650
+  → COST       (COST)             ✓  288 closes   last=951.670
+  → WMT        (WMT)              ✓  288 closes   last=111.840
+  → HD         (HD)               ✓  288 closes   last=357.900
+  → GLD        (GLD)              ✓  288 closes   last=378.130
+  → SLV        (SLV)              ✓  288 closes   last=55.020
+  → PALL       (PALL)             ✓  288 closes   last=22.910
+  → PPLT       (PPLT)             ✓  288 closes   last=14.720
+  → MQG        (MQG.AX)           ✓  293 closes   last=251.630
+  → A2M        (A2M.AX)           ✓  293 closes   last=7.500
+  → CBA        (CBA.AX)           ✓  293 closes   last=164.200
+  → BHP        (BHP.AX)           ✓  293 closes   last=60.590
+  → WBC        (WBC.AX)           ✓  293 closes   last=35.790
+  → NAB        (NAB.AX)           ✓  293 closes   last=38.545
+  → WES        (WES.AX)           ✓  293 closes   last=88.765
+  → CSL        (CSL.AX)           ✓  293 closes   last=121.770
+  → WDS        (WDS.AX)           ✓  293 closes   last=27.885
+  → FMG        (FMG.AX)           ✓  293 closes   last=18.545
+  → ANZ        (ANZ.AX)           ✓  293 closes   last=35.280
+  → 1211.HK    (1211.HK)          ✓  284 closes   last=82.800
+  → SPY        (SPY)              ✓  288 closes   last=744.780
+  → QQQ        (QQQ)              ✓  288 closes   last=712.600
+  → DIA        (DIA)              ✓  288 closes   last=527.880
+  → EWJ        (EWJ)              ✓  288 closes   last=93.140
+  → EWG        (EWG)              ✓  288 closes   last=42.310
+  → EWU        (EWU)              ✓  288 closes   last=47.160
+  → FXI        (FXI)              ✓  288 closes   last=31.910
+retry 1...   → INDA       (INDA)             ✓  288 closes   last=49.560
+  → EEM        (EEM)              ✓  288 closes   last=65.700
+  → EURUSD     (EURUSD=X)         ✓  299 closes   last=1.145
+  → GBPUSD     (GBPUSD=X)         ✓  299 closes   last=1.337
+  → USDJPY     (USDJPY=X)         ✓  299 closes   last=161.185
+  → AUDUSD     (AUDUSD=X)         ✓  299 closes   last=0.694
+  → USDCAD     (USDCAD=X)         ✓  299 closes   last=1.417
+  → DXY        (DX-Y.NYB)         ✓  290 closes   last=100.788
+
+  Fetching 29 of 45 cryptos from CoinGecko
+  (majors daily + half the alts; the other half refreshes next run)
+  → BTC      (bitcoin               )  ✓  366 closes   last=61,419.9975
+  → ETH      (ethereum              )  ✓  366 closes   last=1,704.8196
+  → SOL      (solana                )  ✓  366 closes   last=80.6025
+  → XRP      (ripple                )  ✓  366 closes   last=1.0910
+  → BNB      (binancecoin           )  ✓  366 closes   last=560.6617
+  → ADA      (cardano               )  retry 1... retry 2... ERROR: HTTP Error 429: Too Many Requests
+⚠  kept previous
+  → LINK     (chainlink             )  retry 1... retry 2... ERROR: HTTP Error 429: Too Many Requests
+⚠  kept previous
+  → TON      (the-open-network      )  retry 1... retry 2... ERROR: HTTP Error 429: Too Many Requests
+✗  no data
+  → AVAX     (avalanche-2           )  retry 1... ✓  366 closes   last=6.8162
+  → SUI      (sui                   )  ✓  366 closes   last=0.7394
+  → DOGE     (dogecoin              )  ✓  366 closes   last=0.0745
+  → DOT      (polkadot              )  ✓  366 closes   last=0.8476
+  → TRX      (tron                  )  ✓  366 closes   last=0.3170
+  → LTC      (litecoin              )  retry 1... retry 2... ERROR: HTTP Error 429: Too Many Requests
+⚠  kept previous
+  → APT      (aptos                 )  retry 1... retry 2... ERROR: HTTP Error 429: Too Many Requests
+⚠  kept previous
+  → ARB      (arbitrum              )  retry 1... retry 2... ERROR: HTTP Error 429: Too Many Requests
+✗  no data
+  → OP       (optimism              )  retry 1... ✓  366 closes   last=0.1011
+  → HBAR     (hedera-hashgraph      )  ✓  366 closes   last=0.0710
+  → AAVE     (aave                  )  ✓  366 closes   last=86.2857
+  → XLM      (stellar               )  ✓  366 closes   last=0.1981
+  → ALGO     (algorand              )  ✓  366 closes   last=0.0867
+  → ICP      (internet-computer     )  retry 1... retry 2... ERROR: HTTP Error 429: Too Many Requests
+⚠  kept previous
+  → SAND     (the-sandbox           )  retry 1... retry 2... ERROR: HTTP Error 429: Too Many Requests
+⚠  kept previous
+  → MKR      (maker                 )  retry 1... retry 2... ERROR: HTTP Error 429: Too Many Requests
+⚠  kept previous
+  → LDO      (lido-dao              )  retry 1... retry 2... ✓  366 closes   last=0.2593
+  → FTM      (fantom                )  ✓  366 closes   last=0.0284
+  → EGLD     (elrond-erd-2          )  ✓  366 closes   last=2.6729
+  → PEPE     (pepe                  )  ✓  366 closes   last=0.0000
+  → WIF      (dogwifcoin            )  ✓  366 closes   last=0.1722
+
+  Fetching trailing P/E for 22 stocks from stockanalysis
+  -> PLTR     P/E 145.3
+  -> AAPL     P/E 37.4
+  -> MSFT     P/E 23.3
+  -> TSLA     P/E 382.6
+  -> NVDA     P/E 29.8
+  -> ASML     P/E 60.2
+  -> AMZN     P/E 29.0
+  -> GOOGL    P/E 27.5
+  -> META     P/E 21.2
+  -> BRK.B    P/E 15.1
+  -> AVGO     P/E 60.0
+  -> JPM      P/E 16.0
+  -> LLY      P/E 43.1
+  -> V        P/E 31.6
+  -> UNH      P/E 32.1
+  -> ORCL     P/E 24.1
+  -> MA       P/E 31.2
+  -> XOM      P/E 23.1
+  -> NFLX     P/E 25.1
+  -> COST     P/E 47.9
+  -> WMT      P/E 39.4
+  -> HD       P/E 25.4
+  P/E refreshed for 22 / 22 stocks
+  ✓  index.html synced
+
+============================================================
+  ✓  Done at 14:46:17  (76 ok, 9 failed)
+  regime-board.html + index.html updated.
+============================================================
+
+  Missing: TON, NEAR, ARB, MANA, RUNE
+  Run again or use --csv to import missing tickers manually.
+
