@@ -1,3 +1,37 @@
 ============================================================ 
 Publish started: Sat 04/07/2026  9:13:41.81 
 Already up to date.
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.nojekyll', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CLAUDE.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'PROJECT-BRIEF.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'RSI-Divergence-Scanner.pine', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'add-asset-badges.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'add-reversal-watch.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backtest-buyscore.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backtest-dualmomentum-results.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backtest-dualmomentum.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backtest-feargreed-results.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backtest-feargreed.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'backtest-results.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'btc-allocation-rule.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'btc-signal.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'claude-apply-session.bat', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'claude-publish-log.txt', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'claude-publish.bat', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'git-push.bat', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'patch-divergence.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'prove.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'prove2.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'prove3.py', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'update-prices-daily.bat', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'water-backtest.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'water-strategy.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'water-sweep.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'water.py', LF will be replaced by CRLF the next time Git touches it
+[main 665c73d] feat: The Plan page (strategy scoreboard, BTC status, checklist), Trade Journal vs SPY, what-changed strip, honest Guide update
+ 3 files changed, 74 insertions(+), 11 deletions(-)
+To https://github.com/jamoenjm-alt/trend-momo.git
+   2b106b2..665c73d  main -> main
+Publish finished: Sat 04/07/2026  9:13:45.81 
