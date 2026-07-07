@@ -2663,7 +2663,7 @@ function App() {
             h('th', { title: 'Average of all 10 MA pairs, fast to slow — the overall trend regime. The coloured dot shows how stable that regime has been over the last ~30 days (green ring = very stable, red ring = flipping a lot).' }, h('div', null, 'All Signals'), h('div', { style: sub }, 'all 10 MA pairs')),
             h('th', { title: 'Hand-curated fundamental quality score out of 10 (debt, cash flow, moat). Updated periodically, not live. Hover a cell for the one-line thesis.' }, h('div', null, 'Balance Sheet'), h('div', { style: sub }, 'score /10')),
             h('th', { title: 'Trailing price-to-earnings ratio. Auto-refreshed daily for major US names, curated for the rest. Rough guide: under ~15 cheap, 15–36 normal, over ~36 expensive. Not applicable to crypto, forex, commodities.' }, h('div', null, 'P/E Ratio'),   h('div', { style: sub }, 'trailing')),
-            h('th', { title: 'Recent headline sentiment from Alpha Vantage. Best-effort: the free API is rate-limited, so this column can be empty or stale.' }, h('div', null, 'News'),        h('div', { style: sub }, 'sentiment')),
+            h('th', { title: 'Recent headline sentiment via Finnhub (Alpha Vantage/Yahoo as fallbacks). Best-effort: free APIs are rate-limited, so this column can be empty or stale. News lags price — gut-check only.' }, h('div', null, 'News'),        h('div', { style: sub }, 'sentiment')),
             h('th', { title: 'Trend strength 0–10: long-term trend counts most, plus a stability bonus. 10 = strong established uptrend, 0 = deep downtrend. It DESCRIBES the trend — it does not rank buy-attractiveness. In our 2010–2026 backtest the highest scores earned the LOWEST forward returns (extended names mean-revert). Strong score = trend confirmation if you already hold it; weak score = where contrarians go hunting.' }, h('div', null, 'Trend Score'),   h('div', { style: sub }, 'out of 10')),
             h('th', { title: 'Trend Score nudged by valuation: cheap P/E (<15) adds up to +1.5, expensive (>36) subtracts up to 2.5. Same caveat: describes state, not a trigger.' }, h('div', null, 'Value Score'), h('div', { style: sub }, 'P/E-adjusted')),
             h('th', { title: '0 = extreme fear, 100 = extreme greed. Derived from this board’s own trend score, nudged by news and P/E. Backtest: buying max fear out-earned buying max greed 3-to-1 — but neither beat simply holding SPY. Read it as a contrarian thermometer.' }, h('div', null, 'Fear / Greed'), h('div', { style: sub }, '0–100')),
@@ -2701,9 +2701,9 @@ function App() {
       h('div', { style: { marginTop:16, fontSize:'0.7rem', color:'#94a3b8', lineHeight:1.7 } },
         '1–2 Week = 10/3 · 15/5 MAs · 1–3 Month = 42/10 · 50/15 · 63/21 · 3–9 Month = 84/21 · 126/42 · 168/42 · All Signals = all 10 pairs. Trend Score = weighted trend strength 0–10 — it describes the trend, it does not rank buy-attractiveness.',
         h('br'),
-        'Dots: green+ring = Very Stable · green = Stable · red = Unstable · red+ring = Very Unstable. Hover for detail.',
+        'Dots: dark green = Very Stable (30+ days) · light green = Stable (10–30 days) · yellow = Unstable (changed within 10 days) · red = Very Unstable (multiple flips in 30 days). Hover for detail.',
         h('br'),
-        'Data: STATIC_PRICES (update-prices.ps1) · CoinCap (crypto) · Yahoo Finance · Stooq. Balance sheet + P/E: Claude analysis. News: Alpha Vantage + Yahoo Finance.',
+        'Data: STATIC_PRICES (update-prices.py) · CoinCap (crypto) · Yahoo Finance · Stooq. Balance sheet + P/E: Claude analysis. News: Finnhub, with Alpha Vantage/Yahoo fallbacks.',
       )),
     ),
     tooltip && h(TrendLadder, { asset:tooltip.asset, sigs:tooltip.sigs, x:tooltip.x, y:tooltip.y, group:tooltip.group }),
@@ -2734,7 +2734,7 @@ createRoot(document.getElementById('root')).render(h(App));
       <div class="sp-card neutral">
         <h3>How the Signal System Works</h3>
         <p>Every cell is calculated from <strong>Moving Average (MA) crossovers</strong> — comparing a fast MA to a slow MA. When price or fast MA is above the slow MA, that signal is bullish (+1). Below = bearish (−1). The regime badge is the average of all relevant signals.</p>
-        <p>The columns run fastest to slowest: <strong>Canary</strong> (days) → <strong>ST Trend</strong> (weeks) → <strong>LT Trend</strong> (months) → <strong>All Indicators</strong> (combined).</p>
+        <p>The columns run fastest to slowest: <strong>Canary</strong> (the board's "1–2 Week" column) → <strong>ST Trend</strong> ("1–3 Month") → <strong>LT Trend</strong> ("3–9 Month") → <strong>All Indicators</strong> ("All Signals").</p>
         <p>Signals are <em>lagging</em> — they confirm a trend that has already started. The edge is in riding confirmed trends, not catching tops and bottoms.</p>
       </div>
 
@@ -2742,7 +2742,7 @@ createRoot(document.getElementById('root')).render(h(App));
         <h3>Bull Entry Signals (Bear → Bull Reversal)</h3>
         <div class="sp-step"><div class="sp-step-num">1</div><div><strong>Canary turns Bull</strong> while ST and LT still Bear = first alert. Don't enter yet — this flips back often. It's a watch signal only.</div></div>
         <div class="sp-step"><div class="sp-step-num">2</div><div><strong>ST Trend turns Bull</strong> while LT still Bear = building conviction. Canary + ST both bull = consider a small starter position.</div></div>
-        <div class="sp-step"><div class="sp-step-num">3</div><div><strong>LT Trend turns Bull</strong> = confirmed trend change. All columns <span class="sp-chip chip-sb">STRONG BULL</span> = highest conviction long entry.</div></div>
+        <div class="sp-step"><div class="sp-step-num">3</div><div><strong>LT Trend turns Bull</strong> = confirmed trend change. All columns <span class="sp-chip chip-sb">STRONG BULL</span> = trend fully confirmed — comfort for positions you already hold. As a fresh entry it's late: fully-extended names had the weakest forward returns in our backtests.</div></div>
         <div class="sp-step"><div class="sp-step-num">4</div><div><strong>Stability dot turns light green</strong> <span class="sp-dot sp-dot-s"></span> = regime has held 10+ days. This is your size-up signal — trend is confirmed, not a false alarm.</div></div>
         <div class="sp-warn">⚡ Fastest reversals: all columns flip bull within days. These are momentum explosions. Enter early but size smaller until LT confirms.</div>
       </div>
@@ -2766,7 +2766,7 @@ createRoot(document.getElementById('root')).render(h(App));
 
       <div class="sp-card neutral">
         <h3>Reading Column Combinations</h3>
-        <p><span class="sp-chip chip-sb">SB</span><span class="sp-chip chip-sb">SB</span><span class="sp-chip chip-sb">SB</span> + <span class="sp-dot sp-dot-vs"></span> Established uptrend, dark green dot. Highest conviction. Best risk/reward.</p>
+        <p><span class="sp-chip chip-sb">SB</span><span class="sp-chip chip-sb">SB</span><span class="sp-chip chip-sb">SB</span> + <span class="sp-dot sp-dot-vs"></span> Established uptrend, dark green dot. Strongest confirmation for existing holdings — but as a fresh entry it's late; extended names mean-reverted in our tests.</p>
         <p><span class="sp-chip chip-sb">SB</span><span class="sp-chip chip-sb">SB</span><span class="sp-chip chip-wbr">WBR</span> + <span class="sp-dot sp-dot-u"></span> Strong short-term, LT still turning. Size smaller until LT confirms.</p>
         <p><span class="sp-chip chip-wbr">WBR</span><span class="sp-chip chip-wbr">WBR</span><span class="sp-chip chip-sb">SB</span> + <span class="sp-dot sp-dot-u"></span> Canary + ST have flipped bear but LT still bull. <em>Key exit warning</em>. Reduce now.</p>
         <p><span class="sp-chip chip-sw">SW</span><span class="sp-chip chip-sw">SW</span><span class="sp-chip chip-sw">SW</span> + <span class="sp-dot sp-dot-vu"></span> All sideways + red dot = choppy. No edge. Do nothing.</p>
@@ -2830,9 +2830,9 @@ createRoot(document.getElementById('root')).render(h(App));
         <div class="htu-block">
           <h3>The Four Signal Columns</h3>
           <p><strong>1–2 Week (Canary)</strong> — Earliest warning (3/10 &amp; 5/15 day MAs). Turns first. Expect false alarms.</p>
-          <p><strong>ST Trend Momo</strong> — Short-term trend over weeks (42–63 day MAs). Strong signal a move is happening now.</p>
-          <p><strong>LT Trend Momo</strong> — Long-term trend over months (84–252 day MAs). Slowest to change, most reliable. Most important column.</p>
-          <p><strong>All Indicators</strong> — Average of every MA pair. Overall momentum health score.</p>
+          <p><strong>1–3 Month (ST Trend)</strong> — Short-term trend over weeks (42–63 day MAs). Strong signal a move is happening now.</p>
+          <p><strong>3–9 Month (LT Trend)</strong> — Long-term trend over months (84–252 day MAs). Slowest to change, most reliable. Most important column.</p>
+          <p><strong>All Signals</strong> — Average of every MA pair. Overall trend health score.</p>
         </div>
         <div class="htu-block">
           <h3>The Regime Badges</h3>
@@ -2849,8 +2849,7 @@ createRoot(document.getElementById('root')).render(h(App));
           <p>Compares today&rsquo;s regime to 10, 20, and 30 days ago.</p>
           <div class="htu-dot-row"><span class="htu-sdot htu-dot-vs"></span><span><strong>Dark green</strong> — Unchanged 30+ days. Established trend. Best entries.</span></div>
           <div class="htu-dot-row"><span class="htu-sdot htu-dot-s"></span><span><strong>Light green</strong> — Unchanged 10–30 days. Trend holding.</span></div>
-          <div class="htu-dot-row"><span class="htu-sdot htu-dot-u"></span><span><strong>Yellow</strong> — Changed recently. Watch closely.</span></div>
-          <div class="htu-dot-row"><span class="htu-sdot htu-dot-lr"></span><span><strong>Light red</strong> — High flip rate. Reduce exposure, tighten stops.</span></div>
+          <div class="htu-dot-row"><span class="htu-sdot htu-dot-u"></span><span><strong>Yellow</strong> — Regime changed within the last 10 days. Watch closely.</span></div>
           <div class="htu-dot-row"><span class="htu-sdot htu-dot-vu"></span><span><strong>Red</strong> — Multiple flips in 30 days. Choppy — avoid trading.</span></div>
         </div>
         <div class="htu-block">
@@ -2869,7 +2868,7 @@ createRoot(document.getElementById('root')).render(h(App));
         </div>
         <div class="htu-block htu-wide">
           <h3>Quick Practical Rules</h3>
-          <p>✅ All columns STRONG BULL + dark green dot + strong balance sheet = highest conviction long.</p>
+          <p>✅ All columns STRONG BULL + dark green dot + strong balance sheet = fully confirmed uptrend. Reassurance for holders — not an entry signal; fully-extended names had the weakest forward returns in our backtests.</p>
           <p>⚠️ Canary goes bear while LT still bull = early warning. Don't sell yet — wait for ST to confirm.</p>
           <p>🔄 Yellow/red dot + new bull signal = unconfirmed. Wait for green dot before sizing up.</p>
           <p>🚫 All STRONG BEAR = exit. Red dot + STRONG BEAR = confirmed sustained downtrend, no longs.</p>
