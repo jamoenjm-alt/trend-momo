@@ -1996,13 +1996,48 @@ function BtcSignalPage({ data }) {
       ),
     );
   }
+  const picks = dailyPicks(data);
+  const pickCard = (title, p, color, note) => p && h('div', { className: 'btc-card' },
+    h('h3', { className: 'plan-h' }, title),
+    h('div', { className: 'btc-stats' },
+      h('div', null, h('div', { className: 'btc-k' }, 'Ticker'), h('div', { className: 'btc-v' }, p.ticker, ' ', assetBadge(p.ticker))),
+      h('div', null, h('div', { className: 'btc-k' }, 'Score'), h('div', { className: 'btc-v', style: { color: color } }, p.score.toFixed(1) + ' / 10')),
+      h('div', null, h('div', { className: 'btc-k' }, 'Regime'), h('div', { className: 'btc-v' }, p.regime)),
+      h('div', null, h('div', { className: 'btc-k' }, 'Rel Vol'), h('div', { className: 'btc-v' }, relVolume(p.ticker) != null ? relVolume(p.ticker).toFixed(1) + '×' : '–')),
+    ),
+    h('div', { className: 'btc-note' }, p.name + '. ' + note));
   return h('div', { className: 'outlook' },
     h('div', { className: 'outlook-head' },
-      h('h2', null, 'BTC Trend Signal'),
-      h('p', null, 'Allocation filter for the SPY-core + BTC-satellite rule: hold a 5–10% BTC sleeve only while BTC closes above its 200-day moving average; otherwise park the sleeve in bonds/cash.'),
+      h('h2', null, 'Signal'),
+      h('p', null, 'The BTC trend filter — the only rule that beat buy-and-hold in our backtests — plus the board’s daily extremes, recomputed automatically from each day’s data.'),
     ),
     body,
+    h('div', { className: 'outlook-head', style: { marginTop: 26 } },
+      h('h2', null, 'Today’s Extremes — ' + new Date().toDateString()),
+      h('p', null, 'Mechanical output of the board’s scoring formula: the lowest score on the board (max fear) and the highest (max greed). Forex and index ETFs are excluded. Backtest honesty: 2010–2026, the max-fear side out-earned the max-greed side roughly 3-to-1 over the following month — but neither approach beat simply holding the index. Extremes worth studying, not instructions.'),
+    ),
+    pickCard('📉 Buy of the Day — max fear', picks.buy, '#15803d', 'Lowest score on the board: the most beaten-down name by the trend formula. In testing, this side earned ~1.4%/month forward on average — best odds when it sits at support with a quality balance sheet, and still no guarantee.'),
+    pickCard('📈 Sell of the Day — max greed', picks.sell, '#b91c1c', 'Highest score on the board: the most extended name by the trend formula. In testing, this side earned only ~0.4%/month forward — historically the worst side to chase. If you own it, this is where trimming into strength was statistically kindest.'),
   );
+}
+
+function dailyPicks(data) {
+  const seen = {};
+  let buy = null, sell = null;
+  for (const a of WATCHLIST) {
+    if (a.cls === 'Forex' || a.cls === 'Index') continue;
+    if (seen[a.ticker]) continue;
+    const d = data[a.ticker + '__' + a.cls];
+    const closes = d && d.closes;
+    if (!closes || closes.length < 260 || !d.sigs) continue;
+    seen[a.ticker] = 1;
+    const bs = buyScore(d.sigs);
+    if (bs == null) continue;
+    const rec = { ticker: a.ticker, name: a.name, score: bs, regime: scoreToRegime(d.sigs.allInd).label, stability: d.sigs.stability || 'stable', price: closes[closes.length - 1] };
+    if (!buy || bs < buy.score || (bs === buy.score && rec.ticker < buy.ticker)) buy = rec;
+    if (!sell || bs > sell.score || (bs === sell.score && rec.ticker < sell.ticker)) sell = rec;
+  }
+  return { buy, sell };
 }
 
 // ── Journal / What-Changed (session additions) ──────────────────────────────
@@ -2586,7 +2621,7 @@ function App() {
         h('a', { href:'#', className: view==='signals'?'nav-active':'', onClick:(e)=>{e.preventDefault(); setView('signals');} }, 'Trend Momentum'),
         h('a', { href:'#', className: view==='journal'?'nav-active':'', onClick:(e)=>{e.preventDefault(); setView('journal');} }, 'Journal'),
         h('a', { href:'#', className: view==='reversals'?'nav-active':'', onClick:(e)=>{e.preventDefault(); setView('reversals');} }, 'Reversals'),
-        h('a', { href:'#', className: view==='btc'?'nav-active':'', onClick:(e)=>{e.preventDefault(); setView('btc');} }, 'BTC Signal'),
+        h('a', { href:'#', className: view==='btc'?'nav-active':'', onClick:(e)=>{e.preventDefault(); setView('btc');} }, 'Signal'),
         h('a', { href:'#', className: view==='outlook'?'nav-active':'', onClick:(e)=>{e.preventDefault(); setView('outlook');} }, 'Market Outlook'),
         h('a', { href:'#', className: view==='guide'?'nav-active':'', onClick:(e)=>{e.preventDefault(); setView('guide');} }, 'Guide'),
       ),

@@ -16,3 +16,6 @@ __pycache__/
 update-log.txt
 err.txt
 desktop.ini
+claude-publish-log.txt
+claude-session-log.txt
+claude-session-done.txt
