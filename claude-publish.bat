@@ -25,7 +25,4 @@ REM 3) Publish
 git push >> claude-publish-log.txt 2>&1
 if errorlevel 1 (
   git pull --no-rebase --no-edit -X theirs >> claude-publish-log.txt 2>&1
-  git push >> claude-publish-log.txt 2>&1
-)
-echo Publish finished: %DATE% %TIME% >> claude-publish-log.txt
-exit
+  git pu

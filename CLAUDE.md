@@ -1,7 +1,11 @@
 # CLAUDE.md
 
 Guidance for Claude Code / any AI agent working in this repository.
-Last updated: 2026-07-08. If code and this file disagree, trust the code and fix this file.
+Last updated: 2026-07-09. If code and this file disagree, trust the code and fix this file.
+
+**READ AI-OPERATING-PROTOCOL.md FIRST — it defines how to behave and verify on this
+project (critical-consultant tone, verification discipline, environment traps). It is
+mandatory for every session, regardless of which model you are.**
 
 ## Project Overview
 
