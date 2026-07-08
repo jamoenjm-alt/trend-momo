@@ -1,19 +1,25 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code / any AI agent working in this repository.
+Last updated: 2026-07-08. If code and this file disagree, trust the code and fix this file.
 
 ## Project Overview
 
-A single-file stock trend momentum dashboard (`regime-board.html`) modelled on the Jungle Rock trend memo page. No build step, no npm, no framework CLI — open the HTML directly in a browser.
+A stock/crypto trend-momentum dashboard (`regime-board.html`) modelled on the Jungle Rock
+trend memo page, published to https://jamoenjm-alt.github.io/trend-momo/ via GitHub Pages.
+No build step, no npm, no framework CLI. Price data lives in `data/prices.json` (fetched at
+boot), so the HTML itself is code-only (~200 KB).
+
+**Decision-support board, not an auto-trader.** The owner trades real money. Keep the
+intellectual honesty bar high — see PROJECT-BRIEF.md ("Hard constraint").
 
 ## Running / Testing
 
 ```bash
-# Open in browser (no server needed)
-start regime-board.html          # Windows
-open regime-board.html           # macOS
+# View locally — file:// blocks the data fetch, so use the mini-server:
+serve.bat                          # serves on localhost:8123 and opens the board
 
-# Syntax-check the embedded JS without running a browser
+# Syntax-check the embedded JS without a browser (run after EVERY html edit)
 python -c "
 import re, subprocess
 src = open('regime-board.html').read()
@@ -23,80 +29,83 @@ open('/tmp/s.js','w').write('const h=()=>{},useState=v=>[v,()=>{}],useEffect=()=
 subprocess.run(['node','--check','/tmp/s.js'])
 "
 
-# Bake all 33 tickers into STATIC_PRICES (run from your machine — not the sandbox)
+# Re-bake all ~270 tickers into data/prices.json (~12 min; also runs daily via GitHub Action)
 python update-prices.py
+
+# Publish manual code changes (takes a commit message as argument)
+claude-publish.bat feat: my change description
 ```
 
 ## Architecture
 
-### Single-file structure (`regime-board.html`)
+### Files
 
-Everything lives in one `<script type="module">` block using React 18 via `https://esm.sh/react@18`. No JSX — uses `createElement as h`. No Babel. No bundler.
+- `regime-board.html` — all code: one `<script type="module">` using React 18 via
+  `https://esm.sh/react@18`, no JSX (`createElement as h`).
+- `index.html` — byte-for-byte copy of regime-board.html (GitHub Pages serves it).
+  `update-prices.py` re-syncs it; after manual edits run `copy regime-board.html index.html`.
+- `data/prices.json` — `{ updated, prices, pe, ohlc, weekly }` keyed by board ticker.
+  Written by `update-prices.py`. Fetched by `loadStaticData()` at the bottom of the script
+  before first render. If the fetch fails (file:// open), live API fallbacks take over.
+- `update-prices.py` — Yahoo (equities/ETF/forex) + CoinGecko (crypto) + stockanalysis (P/E)
+  → `data/prices.json`. Merge semantics: tickers that fail today keep yesterday's data.
+- `.github/workflows/update-prices.yml` — daily bake at 22:00 UTC (8am AEST), commits
+  `data/prices.json`. **This is the primary daily updater.**
+- `update-prices-daily.bat` — legacy local daily task. Redundant with the Action;
+  should stay disabled in Windows Task Scheduler to avoid dual-writer merge collisions.
 
-Key layout inside the script (top to bottom):
-1. `WATCHLIST` — array of `{ ticker, name, cls }` where `cls` is one of `Watch | Top20 | Crypto | Commodity | ASX | HK`
-2. `SECTIONS` — ordered display groups
-3. `BALANCE_SHEET` — hardcoded scores/tips, updated periodically (Claude analysis)
-4. `PE_RATIOS` — hardcoded P/E ratios, updated periodically
-5. Signal math functions (`sma`, `signal`, `scoreToRegime`, `computeSignals`, `computeStabilityState`)
-6. Data fetchers (`fetchT`, `fetchAVNews`, `loadAll`)
-7. `window.STATIC_PRICES` block — injected by `update-prices.py`
-8. React components (`Badge`, `StabilityDot`, `SignalCell`, `TrendLadder`, `BalanceSheetCell`, `PECell`, `NewsCell`, `KeyConfig`, `App`)
+### Board structure (top to bottom in the script)
+
+1. `WATCHLIST` — 274 rows of `{ ticker, name, cls }`; cls ∈ Watch | Top20 | Crypto |
+   Commodity | ASX | HK | Index | Forex | Custom. Sections: Watch 9, US Top 100 (cls
+   stays `'Top20'` for back-compat), Crypto 50, Commodity 20, ASX 50, HK 30, Index 9, Forex 6.
+2. `SECTIONS` — display order + labels.
+3. `BALANCE_SHEET` / `PE_RATIOS` — hand-curated, keyed by board ticker; missing keys
+   render N/A (most of the US 100 / ASX 50 are intentionally uncurated).
+4. Signal math (`sma`, `signal`, `scoreToRegime`, `computeSignals`, `computeStabilityState`,
+   `buyScore`, `valueScore`), RSI divergence, rel-volume.
+5. `CRYPTO_COINCAP_IDS` (live crypto fallback ids), `YF_SYMBOL_MAP` (board → Yahoo symbol,
+   covers BRK.B, all ASX .AX names, forex =X, DXY).
+6. Data fetchers + `loadAll` (React) — static data first, then TD batch / Yahoo / Stooq /
+   proxy fallbacks for anything missing.
+7. React components; static tab buttons (`.snav-btn`) live in plain HTML near the bottom and
+   drive `window._setSnavFilter`. Default tab = Watchlist; there is no "All" tab. A non-empty
+   search shows matches across every section regardless of the active tab.
+
+### Ticker conventions
+
+- Board ticker = key everywhere (prices.json, BALANCE_SHEET, PE map). Yahoo symbol mapping
+  lives in `ALL_TICKERS` (python) and `YF_SYMBOL_MAP` (JS): `BRK.B→BRK-B`, ASX bare→`.AX`,
+  HK already `NNNN.HK`, forex `EURUSD→EURUSD=X`, `DXY→DX-Y.NYB`.
+- `SOL.AX` (WHSP) carries its suffix on the board to avoid colliding with crypto SOL.
+- Crypto renames handled: `POL` (ex-MATIC, history migrated), `TON` displays "Gram".
+- Data key inside React state is `ticker + '__' + cls`, so a ticker can sit in
+  multiple sections (AAPL is in Watch and Top20).
 
 ### Signal math
 
-Five SMAs: 21d, 42d, 84d, 126d, 252d. Each signal is +1 (fast > slow) or -1. Composite columns average a subset of signals and map via `scoreToRegime`:
+Ten MA pairs across four composite columns (1–2 Week 10/3·15/5; 1–3 Month 42/10·50/15·63/21;
+3–9 Month 84/21·126/42·168/42; All Signals = all 10). `scoreToRegime` thresholds:
+`>0.6 STRONG_BULL, >0.2 WEAK_BULL, >-0.2 SIDEWAYS, >-0.6 WEAK_BEAR, else STRONG_BEAR`.
+Stability = Overall regime sampled at −0/−10/−20/−30d.
 
-| Column | Signals used |
-|--------|-------------|
-| Short Term (weeks) | price vs 21d/42d/84d, 21d vs 42d, 42d vs 84d |
-| Medium Term (1–3 months) | price vs 21d/42d/84d/126d, 42d vs 84d |
-| Long Term (6–12 months) | price vs 84d/126d/252d, 84d vs 252d, 126d vs 252d |
-| Overall (all signals) | price vs all 5 MAs |
+## Editing Rules (hard-won — do not skip)
 
-`scoreToRegime` thresholds: `>0.6 → STRONG_BULL`, `>0.2 → WEAK_BULL`, `>-0.2 → SIDEWAYS`, `>-0.6 → WEAK_BEAR`, else `STRONG_BEAR`.
-
-### Stability dots (4 states)
-
-`computeStabilityState(closes)` samples the Overall regime at -0d, -10d, -20d, -30d lookbacks. **Critical**: it calls `computeSignals` on shorter slices — `computeSignals` must never call `computeStabilityState` (infinite recursion). Stability is merged into sigs *after* both are computed separately in `loadAll`.
-
-### Data loading priority (inside `loadAll`)
-
-1. `window.STATIC_PRICES[ticker]` — highest priority, set by `update-prices.py`
-2. Twelve Data batch API (8 tickers/request, 700ms between batches) — US/Watch/Commodity
-3. Yahoo Finance v8 fallback for any tickers TD failed on (CORS works in most browsers)
-4. CoinCap → CoinGecko fallback for crypto
-5. Alpha Vantage `TIME_SERIES_DAILY` for ASX/HK (background, non-blocking)
-6. Alpha Vantage `NEWS_SENTIMENT` for news column (fire-and-forget background)
-
-### `window.STATIC_PRICES` injection
-
-The block between `// @@STATIC_PRICES_START@@` and `// @@STATIC_PRICES_END@@` is the injection target. `update-prices.py` replaces this entire block using regex. Always preserve both markers and the exact `window.STATIC_PRICES = {...};` format. Data keyed by board ticker (e.g. `"BRK.B"`, not `"BRK-B"`).
-
-### State management
-
-Data key is `ticker + '__' + cls` (e.g. `AAPL__Watch`) so the same ticker appearing in multiple sections (Watch + Top20) loads independently. `data[key]` shape: `{ closes: null|number[], sigs: null|{...}, loading: boolean }`.
+- **Never edit the HTML blind.** Read the target section first; apply large changes with a
+  small Python script, not the Edit tool (Edit has truncated this file before, and the
+  Cowork mount can leave trailing NUL bytes when a tool shrinks a file — check with
+  `python -c "print(open('f','rb').read().count(b'\x00'))"` after big edits).
+- **Run the node --check snippet after every HTML edit.**
+- `computeSignals` must NOT call `computeStabilityState` (infinite recursion). Stability is
+  computed separately and merged via `{ ...sigs, stability }`.
+- `fetchT` must call `fetch()` internally, never itself.
+- News + ASX/HK Alpha Vantage fetches stay fire-and-forget (`(async()=>{})()`), never
+  awaited before `setData(newData)`.
+- `update-prices.py` writes `data/prices.json` atomically (tmp + `os.replace`). Keep it that
+  way — a half-written JSON kills the whole board.
+- After changing `regime-board.html`, sync `index.html` before publishing.
 
 ## API Keys & Rate Limits
 
-| Service | Key location | Free limit | Used for |
-|---------|-------------|------------|---------|
-| Twelve Data | `const TD_KEY` in HTML | 800 credits/day, 8 req/min | US/ETF prices |
-| Alpha Vantage | `const AV_KEY_DEFAULT` in HTML | 25 req/day, 5 req/min | News sentiment + ASX/HK prices |
-| CoinCap | No key | Generous | BTC/ETH daily history |
-| CoinGecko | No key | Heavy throttling | BTC/ETH fallback only |
-| Yahoo Finance | No key | CORS-accessible | Python script + browser fallback |
-
-When TD credits are exhausted it returns `{"code":429,"message":"..."}` at the top level — `json[ticker]` is `undefined`, causing silent no-data. Run `update-prices.py` to bypass all API limits.
-
-## `update-prices.py`
-
-Fetches all 33 tickers from Yahoo Finance and bakes into `STATIC_PRICES`. Yahoo symbol mapping: `BRK.B → BRK-B`, `BTC → BTC-USD`, `ETH → ETH-USD`, `MQG → MQG.AX`, `A2M → A2M.AX`. CSV mode (`--csv FILE.csv TICKER`) accepts stockanalysis.com history exports.
-
-## Editing Rules
-
-- **All edits to the HTML must be tested with `node --check`** (see syntax check command above) before presenting to the user. Truncation at ~867 lines has occurred before — use Python scripts for large replacements, not the Edit tool.
-- `computeSignals` must not call `computeStabilityState`. Stability is always computed separately and merged via `{ ...sigs, stability }`.
-- `fetchT(url, ms)` wraps `fetch()` with an AbortController timeout — it must call `fetch(url, ...)` internally, not `fetchT(...)` (would recurse infinitely).
-- News and ASX/HK AV fetches must remain fire-and-forget (wrapped in `(async () => { ... })()`). They must not `await` before `setData(newData)` is called.
-- Hardcoded data (`BALANCE_SHEET`, `PE_RATIOS`) uses the board ticker as key, not Yahoo symbol. For tickers in multiple sections, one entry covers all.
+| Service | Where | Free limit | Used for |
+|---------|-------|----------

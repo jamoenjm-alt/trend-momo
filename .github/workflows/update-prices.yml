@@ -18,14 +18,13 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Fetch prices and bake into HTML
+      - name: Fetch prices and bake into data/prices.json
         run: python update-prices.py
 
-      - name: Sync index.html and commit
+      - name: Commit and push
         run: |
-          cp regime-board.html index.html
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add regime-board.html index.html
+          git add regime-board.html index.html data/prices.json
           git diff --cached --quiet || git commit -m "chore: daily price update $(date -u '+%Y-%m-%d')"
           git push

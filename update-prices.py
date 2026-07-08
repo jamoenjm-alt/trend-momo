@@ -1,5 +1,5 @@
 """
-update-prices.py  ─  Bake all watchlist prices into regime-board.html
+update-prices.py  ─  Bake all watchlist prices into data/prices.json
 ════════════════════════════════════════════════════════════════════════
 
 AUTO MODE (recommended — run this once a day):
@@ -7,8 +7,10 @@ AUTO MODE (recommended — run this once a day):
 
     Fetches the last 420 calendar days of daily closes from Yahoo Finance
     for every ticker on the board (US, ASX, HK, crypto, commodities) and
-    writes them into the STATIC_PRICES block inside regime-board.html.
-    After running, just open the HTML — no API calls on page load.
+    writes them into data/prices.json, which regime-board.html fetches at
+    boot. The HTML itself is no longer touched by price updates.
+    NOTE: fetch('data/prices.json') is blocked when opening the HTML via
+    file:// — use serve.bat (local mini-server) or the live site.
 
 CSV MODE (manual override for any ticker):
     python update-prices.py --csv ASML-history.csv ASML
@@ -34,79 +36,237 @@ from datetime import datetime, timedelta, timezone
 # ── All watchlist tickers → Yahoo Finance symbols ─────────────────────────────
 # Keeping the board ticker as key (what the HTML uses) and Yahoo symbol as value.
 ALL_TICKERS = {
-    # ── Watchlist ─────────────────────────────────────────────────────────────
-    "AAPL":    "AAPL",
-    "MSFT":    "MSFT",
-    "TSLA":    "TSLA",
-    "NVDA":    "NVDA",
-    "ASML":    "ASML",
-    "IVV":     "IVV",
-    "PCT":     "PCT",
-    "SOUN":    "SOUN",
-    "SPCX":    "SPCX",
-
-    # ── Top 20 US ─────────────────────────────────────────────────────────────
-    "AMZN":    "AMZN",
-    "GOOGL":   "GOOGL",
-    "META":    "META",
-    "BRK.B":   "BRK-B",
-    "AVGO":    "AVGO",
-    "JPM":     "JPM",
-    "LLY":     "LLY",
-    "V":       "V",
-    "UNH":     "UNH",
-    "ORCL":    "ORCL",
-    "MA":      "MA",
-    "XOM":     "XOM",
-    "NFLX":    "NFLX",
-    "COST":    "COST",
-    "WMT":     "WMT",
-    "HD":      "HD",
-
-    # ── Crypto is fetched from CoinGecko (see CRYPTO_CG below), NOT Yahoo ───────
-    #    CoinGecko ids are canonical, so a bad id yields no data (honest N/A) rather
-    #    than Yahoo's silent wrong-token problem (e.g. plain TON-USD = wrong coin).
-
-    # ── Commodities (ETFs) ────────────────────────────────────────────────────
-    "GLD":     "GLD",
-    "SLV":     "SLV",
-    "PALL":    "PALL",
-    "PPLT":    "PPLT",
-
-    # ── ASX ───────────────────────────────────────────────────────────────────
-    "MQG":     "MQG.AX",
-    "A2M":     "A2M.AX",
-    "CBA":     "CBA.AX",
-    "BHP":     "BHP.AX",
-    "WBC":     "WBC.AX",
-    "NAB":     "NAB.AX",
-    "WES":     "WES.AX",
-    "CSL":     "CSL.AX",
-    "WDS":     "WDS.AX",
-    "FMG":     "FMG.AX",
-    "ANZ":     "ANZ.AX",
-
-    # ── Hong Kong ─────────────────────────────────────────────────────────────
-    "1211.HK": "1211.HK",
-
-    # ── Global Indices (ETFs) ─────────────────────────────────────────────────
-    "SPY":     "SPY",
-    "QQQ":     "QQQ",
-    "DIA":     "DIA",
-    "EWJ":     "EWJ",
-    "EWG":     "EWG",
-    "EWU":     "EWU",
-    "FXI":     "FXI",
-    "INDA":    "INDA",
-    "EEM":     "EEM",
-
-    # ── Forex ─────────────────────────────────────────────────────────────────
-    "EURUSD":  "EURUSD=X",
-    "GBPUSD":  "GBPUSD=X",
-    "USDJPY":  "USDJPY=X",
-    "AUDUSD":  "AUDUSD=X",
-    "USDCAD":  "USDCAD=X",
-    "DXY":     "DX-Y.NYB",
+    # Watchlist
+    "AAPL":       "AAPL",
+    "MSFT":       "MSFT",
+    "TSLA":       "TSLA",
+    "NVDA":       "NVDA",
+    "ASML":       "ASML",
+    "IVV":        "IVV",
+    "PCT":        "PCT",
+    "SOUN":       "SOUN",
+    "SPCX":       "SPCX",
+    # Top 100 US-listed (2026-07-08)
+    "NVDA":       "NVDA",
+    "AAPL":       "AAPL",
+    "GOOGL":      "GOOGL",
+    "MSFT":       "MSFT",
+    "AMZN":       "AMZN",
+    "AVGO":       "AVGO",
+    "TSM":        "TSM",
+    "TSLA":       "TSLA",
+    "META":       "META",
+    "MU":         "MU",
+    "BRK.B":      "BRK-B",
+    "LLY":        "LLY",
+    "WMT":        "WMT",
+    "AMD":        "AMD",
+    "JPM":        "JPM",
+    "ASML":       "ASML",
+    "ORCL":       "ORCL",
+    "XOM":        "XOM",
+    "V":          "V",
+    "INTC":       "INTC",
+    "JNJ":        "JNJ",
+    "CSCO":       "CSCO",
+    "ARM":        "ARM",
+    "LRCX":       "LRCX",
+    "CAT":        "CAT",
+    "COST":       "COST",
+    "MA":         "MA",
+    "AMAT":       "AMAT",
+    "ABBV":       "ABBV",
+    "CVX":        "CVX",
+    "BAC":        "BAC",
+    "NFLX":       "NFLX",
+    "UNH":        "UNH",
+    "PLTR":       "PLTR",
+    "KO":         "KO",
+    "MS":         "MS",
+    "GE":         "GE",
+    "PG":         "PG",
+    "HSBC":       "HSBC",
+    "GS":         "GS",
+    "HD":         "HD",
+    "BABA":       "BABA",
+    "IBM":        "IBM",
+    "MRK":        "MRK",
+    "TXN":        "TXN",
+    "KLAC":       "KLAC",
+    "AZN":        "AZN",
+    "PM":         "PM",
+    "DELL":       "DELL",
+    "SNDK":       "SNDK",
+    "RY":         "RY",
+    "MRVL":       "MRVL",
+    "QCOM":       "QCOM",
+    "NVS":        "NVS",
+    "GEV":        "GEV",
+    "SHEL":       "SHEL",
+    "WFC":        "WFC",
+    "TM":         "TM",
+    "LIN":        "LIN",
+    "RTX":        "RTX",
+    "PANW":       "PANW",
+    "C":          "C",
+    "MUFG":       "MUFG",
+    "ANET":       "ANET",
+    "ADI":        "ADI",
+    "STX":        "STX",
+    "SAP":        "SAP",
+    "AXP":        "AXP",
+    "WDC":        "WDC",
+    "TTE":        "TTE",
+    "TMUS":       "TMUS",
+    "PEP":        "PEP",
+    "VZ":         "VZ",
+    "MCD":        "MCD",
+    "APP":        "APP",
+    "NVO":        "NVO",
+    "CRWD":       "CRWD",
+    "TD":         "TD",
+    "AMGN":       "AMGN",
+    "APH":        "APH",
+    "SAN":        "SAN",
+    "NEE":        "NEE",
+    "TMO":        "TMO",
+    "TJX":        "TJX",
+    "GLW":        "GLW",
+    "DIS":        "DIS",
+    "BA":         "BA",
+    "SCCO":       "SCCO",
+    "T":          "T",
+    "ETN":        "ETN",
+    "BLK":        "BLK",
+    "GILD":       "GILD",
+    "DE":         "DE",
+    "CRM":        "CRM",
+    "UNP":        "UNP",
+    "BUD":        "BUD",
+    "ABT":        "ABT",
+    "SCHW":       "SCHW",
+    "SHOP":       "SHOP",
+    "UBER":       "UBER",
+    # Commodities (ETFs)
+    "GLD":        "GLD",
+    "SLV":        "SLV",
+    "PPLT":       "PPLT",
+    "PALL":       "PALL",
+    "CPER":       "CPER",
+    "USO":        "USO",
+    "BNO":        "BNO",
+    "UNG":        "UNG",
+    "UGA":        "UGA",
+    "DBA":        "DBA",
+    "CORN":       "CORN",
+    "WEAT":       "WEAT",
+    "SOYB":       "SOYB",
+    "CANE":       "CANE",
+    "DBC":        "DBC",
+    "PDBC":       "PDBC",
+    "GSG":        "GSG",
+    "KRBN":       "KRBN",
+    "URA":        "URA",
+    "GDX":        "GDX",
+    # ASX top 50
+    "BHP":        "BHP.AX",
+    "CBA":        "CBA.AX",
+    "RIO":        "RIO.AX",
+    "NEM":        "NEM.AX",
+    "WBC":        "WBC.AX",
+    "NAB":        "NAB.AX",
+    "ANZ":        "ANZ.AX",
+    "WES":        "WES.AX",
+    "MQG":        "MQG.AX",
+    "GMG":        "GMG.AX",
+    "FMG":        "FMG.AX",
+    "WDS":        "WDS.AX",
+    "XYZ":        "XYZ.AX",
+    "TLS":        "TLS.AX",
+    "CSL":        "CSL.AX",
+    "TCL":        "TCL.AX",
+    "WOW":        "WOW.AX",
+    "RMD":        "RMD.AX",
+    "QBE":        "QBE.AX",
+    "ALL":        "ALL.AX",
+    "COL":        "COL.AX",
+    "SIG":        "SIG.AX",
+    "NST":        "NST.AX",
+    "AMC":        "AMC.AX",
+    "STO":        "STO.AX",
+    "AAI":        "AAI.AX",
+    "BXB":        "BXB.AX",
+    "EVN":        "EVN.AX",
+    "CPU":        "CPU.AX",
+    "PLS":        "PLS.AX",
+    "NWS":        "NWS.AX",
+    "S32":        "S32.AX",
+    "SCG":        "SCG.AX",
+    "SUN":        "SUN.AX",
+    "JHX":        "JHX.AX",
+    "FPH":        "FPH.AX",
+    "ORG":        "ORG.AX",
+    "REA":        "REA.AX",
+    "IAG":        "IAG.AX",
+    "LYC":        "LYC.AX",
+    "PME":        "PME.AX",
+    "SGH":        "SGH.AX",
+    "SOL.AX":     "SOL.AX",
+    "BSL":        "BSL.AX",
+    "APA":        "APA.AX",
+    "QAN":        "QAN.AX",
+    "MPL":        "MPL.AX",
+    "MIN":        "MIN.AX",
+    "MEZ":        "MEZ.AX",
+    "TLC":        "TLC.AX",
+    # Hong Kong top 30
+    "0700.HK":    "0700.HK",
+    "1398.HK":    "1398.HK",
+    "1288.HK":    "1288.HK",
+    "0939.HK":    "0939.HK",
+    "0005.HK":    "0005.HK",
+    "3988.HK":    "3988.HK",
+    "0857.HK":    "0857.HK",
+    "3750.HK":    "3750.HK",
+    "9988.HK":    "9988.HK",
+    "0941.HK":    "0941.HK",
+    "0883.HK":    "0883.HK",
+    "1088.HK":    "1088.HK",
+    "3968.HK":    "3968.HK",
+    "2318.HK":    "2318.HK",
+    "2628.HK":    "2628.HK",
+    "1211.HK":    "1211.HK",
+    "2899.HK":    "2899.HK",
+    "0300.HK":    "0300.HK",
+    "1299.HK":    "1299.HK",
+    "0981.HK":    "0981.HK",
+    "3328.HK":    "3328.HK",
+    "1658.HK":    "1658.HK",
+    "1810.HK":    "1810.HK",
+    "0386.HK":    "0386.HK",
+    "0728.HK":    "0728.HK",
+    "9999.HK":    "9999.HK",
+    "2388.HK":    "2388.HK",
+    "3690.HK":    "3690.HK",
+    "0388.HK":    "0388.HK",
+    "9633.HK":    "9633.HK",
+    # Global Indices (ETFs)
+    "SPY":        "SPY",
+    "QQQ":        "QQQ",
+    "DIA":        "DIA",
+    "EWJ":        "EWJ",
+    "EWG":        "EWG",
+    "EWU":        "EWU",
+    "FXI":        "FXI",
+    "INDA":       "INDA",
+    "EEM":        "EEM",
+    # Forex
+    "EURUSD":     "EURUSD=X",
+    "GBPUSD":     "GBPUSD=X",
+    "USDJPY":     "USDJPY=X",
+    "AUDUSD":     "AUDUSD=X",
+    "USDCAD":     "USDCAD=X",
+    "DXY":        "DX-Y.NYB",
 }
 
 # Days of history to fetch (need 252 trading days ≈ 365 calendar + buffer)
@@ -183,19 +343,56 @@ def fetch_yahoo(yahoo_symbol: str, days: int = HISTORY_DAYS, retries: int = 3, i
 # ── All watchlist crypto → CoinGecko coin ids ────────────────────────────────
 # CoinGecko ids are unambiguous; this is the same source the board's live path uses.
 CRYPTO_CG = {
-    "BTC": "bitcoin", "ETH": "ethereum", "SOL": "solana", "XRP": "ripple",
-    "BNB": "binancecoin", "ADA": "cardano", "LINK": "chainlink",
-    "TON": "the-open-network", "AVAX": "avalanche-2", "SUI": "sui",
-    "DOGE": "dogecoin", "DOT": "polkadot", "TRX": "tron", "MATIC": "matic-network",
-    "LTC": "litecoin", "BCH": "bitcoin-cash", "APT": "aptos", "NEAR": "near",
-    "ARB": "arbitrum", "ATOM": "cosmos", "OP": "optimism",
-    "INJ": "injective-protocol", "HBAR": "hedera-hashgraph", "FIL": "filecoin",
-    "AAVE": "aave", "VET": "vechain", "XLM": "stellar", "ETC": "ethereum-classic",
-    "ALGO": "algorand", "UNI": "uniswap", "ICP": "internet-computer",
-    "GRT": "the-graph", "SAND": "the-sandbox", "MANA": "decentraland",
-    "MKR": "maker", "RUNE": "thorchain", "LDO": "lido-dao", "STX": "blockstack",
-    "FTM": "fantom", "SEI": "sei-network", "EGLD": "elrond-erd-2",
-    "DYDX": "dydx-chain", "PEPE": "pepe", "FLOKI": "floki", "WIF": "dogwifcoin",
+    "BTC": "bitcoin",
+    "ETH": "ethereum",
+    "BNB": "binancecoin",
+    "XRP": "ripple",
+    "SOL": "solana",
+    "TRX": "tron",
+    "HYPE": "hyperliquid",
+    "DOGE": "dogecoin",
+    "LEO": "leo-token",
+    "ZEC": "zcash",
+    "XLM": "stellar",
+    "ADA": "cardano",
+    "XMR": "monero",
+    "LINK": "chainlink",
+    "BCH": "bitcoin-cash",
+    "TON": "the-open-network",
+    "LTC": "litecoin",
+    "HBAR": "hedera-hashgraph",
+    "SUI": "sui",
+    "AVAX": "avalanche-2",
+    "CRO": "crypto-com-chain",
+    "NEAR": "near",
+    "SHIB": "shiba-inu",
+    "TAO": "bittensor",
+    "UNI": "uniswap",
+    "OKB": "okb",
+    "ONDO": "ondo-finance",
+    "DOT": "polkadot",
+    "AAVE": "aave",
+    "MNT": "mantle",
+    "WLD": "worldcoin-wld",
+    "SKY": "sky",
+    "ICP": "internet-computer",
+    "PI": "pi-network",
+    "PEPE": "pepe",
+    "ETC": "ethereum-classic",
+    "MORPHO": "morpho",
+    "ATOM": "cosmos",
+    "RENDER": "render-token",
+    "POL": "polygon-ecosystem-token",
+    "KAS": "kaspa",
+    "QNT": "quant-network",
+    "JUP": "jupiter-exchange-solana",
+    "FIL": "filecoin",
+    "INJ": "injective-protocol",
+    "ARB": "arbitrum",
+    "ALGO": "algorand",
+    "VET": "vechain",
+    "APT": "aptos",
+    "SEI": "sei-network",
 }
 
 # CoinGecko free tier is rate-limited — pause longer between calls than Yahoo.
@@ -228,8 +425,7 @@ def fetch_coingecko(cg_id, days=365, retries=3):
 
 # US stocks whose trailing P/E we auto-refresh from stockanalysis (overrides the
 # curated PE_RATIOS in the HTML; falls back to the curated value if a fetch fails).
-PE_STOCKS = ["PLTR","AAPL","MSFT","TSLA","NVDA","ASML","AMZN","GOOGL","META","BRK.B",
-             "AVGO","JPM","LLY","V","UNH","ORCL","MA","XOM","NFLX","COST","WMT","HD"]
+PE_STOCKS = ["NVDA", "AAPL", "GOOGL", "MSFT", "AMZN", "AVGO", "TSM", "TSLA", "META", "MU", "BRK.B", "LLY", "WMT", "AMD", "JPM", "ASML", "ORCL", "XOM", "V", "INTC", "JNJ", "CSCO", "ARM", "LRCX", "CAT", "COST", "MA", "AMAT", "ABBV", "CVX", "BAC", "NFLX", "UNH", "PLTR", "KO", "MS", "GE", "PG", "HSBC", "GS", "HD", "BABA", "IBM", "MRK", "TXN", "KLAC", "AZN", "PM", "DELL", "SNDK", "RY", "MRVL", "QCOM", "NVS", "GEV", "SHEL", "WFC", "TM", "LIN", "RTX", "PANW", "C", "MUFG", "ANET", "ADI", "STX", "SAP", "AXP", "WDC", "TTE", "TMUS", "PEP", "VZ", "MCD", "APP", "NVO", "CRWD", "TD", "AMGN", "APH", "SAN", "NEE", "TMO", "TJX", "GLW", "DIS", "BA", "SCCO", "T", "ETN", "BLK", "GILD", "DE", "CRM", "UNP", "BUD", "ABT", "SCHW", "SHOP", "UBER"]
 
 def fetch_pe(ticker):
     """Current trailing P/E from stockanalysis, or None on error / not meaningful."""
@@ -247,93 +443,35 @@ def fetch_pe(ticker):
     except Exception:
         return None
 
-def inject_live_pe(pe_dict, html_path):
-    """Replace the @@LIVE_PE@@ block with freshly fetched trailing P/E values."""
-    with open(html_path, "r", encoding="utf-8") as f:
-        content = f.read()
-    ms, me = "// @@LIVE_PE_START@@", "// @@LIVE_PE_END@@"
-    i, j = content.find(ms), content.find(me)
-    if i == -1 or j == -1:
-        print("  (LIVE_PE markers not found - skipping P/E inject)")
-        return False
-    ts = datetime.now().strftime("%Y-%m-%d %H:%M")
-    body = (ms + "\n" +
-            f"// trailing P/E auto-refreshed {ts} from stockanalysis\n" +
-            f"window.LIVE_PE = {json.dumps(pe_dict, separators=(',', ':'))};\n" + me)
-    with open(html_path, "w", encoding="utf-8") as f:
-        f.write(content[:i] + body + content[j + len(me):])
-    return True
+def data_json_path(script_dir: str) -> str:
+    return os.path.join(script_dir, "data", "prices.json")
 
 
-def inject_ohlc(ohlc_dict, html_path):
-    with open(html_path, "r", encoding="utf-8") as f:
-        content = f.read()
-    ms, me = "// @@STATIC_OHLC_START@@", "// @@STATIC_OHLC_END@@"
-    i, j = content.find(ms), content.find(me)
-    if i == -1 or j == -1:
-        print("  (STATIC_OHLC markers not found - skipping)")
-        return False
-    body = ms + "\n" + f"window.STATIC_OHLC = {json.dumps(ohlc_dict, separators=(',', ':'))};\n" + me
-    with open(html_path, "w", encoding="utf-8") as f:
-        f.write(content[:i] + body + content[j + len(me):])
-    return True
+def load_data(path: str) -> dict:
+    """Read data/prices.json ({updated, prices, pe, ohlc, weekly}) or an empty skeleton."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            d = json.load(f)
+        return {
+            "updated": d.get("updated"),
+            "prices":  d.get("prices") or {},
+            "pe":      d.get("pe")     or {},
+            "ohlc":    d.get("ohlc")   or {},
+            "weekly":  d.get("weekly") or {},
+        }
+    except Exception:
+        return {"updated": None, "prices": {}, "pe": {}, "ohlc": {}, "weekly": {}}
 
 
-def inject_weekly(weekly_dict, html_path):
-    """Replace the @@STATIC_WEEKLY@@ block with true weekly OHLC (interval=1wk from Yahoo)."""
-    with open(html_path, "r", encoding="utf-8") as f:
-        content = f.read()
-    ms, me = "// @@STATIC_WEEKLY_START@@", "// @@STATIC_WEEKLY_END@@"
-    i, j = content.find(ms), content.find(me)
-    if i == -1 or j == -1:
-        print("  (STATIC_WEEKLY markers not found - skipping)")
-        return False
-    body = ms + "\n" + f"window.STATIC_WEEKLY = {json.dumps(weekly_dict, separators=(',', ':'))};\n" + me
-    with open(html_path, "w", encoding="utf-8") as f:
-        f.write(content[:i] + body + content[j + len(me):])
-    return True
-
-
-def inject_into_html(prices: dict, html_path: str):
-    """
-    Replace the @@STATIC_PRICES_START@@ … @@STATIC_PRICES_END@@ block
-    in regime-board.html with the latest prices dict.
-    Uses plain string splitting (not regex) to avoid corruption of the React tail.
-    """
-    with open(html_path, "r", encoding="utf-8") as f:
-        content = f.read()
-
-    marker_start = "// @@STATIC_PRICES_START@@"
-    marker_end   = "// @@STATIC_PRICES_END@@"
-
-    start_idx = content.find(marker_start)
-    end_idx   = content.find(marker_end)
-
-    if start_idx == -1:
-        print("\n✗  START marker not found in regime-board.html.")
-        sys.exit(1)
-    if end_idx == -1:
-        print("\n✗  END marker not found in regime-board.html.")
-        print("   Run the rebuild script or contact support.")
-        sys.exit(1)
-
-    before = content[:start_idx]
-    after  = content[end_idx + len(marker_end):]
-
-    ts       = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    json_str = json.dumps(prices, separators=(",", ":"))
-
-    updated = (
-        before +
-        marker_start + "\n" +
-        f"// All prices last updated {ts} by update-prices.py\n" +
-        f"window.STATIC_PRICES = {json_str};\n" +
-        marker_end +
-        after
-    )
-
-    with open(html_path, "w", encoding="utf-8") as f:
-        f.write(updated)
+def save_data(path: str, data: dict):
+    """Atomically write data/prices.json (write tmp file, then replace)."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    data["updated"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, separators=(",", ":"))
+    os.replace(tmp, path)
+    print(f"  ✓  data/prices.json written ({os.path.getsize(path):,} bytes)")
 
 
 def sync_index(html_path: str):
@@ -342,19 +480,6 @@ def sync_index(html_path: str):
     index_path = os.path.join(os.path.dirname(html_path), "index.html")
     shutil.copy2(html_path, index_path)
     print(f"  ✓  index.html synced")
-
-
-def load_existing_static_prices(html_path: str) -> dict:
-    """Read the current STATIC_PRICES dict out of the HTML (to merge/preserve)."""
-    with open(html_path, "r", encoding="utf-8") as f:
-        content = f.read()
-    m = re.search(r"window\.STATIC_PRICES\s*=\s*(\{.*?\});", content, re.DOTALL)
-    if m:
-        try:
-            return json.loads(m.group(1))
-        except json.JSONDecodeError:
-            pass
-    return {}
 
 
 def parse_stockanalysis_csv(csv_path: str) -> list:
@@ -404,11 +529,11 @@ def main():
             sys.exit(1)
         print(f"  ✓  {len(closes)} closes  (first={closes[0]:.2f}, last={closes[-1]:.2f})")
 
-        prices = load_existing_static_prices(html_path)
-        prices[board_name] = closes
-        inject_into_html(prices, html_path)
-        sync_index(html_path)
-        print(f"\n✓  {board_name} injected into regime-board.html")
+        dp = data_json_path(script_dir)
+        d = load_data(dp)
+        d["prices"][board_name] = closes
+        save_data(dp, d)
+        print(f"\n✓  {board_name} written to data/prices.json")
         return
 
     # ── Auto mode: Yahoo Finance for ALL tickers ──────────────────────────────
@@ -418,9 +543,11 @@ def main():
     print("=" * 60)
     print()
 
-    prices = load_existing_static_prices(html_path)
-    ohlc = {}
-    weekly = {}
+    dp = data_json_path(script_dir)
+    d = load_data(dp)
+    prices = d["prices"]
+    ohlc   = d["ohlc"]     # merge: tickers that fail today keep yesterday's bars
+    weekly = d["weekly"]
 
     ok_count  = 0
     err_count = 0
@@ -491,20 +618,15 @@ def main():
         print("\n✗  Nothing fetched. Check your internet connection.")
         sys.exit(1)
 
-    inject_into_html(prices, html_path)
-    if pe_out:
-        inject_live_pe(pe_out, html_path)
-    if ohlc:
-        inject_ohlc(ohlc, html_path)
-    if weekly:
-        inject_weekly(weekly, html_path)
+    d["pe"].update(pe_out)   # merge: failed P/E fetches keep the previous value
+    save_data(dp, d)
     sync_index(html_path)
 
     print()
     print("=" * 60)
     ts = datetime.now().strftime("%H:%M:%S")
     print(f"  ✓  Done at {ts}  ({ok_count} ok, {err_count} failed)")
-    print(f"  regime-board.html + index.html updated.")
+    print(f"  data/prices.json updated (regime-board.html untouched).")
     print("=" * 60)
     print()
 

@@ -17,13 +17,17 @@ regime/momentum signals so the user can scan a watchlist quickly.
 5. Auto-updating daily with no manual effort, published to a public URL.
 
 ## How it's built (important constraints)
-- **One file:** `regime-board.html` (~518 KB), React 18 via esm.sh, **no JSX** (`createElement`
-  aliased as `h`), **no build step, no bundler**. `index.html` is a synced published copy.
-- Data is **baked into the HTML** by `update-prices.py` (pulls Yahoo daily closes/OHLC, P/E,
-  CoinGecko crypto) into marker blocks (`STATIC_PRICES`, `STATIC_OHLC`, `LIVE_PE`). Live
-  fallback fetches use CORS proxies (allorigins/codetabs/corsproxy) + Twelve Data + Alpha Vantage.
-- **Daily automation:** `update-prices-daily.bat` (Windows Scheduled Task) re-bakes prices,
-  commits, and pushes every morning. Now does `git pull` first to avoid push collisions.
+- **Code in one file:** `regime-board.html` (~200 KB), React 18 via esm.sh, **no JSX**
+  (`createElement` aliased as `h`), **no build step, no bundler**. `index.html` is a synced copy.
+- **Data in `data/prices.json`** (since 2026-07-08): `{updated, prices, pe, ohlc, weekly}`
+  written by `update-prices.py`, fetched by the page at boot. Live fallbacks (Twelve Data,
+  Yahoo, Stooq, CORS proxies, CoinGecko) cover anything missing. Local viewing needs
+  `serve.bat` (file:// blocks the JSON fetch).
+- **Universe (2026-07-08):** 274 rows — Watch 9, US Top 100, ASX 50, HK 30, Crypto 50,
+  Commodities 20, Indices 9, Forex 6. Tab navigation only (no all-in-one page).
+- **Daily automation:** GitHub Action (22:00 UTC) re-bakes and commits `data/prices.json`.
+  The local `update-prices-daily.bat` scheduled task is redundant and should stay disabled —
+  two writers caused the merge-collision commits in the log.
 
 ## Signal logic (what the columns mean)
 - Trend regimes from 10 moving-average pairs → composite scored via `scoreToRegime`
@@ -50,34 +54,25 @@ We ran point-in-time backtests (no lookahead) on 10 years of data. Results:
   Shipped as `btc-signal.html` (live RISK-ON/OFF badge) + `btc-allocation-rule.md`.
 
 ## Known problems / limitations (fix candidates)
-1. **Editing the 518 KB single file is fragile** — large-file edits have truncated/corrupted it
-   before. Any change should be applied by a small script + verified with `node --check`, never a
-   blind full-file rewrite. Consider splitting into modules or a tiny build step.
-2. **Free data is rate-limited/unreliable** — Twelve Data 800/day, Alpha Vantage 25/day, CORS
-   proxies flaky. Live cells can silently show no data. Baked data via the daily task is the
-   reliable path; live fallbacks are best-effort.
-3. **Weekly RSI divergence uses 5-day resampling, not true weekly OHLC** (`STATIC_WEEKLY` empty).
-   Weekly signals drift from real weekly charts. Fix: bake Yahoo `interval=1wk`.
-4. **All stock strategy backtests are survivorship-biased** — universe = names that survived to
+1. **All stock strategy backtests are survivorship-biased** — universe = names that survived to
    2026. A truly proven mechanical stock strategy needs a survivorship-bias-free dataset
    (Norgate/CRSP); Yahoo can't provide delisted names.
-5. **Backtests ignore costs/slippage/spread** — real net edge is lower.
-6. **BTC signal page is standalone**, not yet a heading in the board nav.
-7. **Mobile layout** — desktop is fine; mobile has had issues and needs a pass.
-8. **No live QA pass done this session** — recommend checking browser console for errors and
-   verifying every column renders on the live site.
+2. **Backtests ignore costs/slippage/spread** — real net edge is lower.
+3. **Free live APIs are rate-limited/unreliable** — baked `data/prices.json` is the reliable
+   path; live fallbacks are best-effort. If the JSON's `updated` stamp is >1 trading day old,
+   the GitHub Action has stalled — check the Actions tab (it went stale Jul 7–8, 2026).
+4. **The project folder's file-sync has rolled files back before** (2026-07-08 incident).
+   If files look older than the last commit, restore from git before any .bat pushes.
+5. **Most of the expanded universe is uncurated** — Balance Sheet / curated P/E cover ~40
+   names; the rest show N/A by design.
+6. **Mobile layout** — desktop is fine; mobile needs a pass.
+7. **BTC signal page is standalone**, not yet a heading in the board nav.
 
-## Suggested improvements (roadmap, ranked)
-1. **Support/resistance levels** (auto swing highs/lows + round numbers, distance-to-level).
-   Highest-value add — a divergence AT support is an A+ setup; in open air it's noise.
-2. **Volume confirmation** (relative volume vs 20-day avg) — filters false breakouts, cheap to add.
-3. **Integrate the BTC trend signal** as its own board heading; add an equity/watchlist
-   "trend status" panel.
-4. **True weekly OHLC** for honest weekly divergences.
-5. **Earnings-date flags** + **ATR/stop-distance** for turning signals into trade plans.
-6. **Daily "what changed" digest** (new divergences, regime flips) emailed via the existing task.
-7. **Split the monolith** into maintainable modules or add a minimal build to end the
-   large-file-edit fragility.
+## Roadmap
+
+Moved to **ROADMAP.md** (ranked, with shipped/rejected lists). Fixed since the last brief:
+data split out of the HTML (fragility solved), true weekly OHLC baked, live QA pass clean,
+274-ticker universe with tab navigation, workflow hardening. See SESSION-2026-07-08.md.
 
 ## Hard constraint for whoever works on this next
 Keep the intellectual honesty bar high. This user trades real money. Do NOT present
