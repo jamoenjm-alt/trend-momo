@@ -466,7 +466,8 @@ def load_data(path: str) -> dict:
 def save_data(path: str, data: dict):
     """Atomically write data/prices.json (write tmp file, then replace)."""
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    data["updated"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # UTC ISO stamp with Z so the board's data-age guard parses it unambiguously
+    data["updated"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(data, f, separators=(",", ":"))
