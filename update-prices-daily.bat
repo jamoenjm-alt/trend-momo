@@ -30,4 +30,8 @@ git push >> update-log.txt 2>&1
 if errorlevel 1 (
   echo push rejected, re-syncing and retrying once ... >> update-log.txt
   git pull --no-rebase --no-edit -X theirs >> update-log.txt 2>&1
-  git p
+  git push >> update-log.txt 2>&1
+)
+
+echo Run finished: %DATE% %TIME% >> update-log.txt
+echo. >> update-log.txt

@@ -108,4 +108,20 @@ Stability = Overall regime sampled at −0/−10/−20/−30d.
 ## API Keys & Rate Limits
 
 | Service | Where | Free limit | Used for |
-|---------|-------|----------
+|---------|-------|------------|----------|
+| Twelve Data | `TD_KEY` in HTML | 800 credits/day, 8/min | live US fallback |
+| Alpha Vantage | `AV_KEY_DEFAULT` in HTML | 25 req/day | news, live ASX/HK fallback |
+| CoinGecko | optional `CG_KEY` in update-prices.py | throttled without key | crypto bake |
+| Yahoo Finance | none | unofficial | main bake source (equities/forex) |
+| stockanalysis.com | none | unofficial | trailing P/E bake (US 100) |
+
+Baked `data/prices.json` is the primary path; live APIs are best-effort fallbacks only.
+
+## Known gotchas
+
+- The project folder is under a file-sync tool that has silently rolled files back to older
+  versions at least once (2026-07-08). If files look older than the last commit,
+  `git status` + `git stash`/restore from HEAD before doing anything else.
+- GitHub Actions bake can silently stop (last seen stale on 2026-07-08 — prices were 2 days
+  old). If `updated` in data/prices.json is > 1 trading day old, check the repo's Actions tab.
+- SPCX (SpaceX) is not publicly listed — its row intentionally shows NO DATA.
