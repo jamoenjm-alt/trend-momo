@@ -8,16 +8,16 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:           #eef2f8;
+      --bg:           #faf9f5;
       --surface:      #ffffff;
-      --border:       #dde5f0;
-      --header-bg:    #1e40af;
+      --border:       #e7e5e4;
+      --header-bg:    #292524;
       --header-text:  #ffffff;
-      --th-bg:        #1e3a8a;
-      --th-text:      #bfdbfe;
-      --row-hover:    #eff6ff;
-      --text:         #1e293b;
-      --muted:        #64748b;
+      --th-bg:        #44403c;
+      --th-text:      #e7e5e4;
+      --row-hover:    #f5f5f4;
+      --text:         #292524;
+      --muted:        #78716c;
 
       /* Regime colours */
       --strong-bull-bg:   #15803d;
@@ -836,7 +836,13 @@
 
     /* ── Asset type badge (Reversal & Divergence panels) ──────── */
     /* .atbadge styles removed — replaced by .at-sub muted label */
-  </style>
+  
+    /* warm-light additions (2026-07-08) */
+    .page-banner h1 { font-family: Georgia, 'Times New Roman', serif; font-weight: 500; }
+    .section-label td { font-family: Georgia, 'Times New Roman', serif; font-size: 0.95rem; letter-spacing: 0.03em; }
+    tbody tr { cursor: pointer; }
+    .div-detail-cell { background: #f5f5f4; border-bottom: 2px solid #e7e5e4; padding: 12px 18px; }
+</style>
 </head>
 <body>
 
@@ -2581,6 +2587,87 @@ function KeyConfig({ keys, onSave }) {
   );
 }
 
+
+// ═══ Click-a-row divergence detail (additive, 2026-07-08) ════════════════════
+function detectDivergenceDetail(closes, highs, lows) {
+  const lbL = 5, lbR = 5, gapLo = 5, gapHi = 60;
+  if (!closes || closes.length < lbL + lbR + 12) return null;
+  const hi = (highs && highs.length === closes.length) ? highs : closes;
+  const lo = (lows && lows.length === closes.length) ? lows : closes;
+  const osc = rsiSeries(closes, 14);
+  const piv = pivotsLR(osc, lbL, lbR);
+  const last = closes.length - 1;
+  const freshOK = (i) => (last - i) <= lbR + 5;
+  let best = null;
+  const oL = piv.lows.filter(i => osc[i] != null);
+  if (oL.length >= 2) { const b = oL[oL.length-1], a = oL[oL.length-2], gap = b - a;
+    if (freshOK(b) && gap >= gapLo && gap <= gapHi && osc[b] > osc[a] && lo[b] < lo[a])
+      best = { dir:'bull', a, b, osc, closes, hi, lo };
+  }
+  const oH = piv.highs.filter(i => osc[i] != null);
+  if (oH.length >= 2) { const b = oH[oH.length-1], a = oH[oH.length-2], gap = b - a;
+    if (freshOK(b) && gap >= gapLo && gap <= gapHi && osc[b] < osc[a] && hi[b] > hi[a] && (!best || b > best.b))
+      best = { dir:'bear', a, b, osc, closes, hi, lo };
+  }
+  return best;
+}
+const _divCache = {};
+function divergenceFor(ticker, closes) {
+  if (!closes || closes.length < 60) return null;
+  const ck = ticker + ':' + closes.length + ':' + closes[closes.length-1];
+  if (ck in _divCache) return _divCache[ck];
+  const o = (typeof window !== 'undefined') && window.STATIC_OHLC ? window.STATIC_OHLC[ticker] : null;
+  let hh = o && o.h, ll = o && o.l, cc = closes;
+  if (hh && ll && hh.length === ll.length && hh.length < cc.length) cc = cc.slice(-hh.length);
+  const r = detectDivergenceDetail(cc, hh, ll);
+  _divCache[ck] = r;
+  return r;
+}
+function DivMiniChart({ title, det }) {
+  if (!det) return null;
+  const span = Math.min(80, det.closes.length);
+  const off = det.closes.length - span;
+  if (det.a < off) return null;
+  const W = 230, PH = 54, RH = 36;
+  const seg = (arr) => { const s = arr.slice(off);
+    const vals = s.filter(v => v != null);
+    return { s, mn: Math.min.apply(null, vals), mx: Math.max.apply(null, vals) }; };
+  const pr = seg(det.closes), rs = seg(det.osc.map(v => v == null ? 50 : v));
+  const x = (i) => ((i - off) / (span - 1) * W);
+  const yP = (v) => pr.mx === pr.mn ? PH/2 : (PH - 3 - (v - pr.mn) / (pr.mx - pr.mn) * (PH - 6));
+  const yR = (v) => rs.mx === rs.mn ? RH/2 : (RH - 3 - (v - rs.mn) / (rs.mx - rs.mn) * (RH - 6));
+  const priceAt = det.dir === 'bull' ? det.lo : det.hi;
+  const col = det.dir === 'bull' ? '#15803d' : '#b91c1c';
+  return h('div', { style: { display:'inline-block', marginRight: 22, verticalAlign:'top' } },
+    h('div', { style: { fontSize:'0.68rem', fontWeight: 700, color: col, marginBottom: 2 } },
+      title + ' — ' + (det.dir === 'bull' ? 'bullish' : 'bearish') + ' RSI divergence'),
+    h('svg', { width: W, height: PH + RH + 8 },
+      h('polyline', { points: pr.s.map((v,i) => x(i+off).toFixed(1)+','+yP(v).toFixed(1)).join(' '), fill:'none', stroke:'#78716c', strokeWidth: 1.2 }),
+      h('line', { x1: x(det.a), y1: yP(priceAt[det.a]), x2: x(det.b), y2: yP(priceAt[det.b]), stroke: col, strokeWidth: 1.6 }),
+      h('circle', { cx: x(det.a), cy: yP(priceAt[det.a]), r: 2.5, fill: col }),
+      h('circle', { cx: x(det.b), cy: yP(priceAt[det.b]), r: 2.5, fill: col }),
+      h('g', { transform: 'translate(0,' + (PH + 8) + ')' },
+        h('polyline', { points: rs.s.map((v,i) => x(i+off).toFixed(1)+','+yR(v).toFixed(1)).join(' '), fill:'none', stroke:'#a78bfa', strokeWidth: 1.2 }),
+        h('line', { x1: x(det.a), y1: yR(det.osc[det.a]), x2: x(det.b), y2: yR(det.osc[det.b]), stroke: col, strokeWidth: 1.6 }),
+        h('circle', { cx: x(det.a), cy: yR(det.osc[det.a]), r: 2.5, fill: col }),
+        h('circle', { cx: x(det.b), cy: yR(det.osc[det.b]), r: 2.5, fill: col }))),
+    h('div', { style: { fontSize:'0.62rem', color:'#a8a29e' } }, 'top: price · bottom: RSI-14 · the line joins the diverging pivots'));
+}
+function DivergenceDetail({ asset, closes }) {
+  const dDay = divergenceFor(asset.ticker, closes);
+  let dWk = null;
+  const WK = (typeof window !== 'undefined') && window.STATIC_WEEKLY ? window.STATIC_WEEKLY[asset.ticker] : null;
+  if (WK && WK.c && WK.c.length >= 30) dWk = detectDivergenceDetail(WK.c, WK.h, WK.l);
+  if (!dDay && !dWk) return h('div', { style: { fontSize:'0.7rem', color:'#78716c' } },
+    asset.ticker + ': no active RSI divergence on daily or weekly. Click the row again to close.');
+  return h('div', null,
+    h(DivMiniChart, { title: 'Daily', det: dDay }),
+    h(DivMiniChart, { title: 'Weekly', det: dWk }),
+    h('div', { style: { fontSize:'0.62rem', color:'#a8a29e', marginTop: 4 } },
+      '⚠ Backtest reality check: bullish divergence alone was right ~27% of the time — context, not a trade trigger. See Reversals for the full list.'));
+}
+// ═══ end divergence detail ═══════════════════════════════════════════════════
+
 function App() {
   const [keys, setKeys] = useState(() => { try { return JSON.parse(localStorage.getItem('regime_keys') || '{}'); } catch { return {}; } });
   const [showConfig, setShowConfig] = useState(false);
@@ -2593,6 +2680,7 @@ function App() {
   const [tooltip, setTooltip] = useState(null);
   const [view, setView] = useState('signals');
   const [snavFilter, setSnavFilter] = useState('Watch');
+  const [expandedKey, setExpandedKey] = useState(null);
   const [fg, setFg] = useState({ crypto: null, equity: null, loading: true });
   const loadedRef = useRef(false);
 
@@ -2952,7 +3040,10 @@ function App() {
                   const sigs=d.sigs, loading=d.loading;
                   const stability=sigs?sigs.stability:'stable';
                   const colScores=sigs?[sigs.canary,sigs.stTrend,sigs.ltTrend,sigs.allInd]:[null,null,null,null];
-                  return h('tr', { key: asset.ticker+asset.cls },
+                  const _key = asset.ticker + '__' + asset.cls;
+                  const isOpen = expandedKey === _key;
+                  return h(Fragment, { key: _key },
+                    h('tr', { onClick: () => setExpandedKey(isOpen ? null : _key), title: 'Click for divergence detail' },
                     h('td', { className:'td-ticker' }, h('div', { className:'ticker-sym' }, asset.ticker)),
                     h('td', { className:'td-desc' }, asset.name),
                     colScores.map((score,i) => loading ? h('td',{key:i,className:'td-signal'},h('span',{className:'spinner'})) : h(SignalCell,{key:i,hasData:!!sigs,score,stability,onEnter:e=>handleEnter(e,asset,sigs,['canary','st','lt','all'][i]),onLeave:handleLeave})),
@@ -2963,6 +3054,10 @@ function App() {
                     h(ValueScoreCell, { ticker: asset.ticker, sigs, loading }),
                     h(FearGreedCell, { ticker: asset.ticker, cls: asset.cls, sigs, loading, newsData, fg }),
                     h(VolumeCell, { ticker: asset.ticker }),
+                    ),
+                    isOpen && h('tr', null,
+                      h('td', { colSpan: 13, className: 'div-detail-cell' },
+                        h(DivergenceDetail, { asset, closes: d.closes })))
                   );
                 })
               );
