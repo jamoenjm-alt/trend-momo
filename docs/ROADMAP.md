@@ -113,3 +113,17 @@ on a fresh split you have not looked at.
 If none pass: that is a real, publishable result — write "fear timing adds nothing over the
 untimed megacap basket" in Explicitly rejected and move on. Do not keep tweaking until something
 looks good; that is the exact mistake this protocol exists to prevent.
+
+## Next backtest — weighting optimization (pre-registered)
+
+Idea (owner, 2026-07): instead of equal-weight (10% each), let the top-10 mega-caps carry
+DIFFERENT weights (e.g. #1 by market cap at 25%, tapering down), and search weight schemes to
+maximise growth-per-drawdown over the full history. Also test universe size (top-10 vs 20 vs 50).
+Rules, fixed before running:
+- Point-in-time membership AND point-in-time market-cap ranking (no hindsight weights).
+- Test on the DEEP history (needs the survivorship-aware fetch), not just 2010-2026.
+- Apply the daily-200dma trend filter variant too (it's the only thing that cut drawdown).
+- Bar: a weight scheme is only "better" if it beats equal-weight on Sharpe AND on
+  growth-per-max-drawdown, in both halves, net of costs. Report turnover.
+- Do NOT curve-fit: pick the scheme on the first half, confirm on the second. If it only wins
+  in-sample, reject it. Cap any single name at a sane max (e.g. 25%) to avoid one-stock bets.

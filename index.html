@@ -2973,6 +2973,7 @@ function App() {
         h('a', { href:'#', className: view==='reversals'?'nav-active':'', onClick:(e)=>{e.preventDefault(); setView('reversals');} }, 'Reversals'),
         h('a', { href:'#', className: view==='btc'?'nav-active':'', onClick:(e)=>{e.preventDefault(); setView('btc');} }, 'Signal'),
         h('a', { href:'#', className: view==='outlook'?'nav-active':'', onClick:(e)=>{e.preventDefault(); setView('outlook');} }, 'Market Outlook'),
+        h('a', { href:'waterflow.html', className: 'nav-model' }, 'Allocation Models'),
         h('a', { href:'#', className: view==='guide'?'nav-active':'', onClick:(e)=>{e.preventDefault(); setView('guide');} }, 'Guide'),
       ),
       h('span', { className: 'banner-link', onClick: () => setShowConfig(s=>!s) }, '⚙ Keys'),
