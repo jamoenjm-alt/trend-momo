@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Waterflow — allocation model</title>
+<style>
+ :root{--bg:#0b0e14;--panel:#131823;--ink:#e6edf3;--mut:#8b949e;--line:#30363d;--wf:#3fb0ff;--spy:#f0a020;--good:#2ea043;--bad:#d1242f}
+ *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif}
+ .wrap{max-width:900px;margin:0 auto;padding:24px 16px 70px}
+ h1{font-size:22px;margin:0 0 2px}.sub{color:var(--mut);font-size:13px;margin-bottom:18px}
+ .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
+ .grid{display:flex;flex-wrap:wrap;gap:14px}
+ .stat{flex:1;min-width:130px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+ .stat .k{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+ .stat .v{font-size:20px;font-weight:700;margin-top:2px}
+ .wf{color:var(--wf)}.spy{color:var(--spy)}
+ h2{font-size:15px;margin:0 0 10px;color:var(--ink)}
+ .two{display:flex;flex-wrap:wrap;gap:16px}
+ .col{flex:1;min-width:280px}
+ table{width:100%;border-collapse:collapse;font-size:13px}
+ td{padding:4px 6px;border-bottom:1px solid var(--line)}.mut{color:var(--mut);font-size:12px}
+ .legend span{display:inline-block;width:11px;height:11px;border-radius:2px;vertical-align:middle;margin-right:5px}
+ .warn{border-left:3px solid var(--bad);background:rgba(209,36,47,.06)}
+ a{color:#58a6ff}
+</style></head><body><div class="wrap">
+<h1>Waterflow</h1>
+<div class="sub">Equal-weight top-10 US mega-caps, reviewed yearly. The only long-only stock model in this project that beat the S&amp;P 500 risk-adjusted over 16 years — with a bigger drawdown. Not advice; your own capital.</div>
+
+<div class="grid" style="margin-bottom:16px">
+ <div class="stat"><div class="k">Waterflow CAGR</div><div class="v wf" id="wf-cagr"></div></div>
+ <div class="stat"><div class="k">S&amp;P 500 CAGR</div><div class="v spy" id="spy-cagr"></div></div>
+ <div class="stat"><div class="k">Waterflow Sharpe</div><div class="v wf" id="wf-sh"></div></div>
+ <div class="stat"><div class="k">Max drawdown</div><div class="v" id="wf-dd"></div></div>
+ <div class="stat"><div class="k">Growth of $1</div><div class="v wf" id="wf-mult"></div></div>
+</div>
+
+<div class="card">
+ <h2>Growth of $1 — Waterflow vs S&amp;P 500 (2010–2026, log scale)</h2>
+ <div class="legend mut"><span style="background:var(--wf)"></span>Waterflow &nbsp;&nbsp;<span style="background:var(--spy)"></span>S&amp;P 500 (SPY)</div>
+ <canvas id="chart" width="860" height="320" style="width:100%;height:320px;display:block"></canvas>
+</div>
+
+<div class="two">
+ <div class="col card">
+  <h2>Current allocation</h2>
+  <svg id="pie" viewBox="0 0 240 240" width="100%" style="max-width:260px;display:block;margin:0 auto"></svg>
+  <div class="mut" style="text-align:center;margin-top:6px">10 holdings &times; 10% each</div>
+ </div>
+ <div class="col card">
+  <h2>Holdings <span class="mut">(equal weight)</span></h2>
+  <table id="holdings"></table>
+  <div class="mut" style="margin-top:10px"><b>If they ever change:</b> the model holds whichever names are the 10 largest US companies by market cap, refreshed once a year. As the megacap leaders shift, the list updates — e.g. NVDA/AVGO/LLY replaced GE/XOM/WFC over the last decade. Turnover is ~2%/month.</div>
+ </div>
+</div>
+
+<div class="card warn">
+ <h2>Read before you trust it</h2>
+ <div class="mut" style="color:var(--ink)">
+  1. <b>Deeper drawdown than the index.</b> Waterflow fell ~35% in 2022 vs the S&amp;P's ~24%. Higher return came with more pain, not less.<br><br>
+  2. <b>The megacap premium may be a regime artifact.</b> This 2010–2026 window was a historic mega-cap/tech run. In 2000–2010 the giants <i>lagged</i> the index. This test cannot see that risk — it isn't in the data.<br><br>
+  3. <b>It's concentrated.</b> 10 names, all US large-cap, heavily tech. No diversification benefit; if megacaps roll over together, so does this.<br><br>
+  Point-in-time top-10 per year (no NVDA/TSLA hindsight), 15bps costs, no parameters tuned after seeing results. Honest, but not a promise.
+ </div>
+</div>
+</div>
+
+<script>
+const D={"dates":["2010-01-04","2010-02-01","2010-03-01","2010-04-01","2010-05-03","2010-06-01","2010-07-01","2010-08-02","2010-09-01","2010-10-01","2010-11-01","2010-12-01","2011-01-03","2011-02-01","2011-03-01","2011-04-01","2011-05-02","2011-06-01","2011-07-01","2011-08-01","2011-09-01","2011-10-03","2011-11-01","2011-12-01","2012-01-03","2012-02-01","2012-03-01","2012-04-02","2012-05-01","2012-06-01","2012-07-02","2012-08-01","2012-09-04","2012-10-01","2012-11-01","2012-12-03","2013-01-02","2013-02-01","2013-03-01","2013-04-01","2013-05-01","2013-06-03","2013-07-01","2013-08-01","2013-09-03","2013-10-01","2013-11-01","2013-12-02","2014-01-02","2014-02-03","2014-03-03","2014-04-01","2014-05-01","2014-06-02","2014-07-01","2014-08-01","2014-09-02","2014-10-01","2014-11-03","2014-12-01","2015-01-02","2015-02-02","2015-03-02","2015-04-01","2015-05-01","2015-06-01","2015-07-01","2015-08-03","2015-09-01","2015-10-01","2015-11-02","2015-12-01","2016-01-04","2016-02-01","2016-03-01","2016-04-01","2016-05-02","2016-06-01","2016-07-01","2016-08-01","2016-09-01","2016-10-03","2016-11-01","2016-12-01","2017-01-03","2017-02-01","2017-03-01","2017-04-03","2017-05-01","2017-06-01","2017-07-03","2017-08-01","2017-09-01","2017-10-02","2017-11-01","2017-12-01","2018-01-02","2018-02-01","2018-03-01","2018-04-02","2018-05-01","2018-06-01","2018-07-02","2018-08-01","2018-09-04","2018-10-01","2018-11-01","2018-12-03","2019-01-02","2019-02-01","2019-03-01","2019-04-01","2019-05-01","2019-06-03","2019-07-01","2019-08-01","2019-09-03","2019-10-01","2019-11-01","2019-12-02","2020-01-02","2020-02-03","2020-03-02","2020-04-01","2020-05-01","2020-06-01","2020-07-01","2020-08-03","2020-09-01","2020-10-01","2020-11-02","2020-12-01","2021-01-04","2021-02-01","2021-03-01","2021-04-01","2021-05-03","2021-06-01","2021-07-01","2021-08-02","2021-09-01","2021-10-01","2021-11-01","2021-12-01","2022-01-03","2022-02-01","2022-03-01","2022-04-01","2022-05-02","2022-06-01","2022-07-01","2022-08-01","2022-09-01","2022-10-03","2022-11-01","2022-12-01","2023-01-03","2023-02-01","2023-03-01","2023-04-03","2023-05-01","2023-06-01","2023-07-03","2023-08-01","2023-09-01","2023-10-02","2023-11-01","2023-12-01","2024-01-02","2024-02-01","2024-03-01","2024-04-01","2024-05-01","2024-06-03","2024-07-01","2024-08-01","2024-09-03","2024-10-01","2024-11-01","2024-12-02","2025-01-02","2025-02-03","2025-03-03","2025-04-01","2025-05-01","2025-06-02","2025-07-01","2025-08-01","2025-09-02","2025-10-01","2025-11-03","2025-12-01","2026-01-02","2026-02-02","2026-03-02","2026-04-01","2026-05-01","2026-06-01","2026-07-01"],"waterflow":[1.0,0.9542,0.9693,1.0187,1.0414,0.95,0.8977,0.9777,0.9427,1.0058,1.0624,1.0659,1.1242,1.1752,1.1661,1.1668,1.1936,1.1657,1.1763,1.203,1.1531,1.1063,1.1876,1.213,1.2875,1.2931,1.3606,1.4092,1.3732,1.3038,1.388,1.4275,1.4678,1.5327,1.4807,1.4377,1.4642,1.4961,1.5144,1.5497,1.5801,1.6494,1.6275,1.7016,1.641,1.6638,1.7659,1.8401,1.8542,1.7426,1.8238,1.8937,1.936,1.9611,2.0054,1.9701,2.0382,2.0014,2.0578,2.0964,2.0648,2.0482,2.1581,2.0796,2.1863,2.1865,2.1781,2.2731,2.088,2.1614,2.4559,2.5051,2.4053,2.3529,2.3743,2.4674,2.4788,2.5404,2.5159,2.6372,2.6734,2.6695,2.6649,2.7334,2.8444,2.9158,3.0879,3.0627,3.1439,3.187,3.2031,3.2995,3.3134,3.3685,3.5946,3.6438,3.7256,4.0035,3.8252,3.6365,3.8335,4.022,4.0239,4.1908,4.3831,4.4275,4.1465,4.1943,3.7677,4.0276,4.1632,4.3334,4.5661,4.1374,4.5661,4.5519,4.4462,4.5109,4.7779,4.8849,5.1849,5.2864,5.0922,4.3174,4.9816,5.3145,5.4609,5.8424,6.5084,6.0922,5.9256,6.5752,6.797,7.0687,7.1909,7.2975,7.7174,7.6607,7.9775,8.1681,8.5031,8.2217,8.85,8.6226,9.1603,8.5594,7.9273,8.7381,7.6569,7.2626,6.6468,7.4437,6.9969,6.3695,6.2069,6.6773,5.9188,6.9098,6.7702,7.3838,7.4357,8.1828,8.7204,8.9486,8.9609,8.7844,8.5495,9.1448,9.3309,9.9277,10.9205,10.9707,10.6848,11.5686,12.4537,12.0449,12.2575,12.8368,12.9954,14.0643,14.8046,14.9322,14.1144,13.2926,13.6543,14.9454,15.4675,15.9464,16.5519,18.1812,19.0894,19.3486,19.1223,19.0961,18.072,17.329,19.6434,20.7243,19.8414],"spy":[1.0,0.9623,0.9873,1.0437,1.0663,0.9527,0.9148,1.0038,0.9655,1.0258,1.0608,1.083,1.1431,1.1763,1.178,1.2032,1.2309,1.1916,1.2161,1.1694,1.0982,1.0034,1.1136,1.1407,1.1712,1.2168,1.2652,1.3086,1.2985,1.1824,1.266,1.276,1.3079,1.3458,1.3317,1.3188,1.3714,1.4201,1.4282,1.4717,1.4928,1.55,1.5299,1.618,1.5586,1.6134,1.6788,1.72,1.7522,1.6684,1.7719,1.8112,1.812,1.856,1.9048,1.861,1.9394,1.8876,1.9597,1.9985,2.0063,1.972,2.0703,2.0179,2.0671,2.0755,2.0454,2.068,1.8904,1.9038,2.0847,2.0876,2.0037,1.9303,1.9747,2.0732,2.0837,2.1067,2.1142,2.1849,2.1894,2.1842,2.1359,2.2225,2.2934,2.3176,2.4414,2.4065,2.4408,2.4886,2.4889,2.5415,2.5468,2.6057,2.6591,2.7311,2.7898,2.9227,2.7787,2.6832,2.7614,2.8513,2.8459,2.9401,3.0338,3.0677,2.8761,2.937,2.6461,2.8564,2.966,3.0365,3.1,2.9169,3.1562,3.1475,3.1037,3.1448,3.2832,3.3422,3.5012,3.4931,3.3311,2.6684,3.0656,3.3123,3.381,3.58,3.8392,3.6845,3.6097,4.0013,4.0487,4.1304,4.277,4.4125,4.6062,4.6224,4.7564,4.8356,4.9926,4.8139,5.0999,4.9942,5.3144,5.039,4.7834,5.0543,4.6253,4.5708,4.2728,4.6037,4.4429,4.1257,4.3272,4.5845,4.3053,4.6442,4.4626,4.6636,4.7154,4.787,5.055,5.1996,5.1393,4.8845,4.8313,5.2479,5.4247,5.6146,5.886,6.0115,5.7604,6.0764,6.2986,6.2717,6.3765,6.5877,6.6157,6.9933,6.796,6.9487,6.7859,6.5405,6.5114,6.9106,7.2227,7.2702,7.4872,7.8384,8.013,7.977,8.0346,8.1786,8.0724,7.7272,8.4986,8.9454,8.8174],"holdings":["AAPL","MSFT","NVDA","GOOGL","AMZN","META","BRK-B","TSLA","AVGO","LLY"],"stats":{"waterflow":{"cagr":19.7,"maxDD":-35.4,"sharpe":1.11,"mult":19.8},"spy":{"cagr":14.0,"maxDD":-23.8,"sharpe":0.94,"mult":8.8}}};
+const $=id=>document.getElementById(id);
+$("wf-cagr").textContent=D.stats.waterflow.cagr+"%";
+$("spy-cagr").textContent=D.stats.spy.cagr+"%";
+$("wf-sh").textContent=D.stats.waterflow.sharpe+" vs "+D.stats.spy.sharpe;
+$("wf-dd").textContent=D.stats.waterflow.maxDD+"% vs "+D.stats.spy.maxDD+"%";
+$("wf-mult").textContent="$"+D.stats.waterflow.mult+" vs $"+D.stats.spy.mult;
+
+// pie
+const COL=["#3fb0ff","#2ea043","#f0a020","#d1242f","#a371f7","#f778ba","#56d4dd","#e3b341","#6e7681","#58a6ff"];
+const pie=$("pie");let ang=-Math.PI/2;const cx=120,cy=120,r=100;
+D.holdings.forEach((h,i)=>{
+ const a2=ang+2*Math.PI/10;
+ const x1=cx+r*Math.cos(ang),y1=cy+r*Math.sin(ang),x2=cx+r*Math.cos(a2),y2=cy+r*Math.sin(a2);
+ const p=document.createElementNS("http://www.w3.org/2000/svg","path");
+ p.setAttribute("d",`M${cx},${cy} L${x1},${y1} A${r},${r} 0 0,1 ${x2},${y2} Z`);
+ p.setAttribute("fill",COL[i]);p.setAttribute("stroke","#0b0e14");p.setAttribute("stroke-width","1.5");
+ pie.appendChild(p);
+ const mid=(ang+a2)/2,lx=cx+r*0.66*Math.cos(mid),ly=cy+r*0.66*Math.sin(mid);
+ const t=document.createElementNS("http://www.w3.org/2000/svg","text");
+ t.setAttribute("x",lx);t.setAttribute("y",ly);t.setAttribute("fill","#fff");t.setAttribute("font-size","10");
+ t.setAttribute("text-anchor","middle");t.setAttribute("dominant-baseline","middle");t.textContent=h;
+ pie.appendChild(t);ang=a2;
+});
+// holdings table
+$("holdings").innerHTML=D.holdings.map((h,i)=>`<tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${COL[i]};margin-right:6px"></span>${h}</td><td style="text-align:right;color:var(--mut)">10%</td></tr>`).join("");
+
+// equity chart (log scale)
+const cv=$("chart"),x=cv.getContext("2d");
+function draw(){
+ const W=cv.width,H=cv.height,pl=44,pr=10,pt=10,pb=22;
+ const wf=D.waterflow,sp=D.spy,n=wf.length;
+ const lo=Math.log10(0.9),hi=Math.log10(Math.max(...wf,...sp)*1.1);
+ const X=i=>pl+i/(n-1)*(W-pl-pr);
+ const Y=v=>pt+(hi-Math.log10(v))/(hi-lo)*(H-pt-pb);
+ x.clearRect(0,0,W,H);
+ // y gridlines at 1,2,5,10,20
+ x.font="10px sans-serif";x.fillStyle="#8b949e";x.strokeStyle="#30363d";x.lineWidth=1;
+ [1,2,5,10,20].forEach(g=>{const yy=Y(g);x.beginPath();x.moveTo(pl,yy);x.lineTo(W-pr,yy);x.stroke();x.fillText("$"+g,6,yy+3);});
+ // year ticks
+ let py=null;
+ D.dates.forEach((d,i)=>{const yr=d.slice(0,4);if(yr!==py && yr%3===0){x.fillText(yr,X(i)-10,H-6);py=yr;}else if(yr!==py)py=yr;});
+ const plot=(arr,c)=>{x.beginPath();x.lineWidth=2;x.strokeStyle=c;arr.forEach((v,i)=>{const px=X(i),py=Y(v);i?x.lineTo(px,py):x.moveTo(px,py);});x.stroke();};
+ plot(sp,"#f0a020");plot(wf,"#3fb0ff");
+}
+draw();
+</script></body></html>

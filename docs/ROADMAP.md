@@ -72,3 +72,44 @@ this document is the single source of truth for project direction.
   covers the US 100 only.
 - The folder sync-rollback incident (2026-07-08) is an open threat: if files ever look
   older than the last commit, restore from git before letting any .bat push.
+
+## Pre-registered test — "does fear timing add anything?" (run as ONE session)
+
+Context: the mega-cap fear backtest (`backtests/backtest-megacap-fear.py`, 2026-07-07) found
+that timing entries on fear (V1 rotation, V2 dip-buy) did NOT beat the **untimed equal-weight
+top-10 basket** (18.5% CAGR, 0.99 Sharpe). Waterflow (that untimed basket) is now shipped.
+Before any fear-timed variant is built or displayed, it must clear this pre-registered bar.
+Write these rules down and DO NOT change them after seeing results.
+
+### The benchmarks to beat (both, not just SPY)
+- SPY buy & hold (full period + H1 + H2).
+- **Untimed EW top-10 (Waterflow)** — this is the real null. Beating SPY is not enough;
+  fear timing must beat the boring basket, or it added nothing.
+
+### Pass/fail bar (fixed before running)
+A variant PASSES only if it beats **both** benchmarks on **Sharpe** in the **full period AND
+both halves**, **net of 15bps/side costs**. Any other outcome = FAIL = do not ship, log it in
+"Explicitly rejected". No parameter is tuned after seeing results; if you tune, you must re-run
+on a fresh split you have not looked at.
+
+### The three (and only three) variants to test — pre-registered
+1. **Fear as a sizing modulator, not a selector.** Hold the full EW-10 basket always; scale
+   total exposure 80%→120% by the basket's aggregate fear (more feared = more exposure), rest
+   to cash/AGG. Hypothesis: buying the basket cheaper adds return without adding names.
+2. **Fear = drawdown-from-high percentile**, not the board's composite F&G. Define "fear" as
+   each name's current drawdown vs its own 1-yr high, ranked. Hypothesis: a cleaner, less
+   reflexive fear proxy times better.
+3. **Dip-buy only above the 200-day MA** ("fear within an uptrend"). Enter a top-10 name on
+   fear only while it is above its 200d MA; ignore fear signals in downtrends. This is the one
+   shape that rhymes with the BTC>200dma signal — the only other rule that ever passed the bar.
+
+### Anti-fudge checklist (tick every box in the results file)
+- [ ] Universe is point-in-time (top-10 per calendar year), not today's winners.
+- [ ] Costs applied (15bps/side). Turnover reported per variant.
+- [ ] Full + H1 + H2 reported for every variant AND both benchmarks.
+- [ ] No parameter changed after first look at results (or fresh split used).
+- [ ] Verdict states explicitly whether each variant beat BOTH benchmarks, or FAILED.
+
+If none pass: that is a real, publishable result — write "fear timing adds nothing over the
+untimed megacap basket" in Explicitly rejected and move on. Do not keep tweaking until something
+looks good; that is the exact mistake this protocol exists to prevent.
