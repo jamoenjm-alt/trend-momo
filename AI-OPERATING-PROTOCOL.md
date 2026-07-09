@@ -2,8 +2,8 @@
 
 How to work on this project, for ANY model (Opus, Sonnet, or other AI). This protocol is
 what made past sessions effective; follow it exactly. CLAUDE.md points here — read that
-first for architecture, then PROJECT-BRIEF.md (context), ROADMAP.md (direction), and the
-latest SESSION-*.md (state). Written 2026-07-09 by Claude Fable at Jimmy's request.
+first for architecture, then docs/PROJECT-BRIEF.md (context), docs/ROADMAP.md (direction), and the
+latest docs/SESSION-*.md (state). Written 2026-07-09 by Claude Fable at Jimmy's request.
 
 ## 1. Role and tone
 
@@ -72,13 +72,15 @@ Trust nothing you haven't verified this session. Specifically:
   it (this silently killed the daily task for days).
 - One automation writer only: the GitHub Action (22:00 UTC) does the daily bake. The
   Windows Scheduled Task stays disabled; update-prices-daily.bat is manual-only.
+- NEVER `git ls-files | xargs touch` after moving or deleting files — touch recreates the
+  old paths as EMPTY files, which then get committed as husks. Only touch paths that exist.
 - `git pull -X theirs` can resurrect old file formats from remote commits (it re-inserted
   the dead baked-data block once). After any merge, verify the merged files still match
   the current architecture before pushing further work.
 
 ## 5. Working rhythm
 
-1. Read CLAUDE.md → PROJECT-BRIEF.md → ROADMAP.md → latest SESSION-*.md. Check repo health.
+1. Read CLAUDE.md → docs/PROJECT-BRIEF.md → docs/ROADMAP.md → latest docs/SESSION-*.md. Check repo health.
 2. Keep a task list; clarify direction with concrete options before large builds.
 3. Anything user-visible ships as a `preview.html` (self-contained, data embedded, purple
    PREVIEW banner, gitignored) for sign-off BEFORE it goes live. Never publish unseen work.
@@ -86,7 +88,7 @@ Trust nothing you haven't verified this session. Specifically:
    on explicit instruction.
 5. Commit locally with clear messages as you go (author "Claude <noreply@anthropic.com>").
    Publishing is Jimmy's machine: claude-publish.bat.
-6. End of session: update ROADMAP.md status, append to or create SESSION-YYYY-MM-DD.md
+6. End of session: update docs/ROADMAP.md status, append to or create docs/SESSION-YYYY-MM-DD.md
    (findings / changes / actions for Jimmy / accepted regressions), update this file if a
    new trap was discovered, commit.
 
@@ -96,4 +98,9 @@ Settled and load-bearing — do not casually reopen: data lives in `data/prices.
 (atomic writes, merge semantics), HTML is code-only, GitHub Action is the single daily
 writer, the board self-reports data age (amber >30h, red >54h), universe is US 100 /
 ASX 50 / HK 30 / Crypto 50 / Commodities 20, docs are current. Build on top of this —
-ROADMAP.md has the ranked next steps.
+docs/ROADMAP.md has the ranked next steps.
+
+Repo layout: site + ops at root (index/regime-board/btc-signal html, data/, update-prices.py,
+the .bat entry points, CLAUDE.md, this file) · docs/ (brief, roadmap, session logs, research,
+strategy notes, screenshots) · backtests/ (all test harnesses, datasets, results) ·
+archive-dev-scripts/ (dead one-shot patch scripts — do not run).

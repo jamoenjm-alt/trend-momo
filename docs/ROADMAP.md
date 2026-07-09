@@ -2,8 +2,8 @@
 
 Owner: Jimmy. Live: https://jamoenjm-alt.github.io/trend-momo/
 This is the forward plan. Any AI model or developer picking this project up should read
-PROJECT-BRIEF.md first (what/why/honest backtest findings), CLAUDE.md second (how to work
-in the repo), then this file (what to do next). Update the status column as things ship —
+PROJECT-BRIEF.md (same folder) first (what/why/honest backtest findings), then the repo
+root's CLAUDE.md + AI-OPERATING-PROTOCOL.md (how to work), then this file (what to do next). Update the status column as things ship —
 this document is the single source of truth for project direction.
 
 ## Guiding constraints (do not violate)

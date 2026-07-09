@@ -15,7 +15,7 @@ No build step, no npm, no framework CLI. Price data lives in `data/prices.json` 
 boot), so the HTML itself is code-only (~200 KB).
 
 **Decision-support board, not an auto-trader.** The owner trades real money. Keep the
-intellectual honesty bar high — see PROJECT-BRIEF.md ("Hard constraint").
+intellectual honesty bar high — see docs/PROJECT-BRIEF.md ("Hard constraint").
 
 ## Running / Testing
 
