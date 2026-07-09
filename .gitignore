@@ -20,3 +20,9 @@ claude-publish-log.txt
 claude-session-log.txt
 claude-session-done.txt
 preview*.html
+backtests/deep-panel.json
+backtests/prove-history.json
+backtests/prove3-panel.json
+backtests/water-history.json
+backtests/deep-output.txt
+backtests/run-deep.bat
