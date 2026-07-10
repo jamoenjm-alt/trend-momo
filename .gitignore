@@ -26,3 +26,11 @@ backtests/prove3-panel.json
 backtests/water-history.json
 backtests/deep-output.txt
 backtests/run-deep.bat
+backtests/diversify-output.txt
+backtests/run-diversify.bat
+backtests/publish-now.bat
+backtests/publish-now-log.txt
+backtests/build-output.txt
+backtests/build-models.py
+backtests/run-build.bat
+backtests/wf5.json
