@@ -56,11 +56,11 @@ claude-publish.bat feat: my change description
 - `.github/workflows/update-prices.yml` — daily bake at 22:00 UTC (8am AEST), commits
   `data/prices.json`. **This is the primary daily updater.**
 - `property-board.html` — AU property trend/momentum board (same architecture: single
-  `<script type="module">`, React via esm.sh, no JSX). States as tabs, ~56 towns/cities as
+  `<script type="module">`, React via esm.sh, no JSX). States as tabs, ~215 towns/cities as
   rows. Signals run on the SQM Research weekly asking-price index (combined) with weekly-bar
-  MA pairs grouped 6M–1Y / 1–3Y / 3–7Y / 10Y+ (26/6·39/13·52/13 | 78/26·104/26·156/52 |
-  260/52·364/104 | 520/156 weeks); same regime thresholds as the stock board. Stability =
-  All-Signals regime at 0/−13/−26/−39 weeks. Fundamentals: gross yield (+percentile vs own
+  MA pairs grouped 0–6M / 6M–1Y / 1–2Y / 2–5Y (12/4·18/6·26/9 | 33/11·39/13·52/17 |
+  65/22·78/26·104/35 | 130/43·195/65·260/87 weeks); same regime thresholds as the stock
+  board. Stability = All-Signals regime at 0/−13/−26/−39 weeks. Fundamentals: gross yield (+percentile vs own
   history), vacancy, rent 12m, stock-on-market 12m.
 - `update-property.py` — bakes `data/property.json` from SQM Research free chart pages
   (each page embeds `var data = [...]` JSON; parsed by bracket-balance scan). Capitals use

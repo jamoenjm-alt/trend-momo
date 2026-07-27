@@ -38,6 +38,15 @@
     .topbar-nav { display: flex; gap: 24px; flex: 1; }
     .topbar-nav a { color: #93c5fd; text-decoration: none; font-size: 0.85rem; font-weight: 500; }
     .topbar-nav a:hover { color: #fff; }
+    .topbar-nav a.nav-stocks {
+      background: #1d4ed8;
+      color: #fff;
+      border-radius: 999px;
+      padding: 3px 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .topbar-nav a.nav-stocks:hover { background: #2563eb; color: #fff; }
 
     .page-banner {
       background: linear-gradient(135deg, #14532d 0%, #15803d 100%);
@@ -134,7 +143,7 @@
   <div class="topbar">
     <div class="topbar-logo">🏠 TREND MOMO — PROPERTY</div>
     <div class="topbar-nav">
-      <a href="regime-board.html">← Stocks &amp; Crypto Board</a>
+      <a href="index.html" class="nav-stocks">← 📈 Stocks &amp; Crypto</a>
       <a href="https://sqmresearch.com.au/property" target="_blank" rel="noopener">Data: SQM Research</a>
     </div>
   </div>
@@ -146,9 +155,9 @@
     <div class="note">
       <strong>How to read this board.</strong> Signals are moving-average trend/momentum pairs computed on the
       <strong>SQM Research weekly asking-price index (combined houses + units)</strong> for each city or town —
-      asking prices, not settled sales. Columns: <strong>6M–1Y</strong> (26/6w, 39/13w, 52/13w),
-      <strong>1–3Y</strong> (78/26w, 104/26w, 156/52w), <strong>3–7Y</strong> (260/52w, 364/104w),
-      <strong>10Y+</strong> (520/156w), <strong>All Signals</strong> = every pair. Each pair contributes
+      asking prices, not settled sales. Columns: <strong>0–6M</strong> (12/4w, 18/6w, 26/9w),
+      <strong>6M–1Y</strong> (33/11w, 39/13w, 52/17w), <strong>1–2Y</strong> (65/22w, 78/26w, 104/35w),
+      <strong>2–5Y</strong> (130/43w, 195/65w, 260/87w), <strong>All Signals</strong> = every pair. Each pair contributes
       Trend (price vs slow MA) and Momo (fast vs slow MA); the average maps to
       Strong Bull &gt; 0.6 &gt; Weak Bull &gt; 0.2 &gt; Sideways &gt; −0.2 &gt; Weak Bear &gt; −0.6 &gt; Strong Bear —
       the same regime thresholds as the stock board. The stability dot samples the All-Signals regime today and
@@ -160,8 +169,8 @@
       use SQM's city-wide index. Data © SQM Research, personal reference only — this board is decision support,
       not advice, and asking-price momentum leads settled prices by roughly one to two quarters.
       <br /><br />
-      <strong>10Y+ caveat:</strong> the 520-week MA needs a decade of history and flips extremely rarely.
-      Treat it as a secular-trend flag, not a trade signal.
+      <strong>Noise caveat:</strong> the 0–6M column reacts within weeks, so it flips often — that's the point of
+      having it, but read it alongside the stability dot rather than on its own.
     </div>
   </div>
 
@@ -183,19 +192,22 @@
     const sectionOf = (state) => (state === 'ACT' || state === 'NT') ? 'ACTNT' : state;
 
     // ── Signal math (weekly bars) ────────────────────────────────────────
-    // Groups per user spec: 6M–1Y, 1–3Y, 3–7Y, 10Y+  (weeks)
+    // Groups per user spec: 0–6M, 6M–1Y, 1–2Y, 2–5Y (weeks; ~3:1 slow:fast)
     const MA_PAIRS = [
-      { slow: 26,  fast: 6,   group: 'm6'  },
-      { slow: 39,  fast: 13,  group: 'm6'  },
-      { slow: 52,  fast: 13,  group: 'm6'  },
-      { slow: 78,  fast: 26,  group: 'y13' },
-      { slow: 104, fast: 26,  group: 'y13' },
-      { slow: 156, fast: 52,  group: 'y13' },
-      { slow: 260, fast: 52,  group: 'y37' },
-      { slow: 364, fast: 104, group: 'y37' },
-      { slow: 520, fast: 156, group: 'y10' },
+      { slow: 12,  fast: 4,  group: 'h1' },   // 0–6M
+      { slow: 18,  fast: 6,  group: 'h1' },
+      { slow: 26,  fast: 9,  group: 'h1' },
+      { slow: 33,  fast: 11, group: 'h2' },   // 6M–1Y
+      { slow: 39,  fast: 13, group: 'h2' },
+      { slow: 52,  fast: 17, group: 'h2' },
+      { slow: 65,  fast: 22, group: 'h3' },   // 1–2Y
+      { slow: 78,  fast: 26, group: 'h3' },
+      { slow: 104, fast: 35, group: 'h3' },
+      { slow: 130, fast: 43, group: 'h4' },   // 2–5Y
+      { slow: 195, fast: 65, group: 'h4' },
+      { slow: 260, fast: 87, group: 'h4' },
     ];
-    const GROUPS = ['m6', 'y13', 'y37', 'y10'];
+    const GROUPS = ['h1', 'h2', 'h3', 'h4'];
 
     function sma(closes, w) {
       if (!closes || closes.length < w) return null;
@@ -320,7 +332,7 @@
               h('h4', null, 'Combined asking index — last 10y'),
               h(Sparkline, { px }),
               h('div', { style: { fontSize: '0.72rem', color: 'var(--muted)', marginTop: 4 } },
-                'Drawdown from peak: ', h('span', { className: pctCls(dd) }, fmtPct(dd)))),
+                'Drawdown from 10y peak: ', h('span', { className: pctCls(dd) }, fmtPct(dd)))),
             h('div', { className: 'detail-block' },
               h('h4', null, 'Houses vs Units (12m)'),
               h('table', null, h('tbody', null,
@@ -343,10 +355,10 @@
     }
 
     const COLS = [
-      { key: 'm6',  label: '6M–1Y' },
-      { key: 'y13', label: '1–3Y' },
-      { key: 'y37', label: '3–7Y' },
-      { key: 'y10', label: '10Y+' },
+      { key: 'h1', label: '0–6M' },
+      { key: 'h2', label: '6M–1Y' },
+      { key: 'h3', label: '1–2Y' },
+      { key: 'h4', label: '2–5Y' },
     ];
     const N_COLS = 12;
 
