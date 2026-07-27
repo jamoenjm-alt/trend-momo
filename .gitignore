@@ -15,6 +15,7 @@ run-*.bat
 __pycache__/
 *.log
 update-log.txt
+update-property-log.txt
 err.txt
 desktop.ini
 claude-publish-log.txt

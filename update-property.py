@@ -175,6 +175,13 @@ def month_key(row):
     return "%04d-%02d" % (int(row["year"]), int(row["month"]))
 
 
+def drop_partial_month(rows):
+    """SQM monthly series include the in-progress month with near-zero counts;
+    the site's charts hide it. Drop any trailing rows >= the current month."""
+    cur = datetime.now(timezone.utc).strftime("%Y-%m")
+    return [r for r in rows if month_key(r) < cur]
+
+
 def pct_rank(vals, x):
     """Percentile (0-100) of x within vals."""
     vals = [v for v in vals if v is not None]
@@ -239,8 +246,16 @@ def bake_region(code, name, state, kind, param):
     if rows:
         rows = [r for r in rows if r.get("vr") is not None]
         rows.sort(key=month_key)
+        rows = drop_partial_month(rows)
         if rows:
-            vrs = [round(float(r["vr"]), 2) for r in rows]
+            vrs = [float(r["vr"]) for r in rows]
+            # SQM unit quirk: city pages embed vr as a fraction (0.02 = 2%),
+            # postcode pages as percent (0.85 = 0.85%). Normalise to percent —
+            # no market's vacancy history maxes out below 0.25% AND fraction
+            # series never exceed 0.25 (= 25%).
+            if vrs and max(vrs) <= 0.25:
+                vrs = [v * 100 for v in vrs]
+            vrs = [round(v, 2) for v in vrs]
             out["vac"] = vrs[-1]
             out["vac12"] = vrs[max(0, len(vrs) - 13)]
             out["vac_m"] = vrs[-36:]
@@ -253,6 +268,7 @@ def bake_region(code, name, state, kind, param):
         def total(r):
             return sum(int(r.get(k) or 0) for k in ("r30", "r60", "r90", "r180", "r180p"))
         rows.sort(key=month_key)
+        rows = drop_partial_month(rows)
         totals = [total(r) for r in rows]
         totals = [t for t in totals if t > 0] or totals
         if totals:
