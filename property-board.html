@@ -106,6 +106,43 @@
       padding: 9px 12px; max-width: 900px; line-height: 1.5;
     }
 
+    /* ── Private portfolio ───────────────────────────────────── */
+    .pf-privacy {
+      background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;
+      padding: 9px 12px; font-size: 0.78rem; color: #14532d;
+      max-width: 900px; line-height: 1.5; margin-bottom: 12px;
+    }
+    .pf-totals {
+      display: flex; gap: 20px; flex-wrap: wrap; padding: 10px 12px; margin-bottom: 10px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px; font-size: 0.82rem;
+    }
+    .pf-alert {
+      background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px;
+      padding: 9px 12px; font-size: 0.8rem; color: #991b1b;
+      max-width: 900px; line-height: 1.5; margin-bottom: 10px;
+    }
+    .pf-editor {
+      margin-top: 18px; padding: 14px; border: 1px solid var(--border);
+      border-radius: 10px; background: var(--surface); max-width: 900px;
+    }
+    .pf-editor h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .pf-hint { font-size: 0.75rem; color: var(--muted); line-height: 1.5; margin-bottom: 8px; }
+    .pf-input {
+      width: 100%; min-height: 110px; font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: 0.74rem; padding: 9px; border: 1px solid var(--border);
+      border-radius: 8px; background: var(--bg); color: var(--text); resize: vertical;
+    }
+    .pf-btns { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+    .pf-btn {
+      padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text); font-size: 0.8rem; cursor: pointer;
+    }
+    .pf-btn:hover { background: var(--row-hover); }
+    .pf-btn-go { background: #15803d; border-color: #15803d; color: #fff; font-weight: 700; }
+    .pf-btn-go:hover { background: #16a34a; }
+    .pf-btn-del { color: #b91c1c; }
+    .pf-msg { margin-top: 8px; font-size: 0.78rem; color: var(--muted); }
+
     .section-title {
       font-size: 0.95rem; font-weight: 800; letter-spacing: 0.06em;
       text-transform: uppercase; margin: 18px 0 8px; color: var(--text);
@@ -217,8 +254,24 @@
       { key: 'SA',  label: 'SA' },
       { key: 'TAS', label: 'TAS' },
       { key: 'ACTNT', label: 'ACT / NT' },
+      { key: 'MINE', label: '🔒 My Portfolio' },
     ];
     const sectionOf = (state) => (state === 'ACT' || state === 'NT') ? 'ACTNT' : state;
+
+    // ── Private portfolio (localStorage only) ────────────────────────────
+    // This site is served from GitHub Pages — every file in the repo is public.
+    // So the portfolio is NEVER written to a file. It lives in this browser's
+    // localStorage and nowhere else. Clearing site data wipes it; use Export
+    // to keep a copy.
+    const PF_KEY = 'tm_property_portfolio_v1';
+    function loadPortfolio() {
+      try { return JSON.parse(localStorage.getItem(PF_KEY) || '[]'); }
+      catch (e) { return []; }
+    }
+    function savePortfolio(list) {
+      try { localStorage.setItem(PF_KEY, JSON.stringify(list)); return true; }
+      catch (e) { return false; }
+    }
 
     // ── Signal math (weekly bars) ────────────────────────────────────────
     // Groups per user spec: 0–6M, 6M–1Y, 1–2Y, 2–5Y (weeks; ~3:1 slow:fast)
@@ -552,6 +605,149 @@
           'A high score is a reason to research a market, not to buy in it.'));
     }
 
+    // Map a purchase date onto the weekly index array. px[last] === px_end.
+    function indexAtDate(r, dateStr) {
+      if (!r.px || !r.px_end || !dateStr) return null;
+      const end = new Date(r.px_end + 'T00:00:00Z').getTime();
+      const buy = new Date(dateStr + 'T00:00:00Z').getTime();
+      if (isNaN(buy)) return null;
+      const weeksAgo = Math.round((end - buy) / (7 * 864e5));
+      const i = r.px.length - 1 - weeksAgo;
+      if (i < 0) return { value: r.px[0], capped: true };
+      if (i >= r.px.length) return { value: r.px[r.px.length - 1], capped: false };
+      return { value: r.px[i], capped: false };
+    }
+
+    function monthsUntil(dateStr) {
+      if (!dateStr) return null;
+      const d = new Date(dateStr + 'T00:00:00Z').getTime();
+      if (isNaN(d)) return null;
+      return (d - Date.now()) / (30.44 * 864e5);
+    }
+
+    function PortfolioView({ regions, items, setItems }) {
+      const [raw, setRaw] = useState('');
+      const [msg, setMsg] = useState('');
+
+      const doImport = () => {
+        try {
+          const parsed = JSON.parse(raw);
+          if (!Array.isArray(parsed)) throw new Error('expected a JSON array');
+          setItems(parsed); savePortfolio(parsed);
+          setMsg('Saved ' + parsed.length + ' properties to this browser.'); setRaw('');
+        } catch (e) { setMsg('Could not read that: ' + e.message); }
+      };
+      const doClear = () => { setItems([]); savePortfolio([]); setMsg('Cleared.'); };
+      const doExport = () => { setRaw(JSON.stringify(items, null, 2)); setMsg('Exported below — copy it somewhere safe.'); };
+
+      // Fixed-rate expiry concentration: loans repricing within the same 90 days.
+      const expiries = items.filter(p => p.fixedTo).map(p => ({ p, m: monthsUntil(p.fixedTo) }))
+        .filter(x => x.m != null && x.m > -1).sort((a, b) => a.m - b.m);
+      let concentration = null;
+      for (let i = 0; i < expiries.length; i++) {
+        const grp = expiries.filter(x => Math.abs(x.m - expiries[i].m) <= 3);
+        const debt = grp.reduce((s, x) => s + (x.p.loan || 0), 0);
+        const total = items.reduce((s, p) => s + (p.loan || 0), 0);
+        if (grp.length > 1 && (!concentration || debt > concentration.debt)) {
+          concentration = { grp, debt, total, pct: total ? debt / total * 100 : 0 };
+        }
+      }
+
+      const rows = items.map((p, idx) => {
+        const r = regions[p.code];
+        const s = r && r._sigs;
+        const seg = p.type === 'unit' ? 'u' : 'h';
+        const snap = (r && r.snap_px) || {};
+        const segNow = snap[seg], segPrev = snap[seg + '52'];
+        const at = r ? indexAtDate(r, p.bought) : null;
+        const idxNow = r ? r.px[r.px.length - 1] : null;
+        const sincePurchase = (at && idxNow) ? (idxNow / at.value - 1) * 100 : null;
+        const value = p.value || null;
+        const gain = (value && p.price) ? (value / p.price - 1) * 100 : null;
+        const lvr = (value && p.loan) ? (p.loan / value) * 100 : null;
+        const myYield = (value && p.rent) ? (p.rent * 52 / value) * 100 : null;
+        const mExp = monthsUntil(p.fixedTo);
+        return { p, r, s, idx, segNow, segPrev, at, sincePurchase, gain, lvr, myYield, mExp };
+      });
+
+      const totVal = items.reduce((s, p) => s + (p.value || 0), 0);
+      const totLoan = items.reduce((s, p) => s + (p.loan || 0), 0);
+      const totRent = items.reduce((s, p) => s + ((p.rent || 0) * 52), 0);
+
+      return h('div', null,
+        h('div', { className: 'pf-privacy' },
+          '🔒 Private to this browser. This data is stored in localStorage on this device only — ',
+          'it is never written to the site\'s files and never published. ',
+          'Anyone else opening this page sees an empty tab. Clearing browser data erases it, so keep an export.'),
+
+        items.length > 0 && h(Fragment, null,
+          h('div', { className: 'pf-totals' },
+            h('span', null, h('strong', null, items.length), ' properties'),
+            h('span', null, 'Value ', h('strong', null, fmtMoney(totVal))),
+            h('span', null, 'Debt ', h('strong', null, fmtMoney(totLoan))),
+            h('span', null, 'Equity ', h('strong', null, fmtMoney(totVal - totLoan))),
+            h('span', null, 'LVR ', h('strong', null, totVal ? (totLoan / totVal * 100).toFixed(0) + '%' : '—')),
+            h('span', null, 'Gross yield ', h('strong', null, totVal ? (totRent / totVal * 100).toFixed(2) + '%' : '—'))),
+
+          concentration && concentration.pct >= 40 && h('div', { className: 'pf-alert' },
+            '⚠ Fixed-rate concentration: ',
+            h('strong', null, fmtMoney(concentration.debt)),
+            ' (', concentration.pct.toFixed(0), '% of your debt) reprices within the same ~3 months — ',
+            concentration.grp.map(x => x.p.label).join(' + '),
+            '. Both loans hit the market rate at once instead of being staggered.'),
+
+          h('table', null,
+            h('thead', null, h('tr', null,
+              h('th', null, 'Property'),
+              h('th', { style: { textAlign: 'right' } }, 'Paid'),
+              h('th', { style: { textAlign: 'right' } }, 'Value'),
+              h('th', { style: { textAlign: 'right' } }, 'Gain'),
+              h('th', { style: { textAlign: 'right' } }, 'LVR'),
+              h('th', { style: { textAlign: 'right' } }, 'Your yield'),
+              h('th', { style: { textAlign: 'right' } }, 'Area yield'),
+              h('th', { style: { textAlign: 'right' } }, 'Area since you bought'),
+              h('th', { style: { textAlign: 'right' } }, 'Your segment 12m'),
+              h('th', null, '0–6M'), h('th', null, '6M–1Y'), h('th', null, '1–2Y'), h('th', null, '2–5Y'),
+              h('th', null, 'All Signals'),
+              h('th', { style: { textAlign: 'right' } }, 'Fixed until'))),
+            h('tbody', null, rows.map(x => {
+              const segChg = chg(x.segNow, x.segPrev);
+              return h('tr', { key: x.idx },
+                h('td', { className: 'td-name' }, x.p.label,
+                  h('span', { className: 'td-sub' }, ' ', x.r ? x.r.name : '?', ' · ', x.p.type || 'house')),
+                h('td', { className: 'td-num' }, fmtMoney(x.p.price)),
+                h('td', { className: 'td-num' }, fmtMoney(x.p.value)),
+                h('td', { className: 'td-num ' + pctCls(x.gain) }, fmtPct(x.gain)),
+                h('td', { className: 'td-num ' + (x.lvr > 80 ? 'neg' : '') }, x.lvr != null ? x.lvr.toFixed(0) + '%' : '—'),
+                h('td', { className: 'td-num' }, x.myYield != null ? x.myYield.toFixed(2) + '%' : '—'),
+                h('td', { className: 'td-num muted' }, x.r && x.r.yield != null ? x.r.yield.toFixed(2) + '%' : '—'),
+                h('td', { className: 'td-num ' + pctCls(x.sincePurchase) },
+                  fmtPct(x.sincePurchase), x.at && x.at.capped ? h('span', { className: 'td-sub' }, ' *') : null),
+                h('td', { className: 'td-num ' + pctCls(segChg) }, fmtPct(segChg)),
+                COLS.map(c => h('td', { key: c.key }, h(Badge, { score: x.s ? x.s.cols[c.key] : null }))),
+                h('td', null, h('div', { className: 'sig-inner' },
+                  h(Badge, { score: x.s ? x.s.allInd : null }),
+                  x.s && h('span', { className: 'stab-dot ' + (STAB_DOT[x.r._stability] || 'dot-s') }))),
+                h('td', { className: 'td-num ' + (x.mExp != null && x.mExp < 12 ? 'neg' : '') },
+                  x.p.fixedTo ? (x.p.fixedTo + (x.mExp != null ? ' (' + Math.round(x.mExp) + 'm)' : '')) : '—'));
+            }))),
+          h('div', { style: { fontSize: '0.72rem', color: 'var(--muted)', marginTop: 6 } },
+            '* purchase predates the 10-year price history held on the board, so the "since you bought" figure is measured from the start of that window.')),
+
+        h('div', { className: 'pf-editor' },
+          h('h4', null, items.length ? 'Edit / export' : 'Add your properties'),
+          h('div', { className: 'pf-hint' },
+            'Paste a JSON array. Fields: label, code (board region code, e.g. TOM / SEA / ARD), ',
+            'type ("house" or "unit"), price, bought (YYYY-MM-DD), value, loan, rate, fixedTo (YYYY-MM-DD), rent (per week).'),
+          h('textarea', { className: 'pf-input', value: raw, onChange: e => setRaw(e.target.value),
+            placeholder: '[{"label":"My place","code":"TOM","type":"house","price":900000,"bought":"2019-06-01","value":1600000,"loan":835000,"rate":6.25,"fixedTo":null,"rent":850}]' }),
+          h('div', { className: 'pf-btns' },
+            h('button', { className: 'pf-btn pf-btn-go', onClick: doImport }, 'Save to this browser'),
+            h('button', { className: 'pf-btn', onClick: doExport }, 'Export current'),
+            h('button', { className: 'pf-btn pf-btn-del', onClick: doClear }, 'Clear')),
+          msg && h('div', { className: 'pf-msg' }, msg)));
+    }
+
     function StateTabs({ filter, setFilter }) {
       return h('div', { className: 'snav' },
         SECTIONS.map(s => h('button', {
@@ -564,6 +760,7 @@
     function Board({ payload }) {
       const [filter, setFilter] = useState('NSW');
       const [search, setSearch] = useState('');
+      const [portfolio, setPortfolio] = useState(loadPortfolio);
 
       const regions = Object.entries(payload.regions);
       const q = search.trim().toLowerCase();
@@ -573,11 +770,25 @@
       const visible = SECTIONS
         .map(sec => ({
           sec,
-          items: regions.filter(([code, r]) =>
-            q ? (r.name.toLowerCase().includes(q) || code.toLowerCase().includes(q) || String(r.param).includes(q))
-              : sectionOf(r.state) === sec.key),
+          // Always group by the row's real section, so a search shows matches
+          // under their own state heading instead of repeating the same list
+          // under all eight.
+          items: regions.filter(([code, r]) => {
+            if (sectionOf(r.state) !== sec.key) return false;
+            if (!q) return true;
+            return r.name.toLowerCase().includes(q)
+                || code.toLowerCase().includes(q)
+                || String(r.param).includes(q);
+          }),
         }))
         .filter(({ sec, items }) => items.length && (q || sec.key === filter));
+
+      if (filter === 'MINE') {
+        return h(Fragment, null,
+          h(StateTabs, { filter, setFilter }),
+          h('div', { className: 'section-title' }, 'My Portfolio'),
+          h(PortfolioView, { regions: payload.regions, items: portfolio, setItems: setPortfolio }));
+      }
 
       return h(Fragment, null,
         h(TopPicks, { picks: payload._picks }),
