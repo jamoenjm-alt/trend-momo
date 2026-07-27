@@ -77,6 +77,25 @@
     .snav-btn:hover { background: #293548; color: #e2e8f0; border-color: #475569; }
     .snav-btn.active { background: #15803d; border-color: #22c55e; color: #fff; font-weight: 700; }
 
+    /* ── Search ──────────────────────────────────────────────── */
+    .searchbar {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      margin: 16px 0 4px; padding: 8px 12px; max-width: 900px;
+      background: var(--surface); border: 2px solid var(--border); border-radius: 10px;
+    }
+    .searchbar:focus-within { border-color: #15803d; }
+    .searchbar-icon { font-size: 0.95rem; opacity: 0.6; }
+    .searchbar-input {
+      flex: 1 1 260px; border: none; outline: none; background: transparent;
+      font-size: 0.95rem; color: var(--text); padding: 4px 0;
+    }
+    .searchbar-clear {
+      border: none; background: var(--border); color: var(--text); cursor: pointer;
+      border-radius: 999px; width: 22px; height: 22px; line-height: 1; font-size: 0.75rem;
+    }
+    .searchbar-clear:hover { background: #d6d3d1; }
+    .searchbar-count { font-size: 0.78rem; color: var(--muted); }
+
     /* ── Top picks ───────────────────────────────────────────── */
     .picks-wrap { padding: 16px 0 4px; }
     .picks-title {
@@ -790,18 +809,29 @@
           h(PortfolioView, { regions: payload.regions, items: portfolio, setItems: setPortfolio }));
       }
 
+      const matchCount = q ? visible.reduce((n, v) => n + v.items.length, 0) : 0;
+
       return h(Fragment, null,
-        h(TopPicks, { picks: payload._picks }),
-        h(StateTabs, { filter, setFilter }),
+        h('div', { className: 'searchbar' },
+          h('span', { className: 'searchbar-icon' }, '🔍'),
+          h('input', {
+            className: 'searchbar-input',
+            placeholder: 'Search any town, suburb or postcode — e.g. Ballarat, Fremantle, 2540',
+            value: search,
+            onChange: e => setSearch(e.target.value),
+          }),
+          q && h('button', { className: 'searchbar-clear', onClick: () => setSearch('') }, '✕'),
+          q && h('span', { className: 'searchbar-count' },
+            matchCount, matchCount === 1 ? ' match' : ' matches', ' across all states')),
+        !q && h(TopPicks, { picks: payload._picks }),
+        !q && h(StateTabs, { filter, setFilter }),
         h('div', { className: 'toolbar' },
           h('div', { className: 'toolbar-left' },
-            h('span', null, 'SQM weekly asking-price index · baked ', updated ? updated.toLocaleDateString() : '?'),
-            staleDays > 10 && h('span', { className: 'stale-warn' }, '⚠ data ', Math.floor(staleDays), ' days old — check the GitHub Action')),
-          h('input', {
-            className: 'search-input', placeholder: 'Search town / postcode…',
-            value: search, onChange: e => setSearch(e.target.value),
-          })),
-        visible.length === 0 && h('div', { className: 'spinner-wrap' }, 'No regions match.'),
+            h('span', null, 'SQM weekly asking-price index · ', regions.length, ' markets · baked ',
+              updated ? updated.toLocaleDateString() : '?'),
+            staleDays > 10 && h('span', { className: 'stale-warn' }, '⚠ data ', Math.floor(staleDays), ' days old — check the GitHub Action'))),
+        visible.length === 0 && h('div', { className: 'spinner-wrap' },
+          q ? 'No town, suburb or postcode matches "' + search.trim() + '".' : 'No regions match.'),
         visible.map(({ sec, items }) => h('div', { key: sec.key },
           h('div', { className: 'section-title' }, sec.label),
           h(SectionTable, { items }))));

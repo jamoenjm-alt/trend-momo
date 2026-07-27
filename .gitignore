@@ -36,3 +36,4 @@ backtests/build-output.txt
 backtests/build-models.py
 backtests/run-build.bat
 backtests/wf5.json
+data/property-history.json

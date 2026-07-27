@@ -66,7 +66,11 @@ claude-publish.bat feat: my change description
   `scorePicks()` ranks a best-buy and best-sell market: fundamentals ~90% (yield percentile
   vs own history, capped absolute yield, vacancy, rent 12m, listings 12m, drawdown) and
   trend ~10%, because property is a multi-year hold. Gated on ≥100 listings, ≥260w history,
-  non-NAT; discounted by `ddmax` (worst fall since 2009) and thin listings. Fundamentals: gross yield (+percentile vs own
+  non-NAT; discounted by `ddmax` (worst fall since 2009) and thin listings.
+  The `🔒 My Portfolio` tab is localStorage-only (`tm_property_portfolio_v1`). **Never commit
+  portfolio data** — GitHub Pages serves the whole repo publicly, so personal holdings must
+  stay in the browser. It flags fixed-rate expiry concentration (>40% of debt repricing in
+  the same ~3 months). Fundamentals: gross yield (+percentile vs own
   history), vacancy, rent 12m, stock-on-market 12m.
 - `update-property.py` — bakes `data/property.json` from SQM Research free chart pages
   (each page embeds `var data = [...]` JSON; parsed by bracket-balance scan). Capitals use

@@ -37,6 +37,9 @@ from datetime import datetime, timezone
 
 BASE = "https://sqmresearch.com.au/property/"
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "property.json")
+# Full untrimmed series for backtesting. NOT fetched by the board and NOT
+# committed (gitignored) — it is ~4 MB and would bloat git history weekly.
+HIST_OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "property-history.json")
 SLEEP = 0.5
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/126.0 Safari/537.36")
@@ -86,6 +89,26 @@ REGIONS = {
     "MDG": ("Mudgee",         "NSW", "postcode", "2850"),
     "KAT": ("Katoomba",       "NSW", "postcode", "2780"),
     "BWL": ("Bowral",         "NSW", "postcode", "2576"),
+    "RSH": ("Rouse Hill", "NSW", "postcode", "2155"),
+    "MDP": ("Marsden Park", "NSW", "postcode", "2765"),
+    "SCH": ("Schofields", "NSW", "postcode", "2762"),
+    "LPT": ("Leppington", "NSW", "postcode", "2179"),
+    "GRC": ("Gregory Hills", "NSW", "postcode", "2557"),
+    "NRL": ("Narellan", "NSW", "postcode", "2567"),
+    "PIC": ("Picton", "NSW", "postcode", "2571"),
+    "MTG2": ("Mittagong", "NSW", "postcode", "2575"),
+    "MSV": ("Moss Vale", "NSW", "postcode", "2577"),
+    "WYG": ("Wyong", "NSW", "postcode", "2259"),
+    "MST": ("Morisset", "NSW", "postcode", "2264"),
+    "RYT": ("Raymond Terrace", "NSW", "postcode", "2324"),
+    "CHW": ("Charlestown", "NSW", "postcode", "2290"),
+    "BLM": ("Belmont (NSW)", "NSW", "postcode", "2280"),
+    "TOR": ("Toronto", "NSW", "postcode", "2283"),
+    "MDW": ("Medowie", "NSW", "postcode", "2318"),
+    "MRM": ("Merimbula", "NSW", "postcode", "2548"),
+    "JND": ("Jindabyne", "NSW", "postcode", "2627"),
+    "GUN": ("Gunnedah", "NSW", "postcode", "2380"),
+    "YMB": ("Yamba", "NSW", "postcode", "2464"),
     # Large-population Sydney sub-markets + remaining big regional centres
     "PRA": ("Parramatta",     "NSW", "postcode", "2150"),
     "BKT": ("Blacktown",      "NSW", "postcode", "2148"),
@@ -146,6 +169,26 @@ REGIONS = {
     "FKN": ("Frankston",      "VIC", "postcode", "3199"),
     "WBE": ("Werribee",       "VIC", "postcode", "3030"),
     "WRG": ("Warragul",       "VIC", "postcode", "3820"),
+    "WYV": ("Wyndham Vale", "VIC", "postcode", "3024"),
+    "CRS": ("Caroline Springs", "VIC", "postcode", "3023"),
+    "SSH": ("Sunshine", "VIC", "postcode", "3020"),
+    "STA": ("St Albans", "VIC", "postcode", "3021"),
+    "MRD2": ("Mernda", "VIC", "postcode", "3754"),
+    "SMR": ("South Morang", "VIC", "postcode", "3752"),
+    "ELT": ("Eltham", "VIC", "postcode", "3095"),
+    "CRY": ("Croydon", "VIC", "postcode", "3136"),
+    "BOR": ("Boronia", "VIC", "postcode", "3155"),
+    "RWV": ("Rowville", "VIC", "postcode", "3178"),
+    "CLY": ("Clayton", "VIC", "postcode", "3168"),
+    "SPV": ("Springvale", "VIC", "postcode", "3171"),
+    "KYB": ("Keysborough", "VIC", "postcode", "3173"),
+    "CHS": ("Chelsea", "VIC", "postcode", "3196"),
+    "CRD2": ("Carrum Downs", "VIC", "postcode", "3201"),
+    "LNG": ("Langwarrin", "VIC", "postcode", "3910"),
+    "CWS": ("Cowes", "VIC", "postcode", "3922"),
+    "BCM": ("Bacchus Marsh", "VIC", "postcode", "3340"),
+    "GSB": ("Gisborne", "VIC", "postcode", "3437"),
+    "YWG": ("Yarrawonga", "VIC", "postcode", "3730"),
     # Large-population Melbourne sub-markets + remaining regional centres
     "DDG": ("Dandenong",      "VIC", "postcode", "3175"),
     "BXH": ("Box Hill",       "VIC", "postcode", "3128"),
@@ -204,6 +247,26 @@ REGIONS = {
     "IPS": ("Ipswich",        "QLD", "postcode", "4305"),
     "RCF": ("Redcliffe",      "QLD", "postcode", "4020"),
     "CBL": ("Caboolture",     "QLD", "postcode", "4510"),
+    "KLG": ("Kallangur", "QLD", "postcode", "4503"),
+    "DCB": ("Deception Bay", "QLD", "postcode", "4508"),
+    "MNH": ("Mango Hill", "QLD", "postcode", "4509"),
+    "BPG": ("Burpengary", "QLD", "postcode", "4505"),
+    "NRB": ("Narangba", "QLD", "postcode", "4504"),
+    "ABC": ("Albany Creek", "QLD", "postcode", "4035"),
+    "ASP2": ("Aspley", "QLD", "postcode", "4034"),
+    "IND": ("Indooroopilly", "QLD", "postcode", "4068"),
+    "SNB": ("Sunnybank", "QLD", "postcode", "4109"),
+    "CLV2": ("Calamvale", "QLD", "postcode", "4116"),
+    "BRP": ("Browns Plains", "QLD", "postcode", "4118"),
+    "MSD": ("Marsden", "QLD", "postcode", "4132"),
+    "JMB": ("Jimboomba", "QLD", "postcode", "4280"),
+    "ORM": ("Ormeau", "QLD", "postcode", "4208"),
+    "PIM": ("Pimpama", "QLD", "postcode", "4209"),
+    "HLV": ("Helensvale", "QLD", "postcode", "4212"),
+    "BLH": ("Burleigh Heads", "QLD", "postcode", "4220"),
+    "PLB": ("Palm Beach (QLD)", "QLD", "postcode", "4221"),
+    "MLB": ("Mooloolaba", "QLD", "postcode", "4557"),
+    "GTT": ("Gatton", "QLD", "postcode", "4343"),
     # Large-population SEQ sub-markets + remaining regional centres
     "SFP": ("Surfers Paradise", "QLD", "postcode", "4217"),
     "RBN": ("Robina",         "QLD", "postcode", "4226"),
@@ -250,6 +313,26 @@ REGIONS = {
     "JDP": ("Joondalup",      "WA", "postcode", "6027"),
     "ARD": ("Armadale",       "WA", "postcode", "6112"),
     "ELB": ("Ellenbrook",     "WA", "postcode", "6069"),
+    "BTL": ("Butler", "WA", "postcode", "6036"),
+    "CLK": ("Clarkson", "WA", "postcode", "6030"),
+    "ALK": ("Alkimos", "WA", "postcode", "6038"),
+    "CRB2": ("Currambine", "WA", "postcode", "6028"),
+    "DUC": ("Duncraig", "WA", "postcode", "6023"),
+    "BLC2": ("Balcatta", "WA", "postcode", "6021"),
+    "DNL2": ("Dianella", "WA", "postcode", "6059"),
+    "BYW": ("Bayswater (WA)", "WA", "postcode", "6053"),
+    "BSD": ("Bassendean", "WA", "postcode", "6054"),
+    "HWY": ("High Wycombe", "WA", "postcode", "6057"),
+    "KLM": ("Kalamunda", "WA", "postcode", "6076"),
+    "GSN": ("Gosnells", "WA", "postcode", "6110"),
+    "THL": ("Thornlie", "WA", "postcode", "6108"),
+    "SUC": ("Success", "WA", "postcode", "6164"),
+    "SCH2": ("Secret Harbour", "WA", "postcode", "6173"),
+    "WRB": ("Warnbro", "WA", "postcode", "6169"),
+    "YCP": ("Yanchep", "WA", "postcode", "6035"),
+    "MDR": ("Mundaring", "WA", "postcode", "6073"),
+    "PJR": ("Pinjarra", "WA", "postcode", "6208"),
+    "HVY": ("Harvey", "WA", "postcode", "6220"),
     # Large-population Perth sub-markets
     "FRE": ("Fremantle",      "WA", "postcode", "6160"),
     "MRY": ("Morley",         "WA", "postcode", "6062"),
@@ -287,6 +370,26 @@ REGIONS = {
     "STR": ("Strathalbyn",    "SA", "postcode", "5255"),
     "KGI": ("Kingscote",      "SA", "postcode", "5223"),
     "MCV": ("McLaren Vale",   "SA", "postcode", "5171"),
+    "GLD": ("Golden Grove", "SA", "postcode", "5125"),
+    "MWL2": ("Mawson Lakes", "SA", "postcode", "5095"),
+    "PRH": ("Para Hills", "SA", "postcode", "5096"),
+    "IGF": ("Ingle Farm", "SA", "postcode", "5098"),
+    "CBT2": ("Campbelltown (SA)", "SA", "postcode", "5074"),
+    "NRW2": ("Norwood", "SA", "postcode", "5067"),
+    "UNL": ("Unley", "SA", "postcode", "5061"),
+    "MTC": ("Mitcham", "SA", "postcode", "5062"),
+    "BKW": ("Blackwood", "SA", "postcode", "5051"),
+    "ABP": ("Aberfoyle Park", "SA", "postcode", "5159"),
+    "MPV": ("Morphett Vale", "SA", "postcode", "5162"),
+    "CHB": ("Christies Beach", "SA", "postcode", "5165"),
+    "SFD": ("Seaford (SA)", "SA", "postcode", "5169"),
+    "SMP": ("Semaphore", "SA", "postcode", "5019"),
+    "HNB": ("Henley Beach", "SA", "postcode", "5022"),
+    "WLK": ("West Lakes", "SA", "postcode", "5021"),
+    "PSP": ("Prospect (SA)", "SA", "postcode", "5082"),
+    "MRO": ("Marion", "SA", "postcode", "5043"),
+    "HLC": ("Hallett Cove", "SA", "postcode", "5158"),
+    "AGV": ("Angle Vale", "SA", "postcode", "5117"),
     # Large-population Adelaide sub-markets
     "ELZ": ("Elizabeth",      "SA", "postcode", "5112"),
     "SLB": ("Salisbury",      "SA", "postcode", "5108"),
@@ -320,6 +423,26 @@ REGIONS = {
     "BIC": ("Bicheno",        "TAS", "postcode", "7215"),
     "PGN": ("Penguin",        "TAS", "postcode", "7316"),
     "SMS": ("Somerset",       "TAS", "postcode", "7322"),
+    "NWH": ("Newnham", "TAS", "postcode", "7248"),
+    "LGN2": ("Legana", "TAS", "postcode", "7277"),
+    "PTH": ("Perth (TAS)", "TAS", "postcode", "7300"),
+    "EVD": ("Evandale", "TAS", "postcode", "7212"),
+    "CPT": ("Campbell Town", "TAS", "postcode", "7210"),
+    "OTL": ("Oatlands", "TAS", "postcode", "7120"),
+    "RCH2": ("Richmond (TAS)", "TAS", "postcode", "7025"),
+    "DGF": ("Dodges Ferry", "TAS", "postcode", "7173"),
+    "CYG": ("Cygnet", "TAS", "postcode", "7112"),
+    "GVN": ("Geeveston", "TAS", "postcode", "7116"),
+    "DVR": ("Dover", "TAS", "postcode", "7117"),
+    "MRG": ("Margate", "TAS", "postcode", "7054"),
+    "BMB": ("Blackmans Bay", "TAS", "postcode", "7052"),
+    "TRN2": ("Taroona", "TAS", "postcode", "7053"),
+    "SDB": ("Sandy Bay", "TAS", "postcode", "7005"),
+    "NHB": ("North Hobart", "TAS", "postcode", "7000"),
+    "MNH2": ("Moonah", "TAS", "postcode", "7009"),
+    "CLM": ("Claremont (TAS)", "TAS", "postcode", "7011"),
+    "LDF": ("Lindisfarne", "TAS", "postcode", "7015"),
+    "BCF": ("Beaconsfield", "TAS", "postcode", "7270"),
     # ACT / NT
     "CBR": ("Canberra",       "ACT", "city",     "act-Canberra"),
     "DRW": ("Darwin",         "NT",  "city",     "nt-Darwin"),
@@ -346,6 +469,9 @@ REGIONS = {
     "CRC": ("Crace",          "ACT", "postcode", "2911"),
     "GGL": ("Gungahlin",      "ACT", "postcode", "2912"),
     "NGN": ("Ngunnawal",      "ACT", "postcode", "2913"),
+    "BRT": ("Barton", "ACT", "postcode", "2600"),
+    "FYS": ("Fyshwick", "ACT", "postcode", "2609"),
+    "AMR": ("Amaroo", "ACT", "postcode", "2914"),
     # NT (small market — fewer towns exist than 20)
     "DWC": ("Darwin City",    "NT", "postcode", "0800"),
     "NCL": ("Nightcliff",     "NT", "postcode", "0810"),
@@ -357,6 +483,9 @@ REGIONS = {
     "HDO": ("Humpty Doo",     "NT", "postcode", "0836"),
     "KTH": ("Katherine",      "NT", "postcode", "0850"),
     "TNC": ("Tennant Creek",  "NT", "postcode", "0860"),
+    "BRM2": ("Berrimah", "NT", "postcode", "0828"),
+    "VRG": ("Virginia (NT)", "NT", "postcode", "0834"),
+    "YUL": ("Yulara", "NT", "postcode", "0872"),
     # Nhulunbuy (0880) and Jabiru (0886) omitted — SQM has no price history for
     # them (too few listings); they baked as empty rows.
 }
@@ -441,6 +570,7 @@ def pct_rank(vals, x):
 
 def bake_region(code, name, state, kind, param):
     out = {"name": name, "state": state, "kind": kind, "param": param}
+    hist = {"name": name, "state": state}   # full untrimmed series for backtests
     ok = False
 
     # ── weekly asking prices (signal series) ─────────────────────────────
@@ -462,6 +592,10 @@ def bake_region(code, name, state, kind, param):
                     worst = min(worst, v / peak - 1)
             out["ddmax"] = round(worst * 100, 1)
             out["hist_w"] = len(px)
+            hist["px"] = [[r["date"], int(round(r.get("combined") or r.get("houses_all") or 0))]
+                          for r in rows]
+            hist["px_h"] = [[r["date"], int(round(r.get("houses_all") or 0))] for r in rows]
+            hist["px_u"] = [[r["date"], int(round(r.get("units_all") or 0))] for r in rows]
             # Keep the last 10 years only. The longest MA pair is 260w and the
             # sparkline draws 520w, so older points are dead weight in a file
             # the board fetches at boot (215 regions x 880w was 1.7 MB).
@@ -487,6 +621,7 @@ def bake_region(code, name, state, kind, param):
             last, y_ago = rows[-1], rows[max(0, len(rows) - 53)]
             out["rent"] = round(val(last), 1)
             out["rent52"] = round(val(y_ago), 1)
+            hist["rent"] = [[r["date"], round(val(r), 1)] for r in rows if val(r)]
             ok = True
 
     # ── rental yield (weekly; houses_all preferred) ──────────────────────
@@ -500,6 +635,7 @@ def bake_region(code, name, state, kind, param):
             series = [val(r) for r in rows]
             out["yield"] = round(series[-1], 2)
             out["yield_pct"] = pct_rank(series, series[-1])
+            hist["yield"] = [[r["date"], round(val(r), 2)] for r in rows if val(r)]
             ok = True
 
     # ── vacancy (monthly) ────────────────────────────────────────────────
@@ -521,6 +657,7 @@ def bake_region(code, name, state, kind, param):
             out["vac"] = vrs[-1]
             out["vac12"] = vrs[max(0, len(vrs) - 13)]
             out["vac_m"] = vrs[-36:]
+            hist["vac"] = [[month_key(r), v] for r, v in zip(rows, vrs)]
             ok = True
 
     # ── stock on market (monthly; sum of aged buckets) ───────────────────
@@ -531,15 +668,17 @@ def bake_region(code, name, state, kind, param):
             return sum(int(r.get(k) or 0) for k in ("r30", "r60", "r90", "r180", "r180p"))
         rows.sort(key=month_key)
         rows = drop_partial_month(rows)
-        totals = [total(r) for r in rows]
-        totals = [t for t in totals if t > 0] or totals
+        pairs = [(month_key(r), total(r)) for r in rows]
+        pairs = [p for p in pairs if p[1] > 0] or pairs
+        totals = [t for _, t in pairs]
         if totals:
             out["stock"] = totals[-1]
             out["stock12"] = totals[max(0, len(totals) - 13)]
             out["stock_m"] = totals[-36:]
+            hist["stock"] = [[m, t] for m, t in pairs]
             ok = True
 
-    return out if ok else None
+    return (out, hist) if ok else (None, None)
 
 
 def main():
@@ -552,19 +691,34 @@ def main():
         except Exception:
             old = {}
 
+    old_hist = {}
+    if os.path.exists(HIST_OUT):
+        try:
+            with open(HIST_OUT, encoding="utf-8") as f:
+                old_hist = json.load(f).get("regions", {})
+        except Exception:
+            old_hist = {}
+
     regions = {}
+    hists = {}
     n = len(REGIONS)
     for i, (code, (name, state, kind, param)) in enumerate(REGIONS.items(), 1):
         if only and code not in only:
             if code in old:
                 regions[code] = old[code]
+            if code in old_hist:
+                hists[code] = old_hist[code]
             continue
         print(f"[{i}/{n}] {code} {name} ...", flush=True)
         try:
-            baked = bake_region(code, name, state, kind, param)
+            baked, hist = bake_region(code, name, state, kind, param)
         except Exception as e:
             print(f"    ERROR {code}: {e}")
-            baked = None
+            baked, hist = None, None
+        if hist:
+            hists[code] = hist
+        elif code in old_hist:
+            hists[code] = old_hist[code]
         if baked:
             regions[code] = baked
             print(f"    ok: px={len(baked.get('px', []))}w "
@@ -587,6 +741,13 @@ def main():
     os.replace(tmp, OUT)
     size_kb = os.path.getsize(OUT) // 1024
     print(f"\nWrote {OUT} ({size_kb} KB, {len(regions)}/{n} regions)")
+
+    hist_payload = {"updated": payload["updated"], "source": payload["source"], "regions": hists}
+    tmp_h = HIST_OUT + ".tmp"
+    with open(tmp_h, "w", encoding="utf-8") as f:
+        json.dump(hist_payload, f, separators=(",", ":"))
+    os.replace(tmp_h, HIST_OUT)
+    print(f"Wrote {HIST_OUT} ({os.path.getsize(HIST_OUT) // 1024} KB, backtest history)")
 
 
 if __name__ == "__main__":
