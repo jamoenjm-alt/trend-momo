@@ -11,6 +11,7 @@ archive-dev-scripts/
 Screenshot*.png
 
 # Scratch / logs / caches
+run-*.bat
 __pycache__/
 *.log
 update-log.txt

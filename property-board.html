@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.25, maximum-scale=5.0, user-scalable=yes" />
+  <title>Trend Momo — AU Property Board</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #faf9f5;
+      --surface:      #ffffff;
+      --border:       #e7e5e4;
+      --header-bg:    #292524;
+      --th-bg:        #44403c;
+      --th-text:      #e7e5e4;
+      --row-hover:    #f5f5f4;
+      --text:         #292524;
+      --muted:        #78716c;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      background: var(--header-bg);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .topbar-logo { font-size: 1.1rem; font-weight: 800; color: #fff; letter-spacing: 0.05em; white-space: nowrap; }
+    .topbar-nav { display: flex; gap: 24px; flex: 1; }
+    .topbar-nav a { color: #93c5fd; text-decoration: none; font-size: 0.85rem; font-weight: 500; }
+    .topbar-nav a:hover { color: #fff; }
+
+    .page-banner {
+      background: linear-gradient(135deg, #14532d 0%, #15803d 100%);
+      padding: 8px 14px;
+      border-top: 1px solid #16a34a;
+    }
+    .page-banner h1 { font-size: 1.05rem; font-weight: 800; letter-spacing: 0.12em; color: #fff; text-transform: uppercase; }
+
+    .main { padding: 0 10px 20px; }
+
+    .toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px;
+    }
+    .toolbar-left { display: flex; align-items: center; gap: 12px; font-size: 0.78rem; color: var(--muted); flex-wrap: wrap; }
+    .stale-warn { color: #b91c1c; font-weight: 700; }
+    .search-input {
+      padding: 7px 12px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 0.85rem; width: 230px; background: var(--surface); color: var(--text);
+    }
+
+    /* Section tab nav */
+    .snav { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 0; }
+    .snav-btn {
+      background: #1e293b; color: #94a3b8; border: 1px solid #334155;
+      padding: 7px 14px; border-radius: 8px; font-size: 0.85rem; cursor: pointer;
+    }
+    .snav-btn:hover { background: #293548; color: #e2e8f0; border-color: #475569; }
+    .snav-btn.active { background: #15803d; border-color: #22c55e; color: #fff; font-weight: 700; }
+
+    .section-title {
+      font-size: 0.95rem; font-weight: 800; letter-spacing: 0.06em;
+      text-transform: uppercase; margin: 18px 0 8px; color: var(--text);
+    }
+
+    table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); }
+    th {
+      background: var(--th-bg); color: var(--th-text); font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.04em; padding: 8px 8px; text-align: left; white-space: nowrap;
+    }
+    td { padding: 7px 8px; border-top: 1px solid var(--border); font-size: 0.85rem; white-space: nowrap; }
+    tbody tr { cursor: pointer; }
+    tbody tr:hover { background: var(--row-hover); }
+    .td-name { font-weight: 700; }
+    .td-sub { color: var(--muted); font-size: 0.72rem; font-weight: 400; }
+    .td-num { text-align: right; font-variant-numeric: tabular-nums; }
+    .pos { color: #15803d; font-weight: 600; }
+    .neg { color: #b91c1c; font-weight: 600; }
+    .muted { color: var(--muted); }
+
+    .chip {
+      display: inline-block; padding: 3px 9px; border-radius: 999px;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.02em; white-space: nowrap;
+    }
+    .chip-sb  { background: #15803d; color: #fff; }
+    .chip-wb  { background: #bbf7d0; color: #14532d; }
+    .chip-sw  { background: #fef9c3; color: #854d0e; }
+    .chip-wbr { background: #fee2e2; color: #991b1b; }
+    .chip-sbr { background: #b91c1c; color: #fff; }
+    .chip-nd  { background: #f1f5f9; color: #94a3b8; }
+
+    .sig-inner { display: flex; align-items: center; gap: 6px; }
+    .stab-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: 0 0 auto; }
+    .dot-vs { background: #15803d; }
+    .dot-s  { background: #86efac; }
+    .dot-u  { background: #eab308; }
+    .dot-vu { background: #dc2626; }
+
+    .detail-row td { background: #fafaf9; cursor: default; }
+    .detail-grid { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; padding: 8px 4px; }
+    .detail-block h4 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 5px; }
+    .detail-block table { border: none; }
+    .detail-block td { border: none; padding: 2px 10px 2px 0; font-size: 0.8rem; white-space: nowrap; }
+    .value-bar-wrap { width: 130px; height: 8px; background: #e7e5e4; border-radius: 4px; overflow: hidden; }
+    .value-bar { height: 100%; background: linear-gradient(90deg, #b91c1c, #eab308, #15803d); }
+    .sqm-link { font-size: 0.75rem; color: #1d4ed8; text-decoration: none; }
+    .sqm-link:hover { text-decoration: underline; }
+
+    .note {
+      margin-top: 26px; padding: 14px; border: 1px solid var(--border); border-radius: 10px;
+      background: var(--surface); font-size: 0.8rem; color: var(--muted); line-height: 1.55; max-width: 900px;
+    }
+    .note strong { color: var(--text); }
+
+    .spinner-wrap { padding: 40px; text-align: center; color: var(--muted); }
+
+    @media (max-width: 900px) {
+      td, th { padding: 6px 5px; }
+      .hide-sm { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-logo">🏠 TREND MOMO — PROPERTY</div>
+    <div class="topbar-nav">
+      <a href="regime-board.html">← Stocks &amp; Crypto Board</a>
+      <a href="https://sqmresearch.com.au/property" target="_blank" rel="noopener">Data: SQM Research</a>
+    </div>
+  </div>
+  <div class="page-banner"><h1>Australian Property — Trend &amp; Momentum Regime Board</h1></div>
+
+  <div class="main">
+    <div id="root"><div class="spinner-wrap">Loading property data…</div></div>
+
+    <div class="note">
+      <strong>How to read this board.</strong> Signals are moving-average trend/momentum pairs computed on the
+      <strong>SQM Research weekly asking-price index (combined houses + units)</strong> for each city or town —
+      asking prices, not settled sales. Columns: <strong>6M–1Y</strong> (26/6w, 39/13w, 52/13w),
+      <strong>1–3Y</strong> (78/26w, 104/26w, 156/52w), <strong>3–7Y</strong> (260/52w, 364/104w),
+      <strong>10Y+</strong> (520/156w), <strong>All Signals</strong> = every pair. Each pair contributes
+      Trend (price vs slow MA) and Momo (fast vs slow MA); the average maps to
+      Strong Bull &gt; 0.6 &gt; Weak Bull &gt; 0.2 &gt; Sideways &gt; −0.2 &gt; Weak Bear &gt; −0.6 &gt; Strong Bear —
+      the same regime thresholds as the stock board. The stability dot samples the All-Signals regime today and
+      13 / 26 / 39 weeks back: green = unchanged, yellow = flipped in the last quarter, red = chopping.
+      <br /><br />
+      <strong>Fundamentals:</strong> gross rental yield (houses), yield percentile vs the town's own history
+      (higher percentile = cheaper vs itself), rental vacancy rate, 12-month rent growth, and stock on market
+      (total aged listings; rising supply is bearish). Towns are proxied by their canonical postcode; capitals
+      use SQM's city-wide index. Data © SQM Research, personal reference only — this board is decision support,
+      not advice, and asking-price momentum leads settled prices by roughly one to two quarters.
+      <br /><br />
+      <strong>10Y+ caveat:</strong> the 520-week MA needs a decade of history and flips extremely rarely.
+      Treat it as a secular-trend flag, not a trade signal.
+    </div>
+  </div>
+
+  <script type="module">
+    import { createElement as h, useState, useEffect, Fragment } from 'https://esm.sh/react@18';
+    import { createRoot } from 'https://esm.sh/react-dom@18/client';
+
+    // ── Sections ──────────────────────────────────────────────────────────
+    const SECTIONS = [
+      { key: 'NAT', label: 'National' },
+      { key: 'NSW', label: 'NSW' },
+      { key: 'VIC', label: 'VIC' },
+      { key: 'QLD', label: 'QLD' },
+      { key: 'WA',  label: 'WA' },
+      { key: 'SA',  label: 'SA' },
+      { key: 'TAS', label: 'TAS' },
+      { key: 'ACTNT', label: 'ACT / NT' },
+    ];
+    const sectionOf = (state) => (state === 'ACT' || state === 'NT') ? 'ACTNT' : state;
+
+    // ── Signal math (weekly bars) ────────────────────────────────────────
+    // Groups per user spec: 6M–1Y, 1–3Y, 3–7Y, 10Y+  (weeks)
+    const MA_PAIRS = [
+      { slow: 26,  fast: 6,   group: 'm6'  },
+      { slow: 39,  fast: 13,  group: 'm6'  },
+      { slow: 52,  fast: 13,  group: 'm6'  },
+      { slow: 78,  fast: 26,  group: 'y13' },
+      { slow: 104, fast: 26,  group: 'y13' },
+      { slow: 156, fast: 52,  group: 'y13' },
+      { slow: 260, fast: 52,  group: 'y37' },
+      { slow: 364, fast: 104, group: 'y37' },
+      { slow: 520, fast: 156, group: 'y10' },
+    ];
+    const GROUPS = ['m6', 'y13', 'y37', 'y10'];
+
+    function sma(closes, w) {
+      if (!closes || closes.length < w) return null;
+      const slice = closes.slice(-w);
+      return slice.reduce((a, b) => a + b, 0) / w;
+    }
+
+    function scoreToRegime(score) {
+      if (score === null || score === undefined || isNaN(score)) return { label: 'No Data', cls: 'chip-nd', key: 'NO_DATA' };
+      if (score >  0.6) return { label: 'Strong Bull', cls: 'chip-sb',  key: 'STRONG_BULL' };
+      if (score >  0.2) return { label: 'Weak Bull',   cls: 'chip-wb',  key: 'WEAK_BULL' };
+      if (score > -0.2) return { label: 'Sideways',    cls: 'chip-sw',  key: 'SIDEWAYS' };
+      if (score > -0.6) return { label: 'Weak Bear',   cls: 'chip-wbr', key: 'WEAK_BEAR' };
+      return                    { label: 'Strong Bear', cls: 'chip-sbr', key: 'STRONG_BEAR' };
+    }
+
+    // NOTE: computeSignals must NOT call computeStabilityState (recursion trap
+    // documented on the stock board — same rule here).
+    function computeSignals(closes) {
+      if (!closes || closes.length < 30) return null;
+      const price = closes[closes.length - 1];
+      const periods = [...new Set(MA_PAIRS.flatMap(p => [p.slow, p.fast]))];
+      const mas = {};
+      for (const n of periods) { if (closes.length >= n) mas[n] = sma(closes, n); }
+      const pairSigs = MA_PAIRS.map(({ slow, fast, group }) => {
+        const slowMA = mas[slow] ?? null;
+        const fastMA = mas[fast] ?? null;
+        return {
+          slow, fast, group, slowMA, fastMA,
+          trend: slowMA != null ? (price > slowMA ? 1 : -1) : null,
+          momo:  (fastMA != null && slowMA != null) ? (fastMA > slowMA ? 1 : -1) : null,
+        };
+      });
+      const colAvg = (groups) => {
+        const vals = pairSigs
+          .filter(p => groups.includes(p.group))
+          .flatMap(p => [p.trend, p.momo])
+          .filter(s => s != null);
+        return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+      };
+      const cols = {};
+      for (const g of GROUPS) cols[g] = colAvg([g]);
+      const allInd = colAvg(GROUPS);
+      return { price, mas, pairSigs, cols, allInd };
+    }
+
+    // Stability: All-Signals regime sampled at 0 / -13 / -26 / -39 weeks.
+    function computeStabilityState(closes) {
+      if (!closes || closes.length < 70) return 'stable';
+      const regimeAt = (lookback) => {
+        const slice = lookback ? closes.slice(0, closes.length - lookback) : closes;
+        if (slice.length < 30) return null;
+        const s = computeSignals(slice);
+        return s ? scoreToRegime(s.allInd).key : null;
+      };
+      const r0 = regimeAt(0);
+      if (!r0 || r0 === 'NO_DATA') return 'stable';
+      const r13 = regimeAt(13), r26 = regimeAt(26), r39 = regimeAt(39);
+      const seq = [r39, r26, r13, r0].filter(Boolean);
+      let flips = 0;
+      for (let i = 1; i < seq.length; i++) if (seq[i] !== seq[i - 1]) flips++;
+      if (flips === 0) return 'very_stable';
+      if (flips >= 2) return 'very_unstable';
+      if (r13 && r0 !== r13) return 'unstable';
+      return 'stable';
+    }
+
+    const STAB_DOT = { very_stable: 'dot-vs', stable: 'dot-s', unstable: 'dot-u', very_unstable: 'dot-vu' };
+
+    // ── Formatting helpers ───────────────────────────────────────────────
+    const fmtMoney = (v) => {
+      if (v == null) return '—';
+      if (v >= 1e6) return '$' + (v / 1e6).toFixed(2) + 'm';
+      return '$' + Math.round(v / 1000) + 'k';
+    };
+    const fmtPct = (v, dp = 1) => v == null || isNaN(v) ? '—' : (v > 0 ? '+' : '') + v.toFixed(dp) + '%';
+    const pctCls = (v) => v == null || isNaN(v) ? 'muted' : v > 0 ? 'pos' : v < 0 ? 'neg' : 'muted';
+    const chg = (now, then) => (now != null && then != null && then !== 0) ? (now / then - 1) * 100 : null;
+
+    function sqmUrl(r) {
+      const base = 'https://sqmresearch.com.au/property/asking-property-prices';
+      if (r.kind === 'national') return base + '?national=1';
+      if (r.kind === 'avg') return base + '?avg=1';
+      if (r.kind === 'city') return base + '?region=' + r.param + '&type=c';
+      return base + '?postcode=' + r.param;
+    }
+
+    // ── Components ───────────────────────────────────────────────────────
+    function Badge({ score }) {
+      const r = scoreToRegime(score);
+      return h('span', { className: 'chip ' + r.cls }, r.label);
+    }
+
+    function Sparkline({ px }) {
+      const W = 340, H = 72, PAD = 3;
+      const data = px.slice(-520); // last 10y
+      const min = Math.min(...data), max = Math.max(...data);
+      const span = (max - min) || 1;
+      const pts = data.map((v, i) => {
+        const x = PAD + (i / (data.length - 1)) * (W - 2 * PAD);
+        const y = H - PAD - ((v - min) / span) * (H - 2 * PAD);
+        return x.toFixed(1) + ',' + y.toFixed(1);
+      }).join(' ');
+      return h('svg', { width: W, height: H, style: { display: 'block', background: '#fff', border: '1px solid var(--border)', borderRadius: 6 } },
+        h('polyline', { points: pts, fill: 'none', stroke: '#15803d', strokeWidth: 1.5 }));
+    }
+
+    function DetailRow({ r, sigs, colSpan }) {
+      const px = r.px || [];
+      const last = px[px.length - 1];
+      const ath = px.length ? Math.max(...px) : null;
+      const dd = (ath && last) ? (last / ath - 1) * 100 : null;
+      const sp = r.snap_px || {};
+      const hChg = chg(sp.h, sp.h52), uChg = chg(sp.u, sp.u52);
+      const rentChg = chg(r.rent, r.rent52);
+      const stockChg = chg(r.stock, r.stock12);
+      const vacDelta = (r.vac != null && r.vac12 != null) ? r.vac - r.vac12 : null;
+      return h('tr', { className: 'detail-row' },
+        h('td', { colSpan },
+          h('div', { className: 'detail-grid' },
+            px.length > 30 && h('div', { className: 'detail-block' },
+              h('h4', null, 'Combined asking index — last 10y'),
+              h(Sparkline, { px }),
+              h('div', { style: { fontSize: '0.72rem', color: 'var(--muted)', marginTop: 4 } },
+                'Drawdown from peak: ', h('span', { className: pctCls(dd) }, fmtPct(dd)))),
+            h('div', { className: 'detail-block' },
+              h('h4', null, 'Houses vs Units (12m)'),
+              h('table', null, h('tbody', null,
+                h('tr', null, h('td', null, 'Houses'), h('td', { className: 'td-num' }, fmtMoney(sp.h)), h('td', { className: pctCls(hChg) }, fmtPct(hChg))),
+                h('tr', null, h('td', null, 'Units'), h('td', { className: 'td-num' }, fmtMoney(sp.u)), h('td', { className: pctCls(uChg) }, fmtPct(uChg))),
+                h('tr', null, h('td', null, 'Rent ($/wk)'), h('td', { className: 'td-num' }, r.rent != null ? '$' + Math.round(r.rent) : '—'), h('td', { className: pctCls(rentChg) }, fmtPct(rentChg))),
+                h('tr', null, h('td', null, 'Listings'), h('td', { className: 'td-num' }, r.stock != null ? r.stock.toLocaleString() : '—'), h('td', { className: stockChg == null ? 'muted' : stockChg > 0 ? 'neg' : 'pos' }, fmtPct(stockChg))),
+                h('tr', null, h('td', null, 'Vacancy'), h('td', { className: 'td-num' }, r.vac != null ? r.vac.toFixed(1) + '%' : '—'), h('td', { className: vacDelta == null ? 'muted' : vacDelta > 0 ? 'neg' : 'pos' }, vacDelta != null ? (vacDelta > 0 ? '+' : '') + vacDelta.toFixed(1) + 'pp' : '—'))))),
+            h('div', { className: 'detail-block' },
+              h('h4', null, 'Value vs own history'),
+              h('div', { style: { fontSize: '0.8rem', marginBottom: 4 } },
+                'Gross yield ', r.yield != null ? r.yield.toFixed(1) + '%' : '—',
+                r.yield_pct != null ? ' — ' + r.yield_pct.toFixed(0) + 'th pctile' : ''),
+              r.yield_pct != null && h('div', { className: 'value-bar-wrap' },
+                h('div', { className: 'value-bar', style: { width: r.yield_pct + '%' } })),
+              h('div', { style: { fontSize: '0.68rem', color: 'var(--muted)', marginTop: 4, maxWidth: 180 } },
+                'Higher percentile = yield high vs its own history = relatively cheap.'),
+              h('div', { style: { marginTop: 8 } },
+                h('a', { className: 'sqm-link', href: sqmUrl(r), target: '_blank', rel: 'noopener' }, 'SQM chart page ↗'))))));
+    }
+
+    const COLS = [
+      { key: 'm6',  label: '6M–1Y' },
+      { key: 'y13', label: '1–3Y' },
+      { key: 'y37', label: '3–7Y' },
+      { key: 'y10', label: '10Y+' },
+    ];
+    const N_COLS = 12;
+
+    function Row({ code, r }) {
+      const [open, setOpen] = useState(false);
+      const sigs = r._sigs;
+      const stability = r._stability;
+      const px = r.px || [];
+      const yr = chg(px[px.length - 1], px[px.length - 53]);
+      const rentChg = chg(r.rent, r.rent52);
+      const stockChg = chg(r.stock, r.stock12);
+      return h(Fragment, null,
+        h('tr', { onClick: () => setOpen(o => !o) },
+          h('td', { className: 'td-name' }, r.name, ' ',
+            h('span', { className: 'td-sub' }, r.kind === 'postcode' ? r.param : r.state)),
+          h('td', { className: 'td-num' }, fmtMoney(px[px.length - 1])),
+          h('td', { className: 'td-num ' + pctCls(yr) }, fmtPct(yr)),
+          COLS.map(c => h('td', { key: c.key }, h(Badge, { score: sigs ? sigs.cols[c.key] : null }))),
+          h('td', null, h('div', { className: 'sig-inner' },
+            h(Badge, { score: sigs ? sigs.allInd : null }),
+            sigs && h('span', { className: 'stab-dot ' + (STAB_DOT[stability] || 'dot-s') }))),
+          h('td', { className: 'td-num hide-sm' }, r.yield != null ? r.yield.toFixed(1) + '%' : '—'),
+          h('td', { className: 'td-num hide-sm' }, r.vac != null ? r.vac.toFixed(1) + '%' : '—'),
+          h('td', { className: 'td-num hide-sm ' + pctCls(rentChg) }, fmtPct(rentChg)),
+          h('td', { className: 'td-num hide-sm ' + (stockChg > 0 ? 'neg' : stockChg < 0 ? 'pos' : 'muted') }, fmtPct(stockChg))),
+        open && h(DetailRow, { r, sigs, colSpan: N_COLS }));
+    }
+
+    function SectionTable({ items }) {
+      return h('table', null,
+        h('thead', null, h('tr', null,
+          h('th', null, 'Region'),
+          h('th', { style: { textAlign: 'right' } }, 'Asking Price'),
+          h('th', { style: { textAlign: 'right' } }, '12m %'),
+          COLS.map(c => h('th', { key: c.key }, c.label)),
+          h('th', null, 'All Signals'),
+          h('th', { className: 'hide-sm', style: { textAlign: 'right' } }, 'Yield'),
+          h('th', { className: 'hide-sm', style: { textAlign: 'right' } }, 'Vacancy'),
+          h('th', { className: 'hide-sm', style: { textAlign: 'right' } }, 'Rent 12m'),
+          h('th', { className: 'hide-sm', style: { textAlign: 'right' } }, 'Supply 12m'))),
+        h('tbody', null, items.map(([code, r]) => h(Row, { key: code, code, r }))));
+    }
+
+    function Board({ payload }) {
+      const [filter, setFilter] = useState('NSW');
+      const [search, setSearch] = useState('');
+      useEffect(() => { window._setSnavFilter = setFilter; return () => { delete window._setSnavFilter; }; }, []);
+
+      const regions = Object.entries(payload.regions);
+      const q = search.trim().toLowerCase();
+      const updated = payload.updated ? new Date(payload.updated) : null;
+      const staleDays = updated ? (Date.now() - updated.getTime()) / 864e5 : null;
+
+      const visible = SECTIONS
+        .map(sec => ({
+          sec,
+          items: regions.filter(([code, r]) =>
+            q ? (r.name.toLowerCase().includes(q) || code.toLowerCase().includes(q) || String(r.param).includes(q))
+              : sectionOf(r.state) === sec.key),
+        }))
+        .filter(({ sec, items }) => items.length && (q || sec.key === filter));
+
+      return h(Fragment, null,
+        h('div', { className: 'toolbar' },
+          h('div', { className: 'toolbar-left' },
+            h('span', null, 'SQM weekly asking-price index · baked ', updated ? updated.toLocaleDateString() : '?'),
+            staleDays > 10 && h('span', { className: 'stale-warn' }, '⚠ data ', Math.floor(staleDays), ' days old — check the GitHub Action')),
+          h('input', {
+            className: 'search-input', placeholder: 'Search town / postcode…',
+            value: search, onChange: e => setSearch(e.target.value),
+          })),
+        visible.length === 0 && h('div', { className: 'spinner-wrap' }, 'No regions match.'),
+        visible.map(({ sec, items }) => h('div', { key: sec.key },
+          h('div', { className: 'section-title' }, sec.label),
+          h(SectionTable, { items }))));
+    }
+
+    function App() {
+      const [payload, setPayload] = useState(null);
+      const [err, setErr] = useState(null);
+      useEffect(() => {
+        (async () => {
+          try {
+            const res = await fetch('data/property.json?t=' + Date.now());
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            for (const r of Object.values(data.regions || {})) {
+              const sigs = computeSignals(r.px);
+              r._sigs = sigs;
+              r._stability = sigs ? computeStabilityState(r.px) : 'stable';
+            }
+            setPayload(data);
+          } catch (e) { setErr(e.message); }
+        })();
+      }, []);
+      if (err) return h('div', { className: 'spinner-wrap' },
+        'Could not load data/property.json (' + err + '). ',
+        'Run "python update-property.py" once, or trigger the update-property GitHub Action. ',
+        'Opening via file:// blocks the fetch — use serve.bat.');
+      if (!payload) return h('div', { className: 'spinner-wrap' }, 'Loading property data…');
+      return h(Board, { payload });
+    }
+
+    createRoot(document.getElementById('root')).render(h(App));
+  </script>
+
+  <div class="main">
+    <div class="snav" id="snav">
+      <button class="snav-btn" data-cls="NAT">National</button>
+      <button class="snav-btn active" data-cls="NSW">NSW</button>
+      <button class="snav-btn" data-cls="VIC">VIC</button>
+      <button class="snav-btn" data-cls="QLD">QLD</button>
+      <button class="snav-btn" data-cls="WA">WA</button>
+      <button class="snav-btn" data-cls="SA">SA</button>
+      <button class="snav-btn" data-cls="TAS">TAS</button>
+      <button class="snav-btn" data-cls="ACTNT">ACT / NT</button>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var nav = document.getElementById('snav');
+      // move tab bar above the root table area
+      var root = document.getElementById('root');
+      root.parentNode.insertBefore(nav, root);
+      nav.addEventListener('click', function (e) {
+        var btn = e.target.closest('.snav-btn');
+        if (!btn) return;
+        nav.querySelectorAll('.snav-btn').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        if (window._setSnavFilter) window._setSnavFilter(btn.dataset.cls);
+      });
+    })();
+  </script>
+</body>
+</html>
