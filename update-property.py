@@ -113,6 +113,7 @@ REGIONS = {
     "INV": ("Inverell",       "NSW", "postcode", "2360"),
     "PKS": ("Parkes",         "NSW", "postcode", "2870"),
     "LTG": ("Lithgow",        "NSW", "postcode", "2790"),
+    "TOM": ("Tomerong / Jervis Bay", "NSW", "postcode", "2540"),
     # VIC
     "MEL": ("Melbourne",      "VIC", "city",     "vic-Melbourne"),
     "GEE": ("Geelong",        "VIC", "postcode", "3220"),
@@ -168,6 +169,7 @@ REGIONS = {
     "KYN": ("Kyneton",        "VIC", "postcode", "3444"),
     "PLD": ("Portland",       "VIC", "postcode", "3305"),
     "LEO": ("Leongatha",      "VIC", "postcode", "3953"),
+    "SEA": ("Seaford (VIC)",  "VIC", "postcode", "3198"),
     # QLD
     "BNE": ("Brisbane",       "QLD", "city",     "qld-Brisbane"),
     "GC":  ("Gold Coast (Southport)",      "QLD", "postcode", "4215"),
