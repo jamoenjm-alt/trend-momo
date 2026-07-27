@@ -77,6 +77,35 @@
     .snav-btn:hover { background: #293548; color: #e2e8f0; border-color: #475569; }
     .snav-btn.active { background: #15803d; border-color: #22c55e; color: #fff; font-weight: 700; }
 
+    /* ── Top picks ───────────────────────────────────────────── */
+    .picks-wrap { padding: 16px 0 4px; }
+    .picks-title {
+      font-size: 1rem; font-weight: 800; letter-spacing: 0.06em;
+      text-transform: uppercase; margin-bottom: 4px;
+    }
+    .picks-sub { font-size: 0.78rem; color: var(--muted); max-width: 900px; line-height: 1.5; margin-bottom: 12px; }
+    .picks-grid { display: flex; gap: 14px; flex-wrap: wrap; }
+    .pick-card {
+      flex: 1 1 380px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px; border-top: 4px solid var(--border);
+    }
+    .pick-card.pick-buy  { border-top-color: #15803d; }
+    .pick-card.pick-sell { border-top-color: #b91c1c; }
+    .pick-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .pick-tag { font-size: 0.68rem; font-weight: 800; letter-spacing: 0.08em; color: var(--muted); }
+    .pick-score { font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .pick-name { font-size: 1.25rem; font-weight: 800; line-height: 1.2; }
+    .pick-price { font-size: 0.92rem; font-weight: 700; margin-bottom: 10px; }
+    .pick-table { width: 100%; border: none; }
+    .pick-table td { border: none; padding: 3px 8px 3px 0; font-size: 0.8rem; }
+    .pick-table td:nth-child(2) { font-weight: 700; }
+    .pick-runners { margin-top: 10px; font-size: 0.74rem; color: var(--muted); }
+    .picks-warn {
+      margin-top: 12px; font-size: 0.76rem; color: var(--muted);
+      background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;
+      padding: 9px 12px; max-width: 900px; line-height: 1.5;
+    }
+
     .section-title {
       font-size: 0.95rem; font-weight: 800; letter-spacing: 0.06em;
       text-transform: uppercase; margin: 18px 0 8px; color: var(--text);
@@ -159,7 +188,7 @@
       <strong>6M–1Y</strong> (33/11w, 39/13w, 52/17w), <strong>1–2Y</strong> (65/22w, 78/26w, 104/35w),
       <strong>2–5Y</strong> (130/43w, 195/65w, 260/87w), <strong>All Signals</strong> = every pair. Each pair contributes
       Trend (price vs slow MA) and Momo (fast vs slow MA); the average maps to
-      Strong Bull &gt; 0.6 &gt; Weak Bull &gt; 0.2 &gt; Sideways &gt; −0.2 &gt; Weak Bear &gt; −0.6 &gt; Strong Bear —
+      Strong Uptrend &gt; 0.6 &gt; Weak Uptrend &gt; 0.2 &gt; Sideways &gt; −0.2 &gt; Weak Downtrend &gt; −0.6 &gt; Strong Downtrend —
       the same regime thresholds as the stock board. The stability dot samples the All-Signals regime today and
       13 / 26 / 39 weeks back: green = unchanged, yellow = flipped in the last quarter, red = chopping.
       <br /><br />
@@ -217,11 +246,11 @@
 
     function scoreToRegime(score) {
       if (score === null || score === undefined || isNaN(score)) return { label: 'No Data', cls: 'chip-nd', key: 'NO_DATA' };
-      if (score >  0.6) return { label: 'Strong Bull', cls: 'chip-sb',  key: 'STRONG_BULL' };
-      if (score >  0.2) return { label: 'Weak Bull',   cls: 'chip-wb',  key: 'WEAK_BULL' };
-      if (score > -0.2) return { label: 'Sideways',    cls: 'chip-sw',  key: 'SIDEWAYS' };
-      if (score > -0.6) return { label: 'Weak Bear',   cls: 'chip-wbr', key: 'WEAK_BEAR' };
-      return                    { label: 'Strong Bear', cls: 'chip-sbr', key: 'STRONG_BEAR' };
+      if (score >  0.6) return { label: 'Strong Uptrend', cls: 'chip-sb',  key: 'STRONG_BULL' };
+      if (score >  0.2) return { label: 'Weak Uptrend',   cls: 'chip-wb',  key: 'WEAK_BULL' };
+      if (score > -0.2) return { label: 'Sideways',       cls: 'chip-sw',  key: 'SIDEWAYS' };
+      if (score > -0.6) return { label: 'Weak Downtrend',   cls: 'chip-wbr', key: 'WEAK_BEAR' };
+      return                    { label: 'Strong Downtrend', cls: 'chip-sbr', key: 'STRONG_BEAR' };
     }
 
     // NOTE: computeSignals must NOT call computeStabilityState (recursion trap
@@ -276,6 +305,69 @@
     }
 
     const STAB_DOT = { very_stable: 'dot-vs', stable: 'dot-s', unstable: 'dot-u', very_unstable: 'dot-vu' };
+
+    // ── Top picks: buy / sell scoring ────────────────────────────────────
+    // Deliberately NOT the stock board's momentum score. Property is held for
+    // years and costs ~5% round-trip to transact, so fundamentals carry ~90%
+    // of the weight and trend only ~8-10%. Buying the dip in a structurally
+    // tight market is the thesis; chasing a hot streak is not.
+    const cl01 = (x, lo, hi) => Math.max(0, Math.min(1, (x - lo) / (hi - lo)));
+
+    function maxDrawdown(px) {
+      let peak = px[0], worst = 0;
+      for (const v of px) { peak = Math.max(peak, v); worst = Math.min(worst, v / peak - 1); }
+      return worst * 100;
+    }
+
+    function scorePicks(regions) {
+      const rows = [];
+      for (const [code, r] of Object.entries(regions)) {
+        if (r.state === 'NAT') continue;              // aggregates aren't investable
+        if (!r.px || r.px.length < 260) continue;     // need 5y of history
+        if ((r.stock || 0) < 100) continue;           // liquidity floor
+        if (r.yield == null || r.yield_pct == null || r.vac == null) continue;
+        const s = r._sigs;
+        if (!s) continue;
+        const last = r.px[r.px.length - 1];
+        const dd = (last / Math.max(...r.px) - 1) * 100;
+        // Worst peak-to-trough since 2009 (baked). Exposes mining-town risk a
+        // 10y window hides — the 2012-16 bust is outside the trimmed history.
+        const ddmax = r.ddmax != null ? r.ddmax : maxDrawdown(r.px);
+        const rentG  = chg(r.rent, r.rent52);
+        const stockG = chg(r.stock, r.stock12);
+        const vacD   = (r.vac != null && r.vac12 != null) ? r.vac - r.vac12 : 0;
+        const h1 = s.cols.h1 ?? 0, h4 = s.cols.h4 ?? 0;
+        // Capital-risk discount: deep historical busts and thin listings.
+        const risk = 1 - (cl01(-ddmax, 15, 45) * 0.30 + cl01(300 - r.stock, 0, 200) * 0.10);
+        const B = {
+          value:  r.yield_pct / 100,                 // cheap vs its OWN history
+          income: cl01(r.yield, 2.5, 5.5),           // capped — 9% yield earns no bonus
+          dip:    cl01(-dd, 0, 15),                  // buying below the peak
+          vac:    cl01(2.5 - r.vac, 0, 2.0),         // rental demand
+          rent:   cl01(rentG ?? 0, 0, 10),           // rents lead prices
+          supply: cl01(-(stockG ?? 0), 0, 20),       // listings drying up
+          trend:  cl01((h4 + 1) / 2, 0, 1) * (1 - cl01((h1 + 1) / 2, 0, 1) * 0.5),
+        };
+        const buy = (0.20 * B.value + 0.10 * B.income + 0.12 * B.dip + 0.20 * B.vac
+                   + 0.20 * B.rent + 0.10 * B.supply + 0.08 * B.trend) * risk;
+        const S = {
+          value:  1 - r.yield_pct / 100,             // expensive vs its own history
+          peak:   cl01(dd, -5, 0),                   // still at/near the top
+          vac:    cl01(r.vac, 1.0, 3.0) * 0.6 + cl01(vacD, 0, 0.8) * 0.4,
+          rent:   cl01(3 - (rentG ?? 0), 0, 8),      // rent support gone
+          supply: cl01(stockG ?? 0, 0, 25),          // listings piling up
+          roll:   cl01((h4 + 1) / 2, 0, 1) * (1 - cl01((h1 + 1) / 2, 0, 1)),
+        };
+        const sell = 0.22 * S.value + 0.12 * S.peak + 0.20 * S.vac
+                   + 0.20 * S.rent + 0.16 * S.supply + 0.10 * S.roll;
+        rows.push({ code, r, buy, sell, dd, ddmax, rentG, stockG, vacD, risk });
+      }
+      return {
+        buy:  [...rows].sort((a, b) => b.buy - a.buy),
+        sell: [...rows].sort((a, b) => b.sell - a.sell),
+        n: rows.length,
+      };
+    }
 
     // ── Formatting helpers ───────────────────────────────────────────────
     const fmtMoney = (v) => {
@@ -402,10 +494,76 @@
         h('tbody', null, items.map(([code, r]) => h(Row, { key: code, code, r }))));
     }
 
+    function PickCard({ side, pick, runners }) {
+      if (!pick) return null;
+      const { r, dd, ddmax, rentG, stockG } = pick;
+      const buying = side === 'buy';
+      const score = buying ? pick.buy : pick.sell;
+      const rows = [
+        ['Gross yield', r.yield.toFixed(2) + '%',
+         r.yield_pct.toFixed(0) + 'th pctile vs own history',
+         buying ? r.yield_pct >= 60 : r.yield_pct <= 40],
+        ['Vacancy', r.vac.toFixed(2) + '%',
+         r.vac < 1 ? 'very tight' : r.vac < 2 ? 'balanced' : 'loose',
+         buying ? r.vac < 1.5 : r.vac > 1.5],
+        ['Rent 12m', fmtPct(rentG), rentG > 0 ? 'rents rising' : 'rents falling',
+         buying ? rentG > 0 : rentG < 3],
+        ['Listings 12m', fmtPct(stockG), stockG < 0 ? 'supply tightening' : 'supply building',
+         buying ? stockG < 0 : stockG > 0],
+        ['Off 10y peak', fmtPct(dd), buying ? 'entry discount' : 'still near top',
+         buying ? dd < -3 : dd > -5],
+        [r.ddmax != null ? 'Worst fall since 2009' : 'Worst fall (10y)',
+         fmtPct(ddmax), 'downside precedent', ddmax > -25],
+        ['Listings on market', (r.stock || 0).toLocaleString(), 'liquidity', (r.stock || 0) >= 250],
+      ];
+      return h('div', { className: 'pick-card ' + (buying ? 'pick-buy' : 'pick-sell') },
+        h('div', { className: 'pick-head' },
+          h('span', { className: 'pick-tag' }, buying ? 'BEST BUY SETUP' : 'BEST SELL SETUP'),
+          h('span', { className: 'pick-score' }, 'score ', score.toFixed(2))),
+        h('div', { className: 'pick-name' }, r.name,
+          h('span', { className: 'td-sub' }, ' ', r.kind === 'postcode' ? r.param : '', ' ', r.state)),
+        h('div', { className: 'pick-price' }, fmtMoney(r.px[r.px.length - 1]),
+          h('span', { className: 'td-sub' }, ' combined asking')),
+        h('table', { className: 'pick-table' }, h('tbody', null,
+          rows.map(([label, val, note, good]) => h('tr', { key: label },
+            h('td', null, label),
+            h('td', { className: 'td-num ' + (good ? 'pos' : 'neg') }, val),
+            h('td', { className: 'muted' }, note))))),
+        h('div', { className: 'pick-runners' }, 'Next: ',
+          runners.map((x, i) => h('span', { key: x.code },
+            i ? ' · ' : '', x.r.name, ' ', h('span', { className: 'td-sub' }, x.r.state)))));
+    }
+
+    function TopPicks({ picks }) {
+      if (!picks || !picks.buy.length) return null;
+      return h('div', { className: 'picks-wrap' },
+        h('h2', { className: 'picks-title' }, 'Top Picks — where the data points'),
+        h('div', { className: 'picks-sub' },
+          'Scored across ', picks.n, ' markets with 5y+ history and 100+ listings. ',
+          'Weighted for a 2–5 year hold: yield vs the town\'s own history, rental demand, ',
+          'rent and supply direction do ~90% of the work; trend does ~10%. ',
+          'Discounted for markets with deep historical busts or thin listings.'),
+        h('div', { className: 'picks-grid' },
+          h(PickCard, { side: 'buy',  pick: picks.buy[0],  runners: picks.buy.slice(1, 5) }),
+          h(PickCard, { side: 'sell', pick: picks.sell[0], runners: picks.sell.slice(1, 5) })),
+        h('div', { className: 'picks-warn' },
+          '⚠ This is a screen, not a recommendation. It reads asking prices and listing counts — ',
+          'it knows nothing about a specific street, flood zone, body corporate, or what you paid. ',
+          'A high score is a reason to research a market, not to buy in it.'));
+    }
+
+    function StateTabs({ filter, setFilter }) {
+      return h('div', { className: 'snav' },
+        SECTIONS.map(s => h('button', {
+          key: s.key,
+          className: 'snav-btn' + (filter === s.key ? ' active' : ''),
+          onClick: () => setFilter(s.key),
+        }, s.label)));
+    }
+
     function Board({ payload }) {
       const [filter, setFilter] = useState('NSW');
       const [search, setSearch] = useState('');
-      useEffect(() => { window._setSnavFilter = setFilter; return () => { delete window._setSnavFilter; }; }, []);
 
       const regions = Object.entries(payload.regions);
       const q = search.trim().toLowerCase();
@@ -422,6 +580,8 @@
         .filter(({ sec, items }) => items.length && (q || sec.key === filter));
 
       return h(Fragment, null,
+        h(TopPicks, { picks: payload._picks }),
+        h(StateTabs, { filter, setFilter }),
         h('div', { className: 'toolbar' },
           h('div', { className: 'toolbar-left' },
             h('span', null, 'SQM weekly asking-price index · baked ', updated ? updated.toLocaleDateString() : '?'),
@@ -450,6 +610,7 @@
               r._sigs = sigs;
               r._stability = sigs ? computeStabilityState(r.px) : 'stable';
             }
+            data._picks = scorePicks(data.regions || {});
             setPayload(data);
           } catch (e) { setErr(e.message); }
         })();
@@ -465,32 +626,5 @@
     createRoot(document.getElementById('root')).render(h(App));
   </script>
 
-  <div class="main">
-    <div class="snav" id="snav">
-      <button class="snav-btn" data-cls="NAT">National</button>
-      <button class="snav-btn active" data-cls="NSW">NSW</button>
-      <button class="snav-btn" data-cls="VIC">VIC</button>
-      <button class="snav-btn" data-cls="QLD">QLD</button>
-      <button class="snav-btn" data-cls="WA">WA</button>
-      <button class="snav-btn" data-cls="SA">SA</button>
-      <button class="snav-btn" data-cls="TAS">TAS</button>
-      <button class="snav-btn" data-cls="ACTNT">ACT / NT</button>
-    </div>
-  </div>
-  <script>
-    (function () {
-      var nav = document.getElementById('snav');
-      // move tab bar above the root table area
-      var root = document.getElementById('root');
-      root.parentNode.insertBefore(nav, root);
-      nav.addEventListener('click', function (e) {
-        var btn = e.target.closest('.snav-btn');
-        if (!btn) return;
-        nav.querySelectorAll('.snav-btn').forEach(function (b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-        if (window._setSnavFilter) window._setSnavFilter(btn.dataset.cls);
-      });
-    })();
-  </script>
 </body>
 </html>

@@ -449,6 +449,17 @@ def bake_region(code, name, state, kind, param):
         rows.sort(key=lambda r: r["date"])
         px = [int(round(r.get("combined") or r.get("houses_all") or 0)) for r in rows]
         if len(px) >= 60:
+            # Worst peak-to-trough over the FULL history (2009→) before we trim.
+            # This is the number that exposes mining-town risk: a 10y window
+            # starts after the 2012-16 bust and makes Karratha look tame.
+            peak = px[0]
+            worst = 0.0
+            for v in px:
+                peak = max(peak, v)
+                if peak:
+                    worst = min(worst, v / peak - 1)
+            out["ddmax"] = round(worst * 100, 1)
+            out["hist_w"] = len(px)
             # Keep the last 10 years only. The longest MA pair is 260w and the
             # sparkline draws 520w, so older points are dead weight in a file
             # the board fetches at boot (215 regions x 880w was 1.7 MB).

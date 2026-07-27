@@ -1346,11 +1346,11 @@ function sma(closes, w) {
 
 function scoreToRegime(score) {
   if (score === null || score === undefined || isNaN(score)) return { label: 'No Data',     key: 'NO_DATA',     rank: 99 };
-  if (score >  0.6) return { label: 'Strong Bull', key: 'STRONG_BULL', rank: 0 };
-  if (score >  0.2) return { label: 'Weak Bull',   key: 'WEAK_BULL',   rank: 1 };
+  if (score >  0.6) return { label: 'Strong Uptrend', key: 'STRONG_BULL', rank: 0 };
+  if (score >  0.2) return { label: 'Weak Uptrend',   key: 'WEAK_BULL',   rank: 1 };
   if (score > -0.2) return { label: 'Sideways',    key: 'SIDEWAYS',    rank: 2 };
-  if (score > -0.6) return { label: 'Weak Bear',   key: 'WEAK_BEAR',   rank: 3 };
-  return                    { label: 'Strong Bear', key: 'STRONG_BEAR', rank: 4 };
+  if (score > -0.6) return { label: 'Weak Downtrend',   key: 'WEAK_BEAR',   rank: 3 };
+  return                    { label: 'Strong Downtrend', key: 'STRONG_BEAR', rank: 4 };
 }
 
 // Stability: sample Overall regime at 4 lookback points
@@ -2021,13 +2021,13 @@ function ReversalWatch({ data }) {
   );
   return h('div', { className: 'reversal-wrap' },
     h('div', { className: 'reversal-col reversal-col-bull' },
-      h('div', { className: 'reversal-col-title' }, '↑ Bullish Turns'),
+      h('div', { className: 'reversal-col-title' }, '↑ Turning Up'),
       bulls.length
         ? bulls.map(makeRow)
         : h('div', { className: 'reversal-empty' }, 'No significant shifts'),
     ),
     h('div', { className: 'reversal-col reversal-col-bear' },
-      h('div', { className: 'reversal-col-title' }, '↓ Bearish Turns'),
+      h('div', { className: 'reversal-col-title' }, '↓ Turning Down'),
       bears.length
         ? bears.map(makeRow)
         : h('div', { className: 'reversal-empty' }, 'No significant shifts'),
@@ -3127,53 +3127,53 @@ loadStaticData().then(() => {
 
       <div class="sp-card neutral">
         <h3>How the Signal System Works</h3>
-        <p>Every cell is calculated from <strong>Moving Average (MA) crossovers</strong> — comparing a fast MA to a slow MA. When price or fast MA is above the slow MA, that signal is bullish (+1). Below = bearish (−1). The regime badge is the average of all relevant signals.</p>
+        <p>Every cell is calculated from <strong>Moving Average (MA) crossovers</strong> — comparing a fast MA to a slow MA. When price or fast MA is above the slow MA, that signal is positive (+1). Below = negative (−1). The regime badge is the average of all relevant signals.</p>
         <p>The columns run fastest to slowest: <strong>Canary</strong> (the board's "1–2 Week" column) → <strong>ST Trend</strong> ("1–3 Month") → <strong>LT Trend</strong> ("3–9 Month") → <strong>All Indicators</strong> ("All Signals").</p>
         <p>Signals are <em>lagging</em> — they confirm a trend that has already started. The edge is in riding confirmed trends, not catching tops and bottoms.</p>
       </div>
 
       <div class="sp-card bull">
-        <h3>Bull Entry Signals (Bear → Bull Reversal)</h3>
-        <div class="sp-step"><div class="sp-step-num">1</div><div><strong>Canary turns Bull</strong> while ST and LT still Bear = first alert. Don't enter yet — this flips back often. It's a watch signal only.</div></div>
-        <div class="sp-step"><div class="sp-step-num">2</div><div><strong>ST Trend turns Bull</strong> while LT still Bear = building conviction. Canary + ST both bull = consider a small starter position.</div></div>
-        <div class="sp-step"><div class="sp-step-num">3</div><div><strong>LT Trend turns Bull</strong> = confirmed trend change. All columns <span class="sp-chip chip-sb">STRONG BULL</span> = trend fully confirmed — comfort for positions you already hold. As a fresh entry it's late: fully-extended names had the weakest forward returns in our backtests.</div></div>
+        <h3>Entry Signals (Downtrend → Uptrend Reversal)</h3>
+        <div class="sp-step"><div class="sp-step-num">1</div><div><strong>Canary turns Uptrend</strong> while ST and LT still Downtrend = first alert. Don't enter yet — this flips back often. It's a watch signal only.</div></div>
+        <div class="sp-step"><div class="sp-step-num">2</div><div><strong>ST Trend turns Uptrend</strong> while LT still Downtrend = building conviction. Canary + ST both uptrend = consider a small starter position.</div></div>
+        <div class="sp-step"><div class="sp-step-num">3</div><div><strong>LT Trend turns Uptrend</strong> = confirmed trend change. All columns <span class="sp-chip chip-sb">STRONG UPTREND</span> = trend fully confirmed — comfort for positions you already hold. As a fresh entry it's late: fully-extended names had the weakest forward returns in our backtests.</div></div>
         <div class="sp-step"><div class="sp-step-num">4</div><div><strong>Stability dot turns light green</strong> <span class="sp-dot sp-dot-s"></span> = regime has held 10+ days. This is your size-up signal — trend is confirmed, not a false alarm.</div></div>
-        <div class="sp-warn">⚡ Fastest reversals: all columns flip bull within days. These are momentum explosions. Enter early but size smaller until LT confirms.</div>
+        <div class="sp-warn">⚡ Fastest reversals: all columns flip to uptrend within days. These are momentum explosions. Enter early but size smaller until LT confirms.</div>
       </div>
 
       <div class="sp-card bear">
-        <h3>Sell &amp; Exit Signals (Bull → Bear Reversal)</h3>
-        <div class="sp-step"><div class="sp-step-num">1</div><div><strong>Canary turns Bear</strong> while ST and LT still Bull = early warning. Tighten your stop, reduce 10–20%, watch closely.</div></div>
-        <div class="sp-step"><div class="sp-step-num">2</div><div><strong>ST Trend turns Bear</strong> = meaningful exit signal. Canary + ST both bear = reduce 30–50%. Short-term trend has turned against you.</div></div>
-        <div class="sp-step"><div class="sp-step-num">3</div><div><strong>LT Trend turns Bear</strong> = confirmed exit. This is the signal to exit the majority of your position.</div></div>
-        <div class="sp-step"><div class="sp-step-num">4</div><div><strong>All Indicators <span class="sp-chip chip-sbr">STRONG BEAR</span></strong> = you missed the ideal exit — still exit now. Don't hold hoping for a bounce.</div></div>
+        <h3>Sell &amp; Exit Signals (Uptrend → Downtrend Reversal)</h3>
+        <div class="sp-step"><div class="sp-step-num">1</div><div><strong>Canary turns Downtrend</strong> while ST and LT still Uptrend = early warning. Tighten your stop, reduce 10–20%, watch closely.</div></div>
+        <div class="sp-step"><div class="sp-step-num">2</div><div><strong>ST Trend turns Downtrend</strong> = meaningful exit signal. Canary + ST both downtrend = reduce 30–50%. Short-term trend has turned against you.</div></div>
+        <div class="sp-step"><div class="sp-step-num">3</div><div><strong>LT Trend turns Downtrend</strong> = confirmed exit. This is the signal to exit the majority of your position.</div></div>
+        <div class="sp-step"><div class="sp-step-num">4</div><div><strong>All Indicators <span class="sp-chip chip-sbr">STRONG DOWNTREND</span></strong> = you missed the ideal exit — still exit now. Don't hold hoping for a bounce.</div></div>
         <div class="sp-warn">🔴 Stability dot turns red <span class="sp-dot sp-dot-vu"></span> while bearish = downtrend is well-established and reliable. This is not a dip.</div>
       </div>
 
       <div class="sp-card neutral">
         <h3>Price Reversal Patterns</h3>
-        <p><strong>Momentum Surge (V-shape):</strong> Canary → ST → LT all flip bull within 1–2 weeks. Fast and powerful. High conviction entry once LT confirms. Often follows major news or earnings beats.</p>
+        <p><strong>Momentum Surge (V-shape):</strong> Canary → ST → LT all flip to uptrend within 1–2 weeks. Fast and powerful. High conviction entry once LT confirms. Often follows major news or earnings beats.</p>
         <p><strong>Slow Grind (Staircase):</strong> Each column flips over 2–4 weeks. More reliable. Stability dot progresses yellow → light green → dark green. Best risk/reward entries.</p>
-        <p><strong>Bear Trap:</strong> Canary + ST flip bull, stability dot still red <span class="sp-dot sp-dot-vu"></span>, then flip back bear within days. Failed reversal — never size up on a red dot.</p>
-        <p><strong>Distribution Top:</strong> Canary goes bear, ST follows a week later, LT holds bull for 2–4 weeks. Classic staged distribution. Exit in stages: reduce at Canary, half-exit at ST, full exit at LT.</p>
+        <p><strong>False Reversal:</strong> Canary + ST flip to uptrend, stability dot still red <span class="sp-dot sp-dot-vu"></span>, then flip back to downtrend within days. Failed reversal — never size up on a red dot.</p>
+        <p><strong>Distribution Top:</strong> Canary goes downtrend, ST follows a week later, LT holds uptrend for 2–4 weeks. Classic staged distribution. Exit in stages: reduce at Canary, half-exit at ST, full exit at LT.</p>
       </div>
 
       <div class="sp-card neutral">
         <h3>Reading Column Combinations</h3>
         <p><span class="sp-chip chip-sb">SB</span><span class="sp-chip chip-sb">SB</span><span class="sp-chip chip-sb">SB</span> + <span class="sp-dot sp-dot-vs"></span> Established uptrend, dark green dot. Strongest confirmation for existing holdings — but as a fresh entry it's late; extended names mean-reverted in our tests.</p>
         <p><span class="sp-chip chip-sb">SB</span><span class="sp-chip chip-sb">SB</span><span class="sp-chip chip-wbr">WBR</span> + <span class="sp-dot sp-dot-u"></span> Strong short-term, LT still turning. Size smaller until LT confirms.</p>
-        <p><span class="sp-chip chip-wbr">WBR</span><span class="sp-chip chip-wbr">WBR</span><span class="sp-chip chip-sb">SB</span> + <span class="sp-dot sp-dot-u"></span> Canary + ST have flipped bear but LT still bull. <em>Key exit warning</em>. Reduce now.</p>
+        <p><span class="sp-chip chip-wbr">WBR</span><span class="sp-chip chip-wbr">WBR</span><span class="sp-chip chip-sb">SB</span> + <span class="sp-dot sp-dot-u"></span> Canary + ST have flipped to downtrend but LT still uptrend. <em>Key exit warning</em>. Reduce now.</p>
         <p><span class="sp-chip chip-sw">SW</span><span class="sp-chip chip-sw">SW</span><span class="sp-chip chip-sw">SW</span> + <span class="sp-dot sp-dot-vu"></span> All sideways + red dot = choppy. No edge. Do nothing.</p>
-        <p><span class="sp-chip chip-sbr">SBR</span><span class="sp-chip chip-sbr">SBR</span><span class="sp-chip chip-sbr">SBR</span> + <span class="sp-dot sp-dot-vs"></span> Dark green dot on bear = sustained downtrend. No longs.</p>
+        <p><span class="sp-chip chip-sbr">SBR</span><span class="sp-chip chip-sbr">SBR</span><span class="sp-chip chip-sbr">SBR</span> + <span class="sp-dot sp-dot-vs"></span> Dark green dot on a downtrend = sustained downtrend. No longs.</p>
       </div>
 
       <div class="sp-card caution">
         <h3>What to Be Cautious Of</h3>
         <p><strong>🔴 Red stability dot = no trade.</strong> When the dot is red, the signal is chopping back and forth. Any entry is a coin flip.</p>
-        <p><strong>All STRONG BULL = likely late.</strong> By the time every column is STRONG BULL with dark green dot, the easy move has already happened. Look for pullback entries, not chasing.</p>
-        <p><strong>Signals lag.</strong> A stock can drop 20% and still show STRONG BULL for a week. Use stops, not signals alone, for risk management.</p>
+        <p><strong>All STRONG UPTREND = likely late.</strong> By the time every column is STRONG UPTREND with dark green dot, the easy move has already happened. Look for pullback entries, not chasing.</p>
+        <p><strong>Signals lag.</strong> A stock can drop 20% and still show STRONG UPTREND for a week. Use stops, not signals alone, for risk management.</p>
         <p><strong>Crypto moves faster.</strong> Signals can flip in days not weeks. Higher false-signal rate. Use smaller positions and wider stops.</p>
-        <p><strong>Market correlation.</strong> In a broad market crash (SPY STRONG BEAR), almost everything goes red regardless of individual signals. Check Indices first.</p>
+        <p><strong>Market correlation.</strong> In a broad market crash (SPY STRONG DOWNTREND), almost everything goes red regardless of individual signals. Check Indices first.</p>
         <p><strong>News events.</strong> Earnings or macro data can cause a 1-day spike flipping Canary. If Canary flips but ST/LT don't follow in 3–5 days, it's noise.</p>
       </div>
 
@@ -3182,25 +3182,25 @@ loadStaticData().then(() => {
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-top:4px;">
           <div>
             <p style="font-weight:700;color:#15803d;margin-bottom:4px;">✅ BUY / HOLD CONDITIONS</p>
-            <p>• LT Trend = <span class="sp-chip chip-sb">STRONG BULL</span> or <span class="sp-chip chip-wb">WEAK BULL</span></p>
+            <p>• LT Trend = <span class="sp-chip chip-sb">STRONG UPTREND</span> or <span class="sp-chip chip-wb">WEAK BULL</span></p>
             <p>• Stability dot light green <span class="sp-dot sp-dot-s"></span> or dark green <span class="sp-dot sp-dot-vs"></span></p>
             <p>• Canary and ST agree with LT direction</p>
-            <p>• SPY / QQQ not in STRONG BEAR</p>
+            <p>• SPY / QQQ not in STRONG DOWNTREND</p>
             <p>• Balance sheet score ≥ 6 (individual stocks)</p>
           </div>
           <div>
             <p style="font-weight:700;color:#b91c1c;margin-bottom:4px;">🚫 SELL / REDUCE CONDITIONS</p>
             <p>• Canary turns <span class="sp-chip chip-wbr">WEAK BEAR</span> → tighten stop</p>
-            <p>• ST Trend turns bear → reduce 30–50%</p>
-            <p>• LT Trend turns bear → exit majority</p>
+            <p>• ST Trend turns downtrend → reduce 30–50%</p>
+            <p>• LT Trend turns downtrend → exit majority</p>
             <p>• Stability dot red <span class="sp-dot sp-dot-vu"></span> on bearish signal → full exit</p>
-            <p>• SPY / QQQ both STRONG BEAR → reduce all longs</p>
+            <p>• SPY / QQQ both STRONG DOWNTREND → reduce all longs</p>
           </div>
           <div>
             <p style="font-weight:700;color:#92400e;margin-bottom:4px;">⚠️ STAND ASIDE CONDITIONS</p>
             <p>• All columns = <span class="sp-chip chip-sw">SIDEWAYS</span></p>
             <p>• Stability dot red <span class="sp-dot sp-dot-vu"></span> = choppy, no edge</p>
-            <p>• Canary and LT disagree (one bull, one bear)</p>
+            <p>• Canary and LT disagree (one up, one down)</p>
             <p>• Recent major news event not yet absorbed</p>
             <p>• When unsure — flat is a valid position</p>
           </div>
@@ -3218,7 +3218,7 @@ loadStaticData().then(() => {
       <div class="htu-grid">
         <div class="htu-block">
           <h3>What Is This Dashboard?</h3>
-          <p>This board shows whether each asset is in a bullish or bearish <em>regime</em> using Moving Average crossover signals — the same method used by professional trend-following funds.</p>
+          <p>This board shows whether each asset is in an uptrend or downtrend <em>regime</em> using Moving Average crossover signals — the same method used by professional trend-following funds.</p>
           <p>It doesn&rsquo;t predict the future. It tells you what the trend is <strong>right now</strong> and how stable that has been over 30 days. Hover any signal cell to see a breakdown of each MA pair.</p>
         </div>
         <div class="htu-block">
@@ -3231,11 +3231,11 @@ loadStaticData().then(() => {
         <div class="htu-block">
           <h3>The Regime Badges</h3>
           <div class="htu-badge-list">
-            <div class="htu-badge-row"><span class="htu-badge htu-sb">STRONG BULL</span><span>All signals bullish. Highest conviction uptrend.</span></div>
-            <div class="htu-badge-row"><span class="htu-badge htu-wb">WEAK BULL</span><span>Mostly bullish. Trend up, moderate conviction.</span></div>
+            <div class="htu-badge-row"><span class="htu-badge htu-sb">STRONG UPTREND</span><span>All signals up. Highest conviction uptrend.</span></div>
+            <div class="htu-badge-row"><span class="htu-badge htu-wb">WEAK UPTREND</span><span>Trend up, moderate conviction.</span></div>
             <div class="htu-badge-row"><span class="htu-badge htu-sw">SIDEWAYS</span><span>Mixed signals. Choppy — wait for clarity.</span></div>
-            <div class="htu-badge-row"><span class="htu-badge htu-wbr">WEAK BEAR</span><span>Mostly bearish. Reduce long exposure.</span></div>
-            <div class="htu-badge-row"><span class="htu-badge htu-sbr">STRONG BEAR</span><span>All signals bearish. Exit longs.</span></div>
+            <div class="htu-badge-row"><span class="htu-badge htu-wbr">WEAK DOWNTREND</span><span>Trend down. Reduce long exposure.</span></div>
+            <div class="htu-badge-row"><span class="htu-badge htu-sbr">STRONG DOWNTREND</span><span>All signals down. Exit longs.</span></div>
           </div>
         </div>
         <div class="htu-block">
@@ -3250,7 +3250,7 @@ loadStaticData().then(() => {
           <h3>Hover the Tooltip</h3>
           <p>Hover any coloured signal cell to see the <strong>Trend Ladder</strong>. Each row shows one MA pair:</p>
           <p>• <strong>Pair</strong> (e.g. 10/3) = slow MA / fast MA periods in days</p>
-          <p>• <strong>Trend</strong> badge = green if price is above the slow MA (bullish), red if below</p>
+          <p>• <strong>Trend</strong> badge = green if price is above the slow MA (uptrend), red if below</p>
           <p>• <strong>Momo</strong> badge = green if fast MA is above slow MA (momentum building), red if below</p>
           <p>• <strong>% vs slow</strong> = how far price is above/below the slow MA right now</p>
         </div>
@@ -3262,10 +3262,10 @@ loadStaticData().then(() => {
         </div>
         <div class="htu-block htu-wide">
           <h3>Quick Practical Rules</h3>
-          <p>✅ All columns STRONG BULL + dark green dot + strong balance sheet = fully confirmed uptrend. Reassurance for holders — not an entry signal; fully-extended names had the weakest forward returns in our backtests.</p>
-          <p>⚠️ Canary goes bear while LT still bull = early warning. Don't sell yet — wait for ST to confirm.</p>
-          <p>🔄 Yellow/red dot + new bull signal = unconfirmed. Wait for green dot before sizing up.</p>
-          <p>🚫 All STRONG BEAR = exit. Red dot + STRONG BEAR = confirmed sustained downtrend, no longs.</p>
+          <p>✅ All columns STRONG UPTREND + dark green dot + strong balance sheet = fully confirmed uptrend. Reassurance for holders — not an entry signal; fully-extended names had the weakest forward returns in our backtests.</p>
+          <p>⚠️ Canary goes downtrend while LT still uptrend = early warning. Don't sell yet — wait for ST to confirm.</p>
+          <p>🔄 Yellow/red dot + new uptrend signal = unconfirmed. Wait for green dot before sizing up.</p>
+          <p>🚫 All STRONG DOWNTREND = exit. Red dot + STRONG DOWNTREND = confirmed sustained downtrend, no longs.</p>
           <p>🔁 Check Global Indices (SPY, QQQ) first. Individual signals are unreliable in a full market crash.</p>
           <p>📖 Click <strong>Signals</strong> in the top nav for the full entry/exit/reversal guide.</p>
         </div>
