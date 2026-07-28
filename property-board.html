@@ -140,6 +140,17 @@
     .spick-stats { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.78rem; color: var(--muted); }
     .spick-runners { margin-top: 6px; font-size: 0.72rem; color: var(--muted); }
 
+    .so-bar-wrap {
+      display: inline-block; width: 46px; height: 7px; background: #e7e5e4;
+      border-radius: 4px; overflow: hidden; vertical-align: middle; margin-right: 5px;
+    }
+    .so-bar { display: block; height: 100%; background: #15803d; }
+    .so-flag {
+      display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 999px;
+      background: #fee2e2; color: #991b1b; font-size: 0.62rem; font-weight: 700;
+      letter-spacing: 0.03em; text-transform: uppercase;
+    }
+
     /* ── Private portfolio ───────────────────────────────────── */
     .pf-privacy {
       background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;
@@ -813,6 +824,83 @@
         h(StatePickCard, { side: 'sell', pick: sells[0], runners: sells.slice(1, 4) }));
     }
 
+    // Which STATE has the best opportunities — a breadth question, not a
+    // "best single market" question. One brilliant town does not make a state
+    // an opportunity, so this ranks on the MEDIAN market and on how many of a
+    // state's markets clear the national top quartile.
+    const median = (arr) => {
+      const s = [...arr].filter(v => v != null).sort((a, b) => a - b);
+      return s.length ? s[Math.floor(s.length / 2)] : null;
+    };
+
+    function StateOpportunity({ picks }) {
+      if (!picks || !picks.buy.length) return null;
+      const allBuy = picks.buy.map(x => x.buy);
+      const natMed = median(allBuy);
+      const sorted = [...allBuy].sort((a, b) => b - a);
+      const q75 = sorted[Math.floor(sorted.length * 0.25)];
+
+      const byState = {};
+      for (const x of picks.buy) (byState[sectionOf(x.r.state)] ||= []).push(x);
+
+      const rows = Object.entries(byState).map(([key, arr]) => {
+        const sec = SECTIONS.find(s => s.key === key);
+        return {
+          key, label: sec ? sec.label : key, n: arr.length,
+          mBuy: median(arr.map(x => x.buy)),
+          mSell: median(arr.map(x => x.sell)),
+          breadth: 100 * arr.filter(x => x.buy >= q75).length / arr.length,
+          yld: median(arr.map(x => x.r.yield)),
+          vac: median(arr.map(x => x.r.vac)),
+          rent: median(arr.map(x => x.rentG)),
+          sup: median(arr.map(x => x.stockG)),
+          best: arr.reduce((a, b) => (a.buy > b.buy ? a : b)).r.name,
+        };
+      }).sort((a, b) => b.mBuy - a.mBuy);
+
+      return h('div', { style: { marginTop: 22 } },
+        h('div', { className: 'section-title' }, 'Which state has the best opportunities?'),
+        h('div', { className: 'picks-sub' },
+          'Ranked by the ', h('strong', null, 'median'), ' market in each state, not its best one — ',
+          'a single strong town is one opportunity, not a state-level one. ',
+          h('strong', null, 'Breadth'), ' is the share of that state\'s markets scoring in the national ',
+          'top quartile (≥ ', q75.toFixed(2), '). National median is ', natMed.toFixed(2), '.'),
+        h('table', null,
+          h('thead', null, h('tr', null,
+            h('th', null, '#'), h('th', null, 'State'),
+            h('th', { style: { textAlign: 'right' } }, 'Markets'),
+            h('th', { style: { textAlign: 'right' } }, 'Median buy'),
+            h('th', { style: { textAlign: 'right' } }, 'Breadth'),
+            h('th', { style: { textAlign: 'right' } }, 'Median sell'),
+            h('th', { style: { textAlign: 'right' } }, 'Yield'),
+            h('th', { style: { textAlign: 'right' } }, 'Vacancy'),
+            h('th', { style: { textAlign: 'right' } }, 'Rent 12m'),
+            h('th', { style: { textAlign: 'right' } }, 'Supply 12m'),
+            h('th', null, 'Strongest market'))),
+          h('tbody', null, rows.map((r, i) => h('tr', { key: r.key },
+            h('td', { className: 'muted' }, i + 1),
+            h('td', { className: 'td-name' }, r.label,
+              r.mSell > r.mBuy && h('span', { className: 'so-flag' }, 'sell-side')),
+            h('td', { className: 'td-num muted' }, r.n),
+            h('td', { className: 'td-num' }, h('strong', null, r.mBuy.toFixed(3))),
+            h('td', { className: 'td-num' },
+              h('span', { className: 'so-bar-wrap' },
+                h('span', { className: 'so-bar', style: { width: Math.round(r.breadth) + '%' } })),
+              ' ', r.breadth.toFixed(0), '%'),
+            h('td', { className: 'td-num muted' }, r.mSell.toFixed(3)),
+            h('td', { className: 'td-num' }, r.yld.toFixed(2), '%'),
+            h('td', { className: 'td-num ' + (r.vac > 1.5 ? 'neg' : 'pos') }, r.vac.toFixed(2), '%'),
+            h('td', { className: 'td-num ' + pctCls(r.rent) }, fmtPct(r.rent)),
+            h('td', { className: 'td-num ' + (r.sup > 0 ? 'neg' : 'pos') }, fmtPct(r.sup)),
+            h('td', { className: 'muted' }, r.best))))),
+        h('div', { className: 'picks-warn', style: { marginTop: 10 } },
+          '⚠ State averages hide enormous spread. Perth metro and the Pilbara are not one market, ',
+          'and a state can rank well because it fell hard and is now cheap against its own history. ',
+          'Small states clear the 100-listing gate with far fewer markets, so their medians rest on a ',
+          'thinner base — read the Markets column before trusting the rank. ',
+          '"Sell-side" marks a state whose median sell score exceeds its median buy score.'));
+    }
+
     // Overview: every state's top buy and sell in one table.
     function AllStatePicks({ picks }) {
       if (!picks) return null;
@@ -906,6 +994,7 @@
             h('span', null, 'SQM weekly asking-price index · ', regions.length, ' markets · baked ',
               updated ? updated.toLocaleDateString() : '?'),
             staleDays > 10 && h('span', { className: 'stale-warn' }, '⚠ data ', Math.floor(staleDays), ' days old — check the GitHub Action'))),
+        !q && filter === 'NAT' && h(StateOpportunity, { picks: payload._picks }),
         !q && filter === 'NAT' && h(AllStatePicks, { picks: payload._picks }),
         !q && filter !== 'NAT' && h(StatePicks, { picks: payload._picks, secKey: filter }),
         visible.length === 0 && h('div', { className: 'spinner-wrap' },
