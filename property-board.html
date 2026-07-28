@@ -260,6 +260,24 @@
     .chip-nd  { background: #f1f5f9; color: #94a3b8; }
 
     .sig-inner { display: flex; align-items: center; gap: 6px; }
+    .stab-wrap { position: relative; display: inline-flex; align-items: center; outline: none; cursor: help; }
+    .stab-tip {
+      position: absolute; top: calc(100% + 7px); left: 50%; transform: translateX(-50%);
+      width: 250px; background: #292524; color: #fff; font-size: 0.72rem; line-height: 1.45;
+      font-weight: 400; padding: 8px 11px; border-radius: 8px; text-align: left;
+      white-space: normal; opacity: 0; visibility: hidden; pointer-events: none; z-index: 60;
+      transition: opacity 0.12s ease; box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    }
+    .stab-tip strong { color: #fff; }
+    .stab-tip::before {
+      content: ''; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+      border: 5px solid transparent; border-bottom-color: #292524;
+    }
+    .stab-wrap:hover .stab-tip, .stab-wrap:focus .stab-tip { opacity: 1; visibility: visible; }
+    /* last two columns would push the tip off-screen */
+    tr td:last-child .stab-tip, tr td:nth-last-child(2) .stab-tip { left: auto; right: 0; transform: none; }
+    tr td:last-child .stab-tip::before, tr td:nth-last-child(2) .stab-tip::before { left: auto; right: 8px; transform: none; }
+
     .stab-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: 0 0 auto; }
     .dot-vs { background: #15803d; }
     .dot-s  { background: #86efac; }
@@ -445,6 +463,27 @@
 
     const STAB_DOT = { very_stable: 'dot-vs', stable: 'dot-s', unstable: 'dot-u', very_unstable: 'dot-vu' };
 
+    // The dot answers "can I trust this regime?", which is a different question
+    // from "what is the regime?" — so it gets its own explanation on hover.
+    const STAB_INFO = {
+      very_stable: ['dot-vs', 'Very stable',
+        'Same regime today and at 13, 26 and 39 weeks ago. The trend is well established.'],
+      stable: ['dot-s', 'Stable',
+        'One regime change in the last 39 weeks, and it happened more than a quarter ago.'],
+      unstable: ['dot-u', 'Unstable',
+        'The regime flipped within the last 13 weeks. Treat the signal as unconfirmed — it may flip back.'],
+      very_unstable: ['dot-vu', 'Very unstable',
+        'Multiple regime flips in the last 39 weeks. The signal is chopping; low confidence either way.'],
+    };
+
+    function StabDot({ stability }) {
+      const info = STAB_INFO[stability] || STAB_INFO.stable;
+      return h('span', { className: 'stab-wrap', tabIndex: 0, title: info[1] + ' — ' + info[2] },
+        h('span', { className: 'stab-dot ' + info[0] }),
+        h('span', { className: 'stab-tip' },
+          h('strong', null, info[1]), h('br'), info[2]));
+    }
+
     // ── Top picks: buy / sell scoring ────────────────────────────────────
     // Deliberately NOT the stock board's momentum score. Property is held for
     // years and costs ~5% round-trip to transact, so fundamentals carry ~90%
@@ -610,7 +649,7 @@
           COLS.map(c => h('td', { key: c.key }, h(Badge, { score: sigs ? sigs.cols[c.key] : null }))),
           h('td', null, h('div', { className: 'sig-inner' },
             h(Badge, { score: sigs ? sigs.allInd : null }),
-            sigs && h('span', { className: 'stab-dot ' + (STAB_DOT[stability] || 'dot-s') }))),
+            sigs && h(StabDot, { stability }))),
           h('td', { className: 'td-num hide-sm' }, r.yield != null ? r.yield.toFixed(1) + '%' : '—'),
           h('td', { className: 'td-num hide-sm' }, r.vac != null ? r.vac.toFixed(1) + '%' : '—'),
           h('td', { className: 'td-num hide-sm ' + pctCls(rentChg) }, fmtPct(rentChg)),
@@ -969,7 +1008,7 @@
                 COLS.map(c => h('td', { key: c.key }, h(Badge, { score: x.s ? x.s.cols[c.key] : null }))),
                 h('td', null, h('div', { className: 'sig-inner' },
                   h(Badge, { score: x.s ? x.s.allInd : null }),
-                  x.s && h('span', { className: 'stab-dot ' + (STAB_DOT[x.r._stability] || 'dot-s') }))),
+                  x.s && h(StabDot, { stability: x.r._stability }))),
                 h('td', { className: 'td-num ' + (x.mExp != null && x.mExp < 12 ? 'neg' : '') },
                   x.p.fixedTo ? (x.p.fixedTo + (x.mExp != null ? ' (' + Math.round(x.mExp) + 'm)' : '')) : '—'),
                 h('td', null, h('button', {
