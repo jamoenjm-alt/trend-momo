@@ -187,6 +187,26 @@
     .pf-btn-go:hover { background: #16a34a; }
     .pf-btn-del { color: #b91c1c; }
     .pf-msg { margin-top: 8px; font-size: 0.78rem; color: var(--muted); }
+    .pf-err { color: #b91c1c; font-weight: 600; }
+    .pf-addr {
+      width: 100%; padding: 10px 12px; font-size: 0.92rem; border: 2px solid var(--border);
+      border-radius: 8px; background: var(--bg); color: var(--text);
+    }
+    .pf-addr:focus { outline: none; border-color: #15803d; }
+    .pf-match { margin-top: 6px; font-size: 0.78rem; padding: 6px 10px; border-radius: 6px; }
+    .pf-match-ok   { background: #f0fdf4; color: #14532d; border: 1px solid #bbf7d0; }
+    .pf-match-warn { background: #fffbeb; color: #854d0e; border: 1px solid #fde68a; }
+    .pf-match-bad  { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .pf-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 9px; margin-top: 12px;
+    }
+    .pf-grid label { display: flex; flex-direction: column; gap: 3px; font-size: 0.72rem; color: var(--muted); }
+    .pf-grid input, .pf-grid select {
+      padding: 7px 9px; border: 1px solid var(--border); border-radius: 7px;
+      background: var(--surface); color: var(--text); font-size: 0.85rem; width: 100%;
+    }
+    .pf-btn-sm { padding: 3px 9px; font-size: 0.7rem; }
 
     .section-title {
       font-size: 0.95rem; font-weight: 800; letter-spacing: 0.06em;
@@ -650,6 +670,40 @@
           'A high score is a reason to research a market, not to buy in it.'));
     }
 
+    // ── Address → covered market ─────────────────────────────────────────
+    // The data is postcode-level. A street address adds no precision; we use it
+    // only to find the postcode. If that exact postcode isn't on the board we
+    // fall back to the numerically nearest covered postcode in the same state
+    // (AU postcodes are geographically clustered) and SAY SO, rather than
+    // pretending the match is exact.
+    function resolveAddress(text, regions) {
+      const raw = (text || '').trim();
+      if (!raw) return null;
+      const entries = Object.entries(regions).filter(([, r]) => r.state !== 'NAT');
+
+      // 1. exact postcode anywhere in the string
+      const pc = (raw.match(/\b(\d{4})\b/) || [])[1];
+      if (pc) {
+        const hit = entries.find(([, r]) => r.param === pc);
+        if (hit) return { code: hit[0], r: hit[1], how: 'exact', pc };
+        // nearest covered postcode sharing the leading digit (same state)
+        const same = entries.filter(([, r]) => /^\d{4}$/.test(r.param) && r.param[0] === pc[0]);
+        if (same.length) {
+          const near = same.reduce((a, b) =>
+            Math.abs(+a[1].param - +pc) <= Math.abs(+b[1].param - +pc) ? a : b);
+          return { code: near[0], r: near[1], how: 'nearest', pc };
+        }
+      }
+
+      // 2. suburb / town name match against covered markets
+      const low = raw.toLowerCase();
+      const byName = entries.filter(([, r]) => low.includes(r.name.toLowerCase().split(' (')[0]))
+        .sort((a, b) => b[1].name.length - a[1].name.length);
+      if (byName.length) return { code: byName[0][0], r: byName[0][1], how: 'name', pc: byName[0][1].param };
+
+      return { code: null, r: null, how: 'none', pc };
+    }
+
     // Map a purchase date onto the weekly index array. px[last] === px_end.
     function indexAtDate(r, dateStr) {
       if (!r.px || !r.px_end || !dateStr) return null;
@@ -668,6 +722,62 @@
       const d = new Date(dateStr + 'T00:00:00Z').getTime();
       if (isNaN(d)) return null;
       return (d - Date.now()) / (30.44 * 864e5);
+    }
+
+    function AddProperty({ regions, onAdd }) {
+      const [f, setF] = useState({ addr: '', label: '', type: 'house', cost: '', bought: '',
+                                   value: '', loan: '', rate: '', fixedTo: '', rent: '' });
+      const [err, setErr] = useState('');
+      const set = (k) => (e) => setF(Object.assign({}, f, { [k]: e.target.value }));
+      const match = resolveAddress(f.addr, regions);
+
+      const submit = () => {
+        if (!match || !match.code) { setErr('Enter an address, suburb or postcode we can match.'); return; }
+        if (!f.cost || !f.bought) { setErr('Cost base and the date you acquired it are required — leave nothing to guess.'); return; }
+        onAdd({
+          label: f.label.trim() || f.addr.trim(),
+          code: match.code, type: f.type,
+          price: +f.cost || null, bought: f.bought,
+          value: +f.value || null, loan: +f.loan || null,
+          rate: +f.rate || null, fixedTo: f.fixedTo || null, rent: +f.rent || null,
+        });
+        setF({ addr: '', label: '', type: 'house', cost: '', bought: '', value: '',
+               loan: '', rate: '', fixedTo: '', rent: '' });
+        setErr('');
+      };
+
+      return h('div', { className: 'pf-editor' },
+        h('h4', null, 'Add a property'),
+        h('div', { className: 'pf-hint' },
+          'Type an address, suburb or postcode. Everything below is yours to enter — ',
+          'nothing is estimated or filled in for you.'),
+        h('input', { className: 'pf-addr', value: f.addr, onChange: set('addr'),
+          placeholder: 'e.g. 12 Smith St, Ballarat VIC 3350   —   or just "Ballarat" or "3350"' }),
+        f.addr.trim() && h('div', { className: 'pf-match ' + (match.how === 'none' ? 'pf-match-bad' : match.how === 'nearest' ? 'pf-match-warn' : 'pf-match-ok') },
+          match.how === 'none'
+            ? '✕ No covered market matches that. Try the postcode.'
+            : match.how === 'nearest'
+              ? '≈ Postcode ' + match.pc + ' is not on the board. Closest covered market: ' +
+                match.r.name + ' (' + match.r.param + ', ' + match.r.state + ') — treat it as a proxy, not your postcode.'
+              : '✓ Matched ' + match.r.name + ' (' + match.r.param + ', ' + match.r.state + ')'),
+        h('div', { className: 'pf-grid' },
+          h('label', null, 'Nickname', h('input', { value: f.label, onChange: set('label'), placeholder: 'optional' })),
+          h('label', null, 'Type', h('select', { value: f.type, onChange: set('type') },
+            h('option', { value: 'house' }, 'House'), h('option', { value: 'unit' }, 'Unit'))),
+          h('label', null, 'Cost base $', h('input', { type: 'number', value: f.cost, onChange: set('cost'),
+            placeholder: 'purchase, or land + build' })),
+          h('label', null, 'Acquired / completed', h('input', { type: 'date', value: f.bought, onChange: set('bought') })),
+          h('label', null, 'Current value $', h('input', { type: 'number', value: f.value, onChange: set('value') })),
+          h('label', null, 'Loan balance $', h('input', { type: 'number', value: f.loan, onChange: set('loan') })),
+          h('label', null, 'Rate %', h('input', { type: 'number', step: '0.01', value: f.rate, onChange: set('rate') })),
+          h('label', null, 'Fixed until', h('input', { type: 'date', value: f.fixedTo, onChange: set('fixedTo') })),
+          h('label', null, 'Rent $/week', h('input', { type: 'number', value: f.rent, onChange: set('rent') }))),
+        h('div', { className: 'pf-btns' },
+          h('button', { className: 'pf-btn pf-btn-go', onClick: submit }, 'Add property')),
+        err && h('div', { className: 'pf-msg pf-err' }, err),
+        h('div', { className: 'pf-hint', style: { marginTop: 8 } },
+          'Built rather than bought? Put land + construction in Cost base and use the completion date. ',
+          'The analysis is postcode-level — a street number adds no precision, it only helps find the postcode.'));
     }
 
     function PortfolioView({ regions, items, setItems }) {
@@ -754,7 +864,8 @@
               h('th', { style: { textAlign: 'right' } }, 'Your segment 12m'),
               h('th', null, '0–6M'), h('th', null, '6M–1Y'), h('th', null, '1–2Y'), h('th', null, '2–5Y'),
               h('th', null, 'All Signals'),
-              h('th', { style: { textAlign: 'right' } }, 'Fixed until'))),
+              h('th', { style: { textAlign: 'right' } }, 'Fixed until'),
+              h('th', null, ''))),
             h('tbody', null, rows.map(x => {
               const segChg = chg(x.segNow, x.segPrev);
               return h('tr', { key: x.idx },
@@ -774,22 +885,28 @@
                   h(Badge, { score: x.s ? x.s.allInd : null }),
                   x.s && h('span', { className: 'stab-dot ' + (STAB_DOT[x.r._stability] || 'dot-s') }))),
                 h('td', { className: 'td-num ' + (x.mExp != null && x.mExp < 12 ? 'neg' : '') },
-                  x.p.fixedTo ? (x.p.fixedTo + (x.mExp != null ? ' (' + Math.round(x.mExp) + 'm)' : '')) : '—'));
+                  x.p.fixedTo ? (x.p.fixedTo + (x.mExp != null ? ' (' + Math.round(x.mExp) + 'm)' : '')) : '—'),
+                h('td', null, h('button', {
+                  className: 'pf-btn pf-btn-del pf-btn-sm',
+                  onClick: () => { const n = items.filter((_, i) => i !== x.idx); setItems(n); savePortfolio(n); },
+                }, 'remove')));
             }))),
           h('div', { style: { fontSize: '0.72rem', color: 'var(--muted)', marginTop: 6 } },
             '* purchase predates the 10-year price history held on the board, so the "since you bought" figure is measured from the start of that window.')),
 
+        h(AddProperty, { regions, onAdd: (p) => { const next = [...items, p]; setItems(next); savePortfolio(next); } }),
+
         h('div', { className: 'pf-editor' },
-          h('h4', null, items.length ? 'Edit / export' : 'Add your properties'),
+          h('h4', null, 'Backup / restore'),
           h('div', { className: 'pf-hint' },
-            'Paste a JSON array. Fields: label, code (board region code, e.g. TOM / SEA / ARD), ',
-            'type ("house" or "unit"), price, bought (YYYY-MM-DD), value, loan, rate, fixedTo (YYYY-MM-DD), rent (per week).'),
+            'Your data lives only in this browser. Export it to keep a copy, or paste a previous ',
+            'export to restore it on another device.'),
           h('textarea', { className: 'pf-input', value: raw, onChange: e => setRaw(e.target.value),
-            placeholder: '[{"label":"My place","code":"TOM","type":"house","price":900000,"bought":"2019-06-01","value":1600000,"loan":835000,"rate":6.25,"fixedTo":null,"rent":850}]' }),
+            placeholder: 'Paste a previous export here to restore it…' }),
           h('div', { className: 'pf-btns' },
-            h('button', { className: 'pf-btn pf-btn-go', onClick: doImport }, 'Save to this browser'),
+            h('button', { className: 'pf-btn pf-btn-go', onClick: doImport }, 'Restore from text'),
             h('button', { className: 'pf-btn', onClick: doExport }, 'Export current'),
-            h('button', { className: 'pf-btn pf-btn-del', onClick: doClear }, 'Clear')),
+            h('button', { className: 'pf-btn pf-btn-del', onClick: doClear }, 'Clear all')),
           msg && h('div', { className: 'pf-msg' }, msg)));
     }
 
