@@ -228,6 +228,28 @@
     }
     .pf-btn-sm { padding: 3px 9px; font-size: 0.7rem; }
 
+    .dd-caret { color: var(--muted); font-size: 0.7rem; }
+    .dd-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 14px; padding: 12px 4px;
+    }
+    .dd-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; }
+    .dd-box h4 {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--muted); margin-bottom: 7px;
+    }
+    .dd-box table { border: none; width: 100%; }
+    .dd-box td { border: none; padding: 3px 8px 3px 0; font-size: 0.79rem; white-space: nowrap; }
+    .dd-box td:nth-child(2) { font-weight: 700; text-align: right; }
+    .dd-box td:nth-child(3) { font-size: 0.7rem; white-space: normal; }
+    .dd-spark { display: flex; gap: 18px; flex-wrap: wrap; }
+    .dd-sparklab { font-size: 0.72rem; color: var(--muted); margin-bottom: 3px; }
+    .dd-warn {
+      margin-top: 9px; font-size: 0.71rem; color: #854d0e; background: #fffbeb;
+      border: 1px solid #fde68a; border-radius: 6px; padding: 6px 8px; line-height: 1.45;
+    }
+    .dd-note { margin-top: 9px; font-size: 0.7rem; color: var(--muted); line-height: 1.45; }
+
     .section-title {
       font-size: 0.95rem; font-weight: 800; letter-spacing: 0.06em;
       text-transform: uppercase; margin: 18px 0 8px; color: var(--text);
@@ -284,6 +306,10 @@
     /* last two columns would push the tip off-screen */
     tr td:last-child .stab-tip, tr td:nth-last-child(2) .stab-tip { left: auto; right: 0; transform: none; }
     tr td:last-child .stab-tip::before, tr td:nth-last-child(2) .stab-tip::before { left: auto; right: 8px; transform: none; }
+
+    .blend-mark { margin-left: 4px; }
+    .blend-i { font-size: 0.74rem; color: #a16207; cursor: help; }
+    .blend-mark .stab-tip { width: 300px; }
 
     .stab-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: 0 0 auto; }
     .dot-vs { background: #15803d; }
@@ -368,6 +394,34 @@
       { key: 'MINE', label: '🔒 My Portfolio' },
     ];
     const sectionOf = (state) => (state === 'ACT' || state === 'NT') ? 'ACTNT' : state;
+
+    // Postcodes that blend genuinely different markets. SQM publishes by
+    // postcode, so these CANNOT be split with this data — the honest move is to
+    // say so on the row rather than let one name imply the whole area behaves
+    // alike. Keyed by postcode, so no re-bake is needed to add more.
+    const BLENDED = {
+      '2540': 'Culburra Beach, Huskisson, Vincentia, Hyams Beach, Sanctuary Point, St Georges Basin, Callala and Tomerong — a premium Jervis Bay holiday market, a working coastal town and rural acreage, all averaged into one index.',
+      '2250': 'Gosford, East/West Gosford, Point Clare, Narara and Springfield.',
+      '2536': 'Batemans Bay, Catalina, Sunshine Bay, Malua Bay and Surf Beach.',
+      '2539': 'Ulladulla, Mollymook and Narrawallee.',
+      '2546': 'Narooma, Dalmeny and Bermagui.',
+      '2534': 'Gerringong and Gerroa.',
+      '2444': 'Port Macquarie, Thrumster and Riverside.',
+      '2530': 'Dapto, Horsley, Kanahooka and Koonawarra.',
+      '2528': 'Warilla, Barrack Heights, Lake Illawarra and Mount Warrigal.',
+      '6210': 'Mandurah, Halls Head, Dudley Park and Silver Sands.',
+      '4870': 'Cairns city and its inner suburbs.',
+    };
+
+    function BlendMark({ pc }) {
+      const note = BLENDED[pc];
+      if (!note) return null;
+      return h('span', { className: 'stab-wrap blend-mark', tabIndex: 0,
+        title: 'One postcode, several distinct markets: ' + note },
+        h('span', { className: 'blend-i' }, 'ⓘ'),
+        h('span', { className: 'stab-tip' },
+          h('strong', null, 'One postcode, several markets'), h('br'), note));
+    }
 
     // ── Private portfolio (localStorage only) ────────────────────────────
     // This site is served from GitHub Pages — every file in the repo is public.
@@ -681,7 +735,8 @@
       return h(Fragment, null,
         h('tr', { onClick: () => setOpen(o => !o) },
           h('td', { className: 'td-name' }, r.name, ' ',
-            h('span', { className: 'td-sub' }, r.kind === 'postcode' ? r.param : r.state)),
+            h('span', { className: 'td-sub' }, r.kind === 'postcode' ? r.param : r.state),
+            h(BlendMark, { pc: r.param })),
           h('td', { className: 'td-num' }, fmtMoney(px[px.length - 1])),
           h('td', { className: 'td-num ' + pctCls(yr) }, fmtPct(yr)),
           COLS.map(c => h('td', { key: c.key }, h(Badge, { score: sigs ? sigs.cols[c.key] : null }))),
@@ -846,6 +901,139 @@
       return out.slice(0, limit || 8);
     }
 
+    function MiniSpark({ vals, invert, w, hgt }) {
+      if (!vals || vals.length < 4) return null;
+      const W = w || 108, H = hgt || 26, P = 2;
+      const mn = Math.min(...vals), mx = Math.max(...vals), sp = (mx - mn) || 1;
+      const pts = vals.map((v, i) => {
+        const x = P + (i / (vals.length - 1)) * (W - 2 * P);
+        const y = H - P - ((v - mn) / sp) * (H - 2 * P);
+        return x.toFixed(1) + ',' + y.toFixed(1);
+      }).join(' ');
+      // invert = rising is bad (vacancy, stock)
+      const rising = vals[vals.length - 1] > vals[0];
+      const good = invert ? !rising : rising;
+      return h('svg', { width: W, height: H, style: { display: 'block' } },
+        h('polyline', { points: pts, fill: 'none', strokeWidth: 1.4,
+          stroke: good ? '#15803d' : '#b91c1c' }));
+    }
+
+    const pctRankOf = (arr, v) => {
+      const a = arr.filter(x => x != null).sort((x, y) => x - y);
+      if (!a.length || v == null) return null;
+      return Math.round(100 * a.filter(x => x <= v).length / a.length);
+    };
+
+    function DeepDive({ p, r, sigs, regions, colSpan }) {
+      const px = r.px || [];
+      const idxNow = px[px.length - 1];
+      const at = indexAtDate(r, p.bought);
+      const areaGain = (at && idxNow) ? (idxNow / at.value - 1) * 100 : null;
+      const ownGain = (p.value && p.price) ? (p.value / p.price - 1) * 100 : null;
+      const vsMkt = (ownGain != null && areaGain != null) ? ownGain - areaGain : null;
+
+      const equity = (p.value != null && p.loan != null) ? p.value - p.loan : null;
+      const lvr = (p.value && p.loan != null) ? (p.loan / p.value) * 100 : null;
+      const yoc = (p.rent && p.price) ? (p.rent * 52 / p.price) * 100 : null;
+      const yNow = (p.rent && p.value) ? (p.rent * 52 / p.value) * 100 : null;
+
+      const intWk = (p.loan && p.rate) ? (p.loan * p.rate / 100) / 52 : null;
+      const cfWk = (p.rent != null && intWk != null) ? p.rent - intWk : null;
+      const shock = (pct) => (p.loan && p.rate) ? ((p.loan * (p.rate + pct) / 100) / 52) - intWk : null;
+
+      const seg = p.type === 'unit' ? 'u' : 'h';
+      const snap = r.snap_px || {};
+      const segChg = chg(snap[seg], snap[seg + '52']);
+      const otherChg = chg(snap[seg === 'u' ? 'h' : 'u'], snap[seg === 'u' ? 'h52' : 'u52']);
+      const priceG = chg(idxNow, px[px.length - 53]);
+      const rentG = chg(r.rent, r.rent52);
+      const divergence = (rentG != null && priceG != null) ? rentG - priceG : null;
+
+      const all = Object.values(regions).filter(x => x.state !== 'NAT' && x._buy != null);
+      const inState = all.filter(x => x.state === r.state);
+      const natRank = pctRankOf(all.map(x => x._buy), r._buy);
+      const stRank = pctRankOf(inState.map(x => x._buy), r._buy);
+
+      const row = (label, val, note, cls) => h('tr', null,
+        h('td', null, label),
+        h('td', { className: 'td-num ' + (cls || '') }, val),
+        h('td', { className: 'muted' }, note));
+
+      return h('tr', { className: 'detail-row' }, h('td', { colSpan },
+        h('div', { className: 'dd-grid' },
+
+          h('div', { className: 'dd-box' },
+            h('h4', null, 'Your position'),
+            h('table', null, h('tbody', null,
+              row('Cost base', fmtMoney(p.price), p.bought || ''),
+              row('Current value', fmtMoney(p.value), ''),
+              row('Your gain', fmtPct(ownGain), '', pctCls(ownGain)),
+              row('Suburb index, same period', fmtPct(areaGain),
+                at && at.capped ? 'from start of 10y window' : ''),
+              row('You vs the suburb', fmtPct(vsMkt),
+                vsMkt == null ? '' : vsMkt > 0 ? 'outperformed' : 'lagged', pctCls(vsMkt)),
+              row('Equity', fmtMoney(equity), ''),
+              row('LVR', lvr != null ? lvr.toFixed(0) + '%' : '—',
+                lvr == null ? '' : lvr > 90 ? 'above 90%' : lvr > 80 ? 'LMI territory' : '',
+                lvr > 80 ? 'neg' : 'pos')))),
+
+          h('div', { className: 'dd-box' },
+            h('h4', null, 'Income & carry'),
+            h('table', null, h('tbody', null,
+              row('Rent', p.rent ? '$' + p.rent + '/wk' : '—', ''),
+              row('Yield on cost', yoc != null ? yoc.toFixed(2) + '%' : '—', 'rent ÷ what you paid'),
+              row('Yield on value', yNow != null ? yNow.toFixed(2) + '%' : '—', 'rent ÷ today\'s value'),
+              row('Suburb yield', r.yield != null ? r.yield.toFixed(2) + '%' : '—',
+                r.yield_pct != null ? r.yield_pct.toFixed(0) + 'th pctile of own history' : ''),
+              row('Interest', intWk != null ? '$' + intWk.toFixed(0) + '/wk' : '—',
+                p.rate ? p.rate + '% on ' + fmtMoney(p.loan) : 'add loan + rate'),
+              row('Rent − interest', cfWk != null ? '$' + cfWk.toFixed(0) + '/wk' : '—',
+                cfWk != null ? ('$' + Math.round(cfWk * 52).toLocaleString() + '/yr, before all other costs') : '',
+                cfWk == null ? '' : cfWk >= 0 ? 'pos' : 'neg'),
+              p.fixedTo && row('If rate +1% at expiry',
+                shock(1) != null ? '−$' + shock(1).toFixed(0) + '/wk' : '—', 'extra interest', 'neg'),
+              p.fixedTo && row('If rate +2% at expiry',
+                shock(2) != null ? '−$' + shock(2).toFixed(0) + '/wk' : '—', 'extra interest', 'neg')))),
+
+          h('div', { className: 'dd-box' },
+            h('h4', null, 'The suburb, in depth'),
+            h('table', null, h('tbody', null,
+              row('Your segment (' + (p.type || 'house') + ') 12m', fmtPct(segChg), '', pctCls(segChg)),
+              row('Other segment 12m', fmtPct(otherChg), 'for contrast', pctCls(otherChg)),
+              row('Price 12m', fmtPct(priceG), 'combined index', pctCls(priceG)),
+              row('Rent 12m', fmtPct(rentG), '', pctCls(rentG)),
+              row('Rent minus price', fmtPct(divergence),
+                divergence == null ? '' : divergence > 0 ? 'yield expanding' : 'yield compressing',
+                pctCls(divergence)),
+              row('Off 10y peak', fmtPct((idxNow / Math.max(...px) - 1) * 100), '', ''),
+              row('Worst fall since 2009', r.ddmax != null ? fmtPct(r.ddmax) : '—', 'downside precedent'),
+              row('Listings', (r.stock || 0).toLocaleString(),
+                (r.stock || 0) < 100 ? 'thin — treat stats as noisy' : 'liquidity',
+                (r.stock || 0) < 100 ? 'neg' : ''),
+              row('Buy score rank', r._buy != null ? r._buy.toFixed(2) : '—',
+                natRank != null ? natRank + 'th pctile nationally · ' + stRank + 'th in ' + r.state : '')))),
+
+          h('div', { className: 'dd-box' },
+            h('h4', null, 'Rental market, last 3 years'),
+            h('div', { className: 'dd-spark' },
+              h('div', null,
+                h('div', { className: 'dd-sparklab' }, 'Vacancy ',
+                  h('strong', null, r.vac != null ? r.vac.toFixed(2) + '%' : '—'),
+                  r.vac12 != null ? h('span', { className: 'muted' }, ' vs ' + r.vac12.toFixed(2) + '% a year ago') : null),
+                h(MiniSpark, { vals: r.vac_m, invert: true })),
+              h('div', null,
+                h('div', { className: 'dd-sparklab' }, 'Stock on market ',
+                  h('strong', null, (r.stock || 0).toLocaleString()),
+                  h('span', { className: 'muted' }, ' ', fmtPct(chg(r.stock, r.stock12)), ' 12m')),
+                h(MiniSpark, { vals: r.stock_m, invert: true }))),
+            BLENDED[r.param] && h('div', { className: 'dd-warn' },
+              '⚠ ', r.param, ' blends several markets: ', BLENDED[r.param]),
+            h('div', { className: 'dd-note' },
+              'All suburb figures are asking prices for the whole postcode, not your property. ',
+              'Cashflow is rent minus interest only — it ignores rates, insurance, management, ',
+              'maintenance, strata and vacancy, which typically run 20–30% of gross rent.')))));
+    }
+
     function AddProperty({ regions, onAdd }) {
       const [f, setF] = useState({ addr: '', label: '', type: 'house', cost: '', bought: '',
                                    value: '', loan: '', rate: '', fixedTo: '', rent: '' });
@@ -946,6 +1134,7 @@
     function PortfolioView({ regions, items, setItems }) {
       const [raw, setRaw] = useState('');
       const [msg, setMsg] = useState('');
+      const [open, setOpen] = useState(-1);
 
       const doImport = () => {
         try {
@@ -1031,8 +1220,12 @@
               h('th', null, ''))),
             h('tbody', null, rows.map(x => {
               const segChg = chg(x.segNow, x.segPrev);
-              return h('tr', { key: x.idx },
-                h('td', { className: 'td-name' }, x.p.label,
+              return h(Fragment, { key: x.idx },
+                h('tr', { style: { cursor: 'pointer' },
+                  onClick: () => setOpen(open === x.idx ? -1 : x.idx) },
+                h('td', { className: 'td-name' },
+                  h('span', { className: 'dd-caret' }, open === x.idx ? '▾' : '▸'), ' ',
+                  x.p.label,
                   h('span', { className: 'td-sub' }, ' ', x.r ? x.r.name : '?', ' · ', x.p.type || 'house')),
                 h('td', { className: 'td-num' }, fmtMoney(x.p.price)),
                 h('td', { className: 'td-num' }, fmtMoney(x.p.value)),
@@ -1051,8 +1244,11 @@
                   x.p.fixedTo ? (x.p.fixedTo + (x.mExp != null ? ' (' + Math.round(x.mExp) + 'm)' : '')) : '—'),
                 h('td', null, h('button', {
                   className: 'pf-btn pf-btn-del pf-btn-sm',
-                  onClick: () => { const n = items.filter((_, i) => i !== x.idx); setItems(n); savePortfolio(n); },
-                }, 'remove')));
+                  onClick: (e) => { e.stopPropagation();
+                    const n = items.filter((_, i) => i !== x.idx); setItems(n); savePortfolio(n); setOpen(-1); },
+                }, 'remove'))),
+                open === x.idx && x.r && h(DeepDive, {
+                  p: x.p, r: x.r, sigs: x.s, regions, colSpan: 16 }));
             }))),
           h('div', { style: { fontSize: '0.72rem', color: 'var(--muted)', marginTop: 6 } },
             '* purchase predates the 10-year price history held on the board, so the "since you bought" figure is measured from the start of that window.')),

@@ -136,7 +136,7 @@ REGIONS = {
     "INV": ("Inverell",       "NSW", "postcode", "2360"),
     "PKS": ("Parkes",         "NSW", "postcode", "2870"),
     "LTG": ("Lithgow",        "NSW", "postcode", "2790"),
-    "TOM": ("Jervis Bay / Culburra / Tomerong", "NSW", "postcode", "2540"),
+    "TOM": ("Culburra / Jervis Bay / Shoalhaven Coast", "NSW", "postcode", "2540"),
     "CRN": ("Cronulla", "NSW", "postcode", "2230"),
     "HBH": ("Helensburgh", "NSW", "postcode", "2508"),
     "THR": ("Thirroul", "NSW", "postcode", "2515"),
