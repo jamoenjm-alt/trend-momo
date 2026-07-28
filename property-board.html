@@ -96,6 +96,10 @@
     .searchbar-clear:hover { background: #d6d3d1; }
     .searchbar-count { font-size: 0.78rem; color: var(--muted); }
 
+    .srcline { font-size: 0.72rem; color: var(--muted); padding: 2px 0 6px; }
+    .srcline a { color: var(--muted); text-decoration: underline; }
+    .srcline a:hover { color: var(--text); }
+
     /* ── Top picks ───────────────────────────────────────────── */
     .picks-wrap { padding: 16px 0 4px; }
     .picks-title {
@@ -327,6 +331,7 @@
 
     // ── Sections ──────────────────────────────────────────────────────────
     const SECTIONS = [
+      { key: 'PICKS', label: '🎯 Picks' },
       { key: 'NAT', label: 'National' },
       { key: 'NSW', label: 'NSW' },
       { key: 'VIC', label: 'VIC' },
@@ -1139,7 +1144,7 @@
     }
 
     function Board({ payload }) {
-      const [filter, setFilter] = useState('NSW');
+      const [filter, setFilter] = useState('PICKS');
       const [search, setSearch] = useState('');
       const [portfolio, setPortfolio] = useState(loadPortfolio);
 
@@ -1167,7 +1172,7 @@
       if (filter === 'MINE') {
         return h(Fragment, null,
           h(StateTabs, { filter, setFilter }),
-          h('div', { className: 'section-title' }, 'My Portfolio'),
+          h('div', { className: 'section-title' }, '🔒 My Portfolio'),
           h(PortfolioView, { regions: payload.regions, items: portfolio, setItems: setPortfolio }));
       }
 
@@ -1185,17 +1190,23 @@
           q && h('button', { className: 'searchbar-clear', onClick: () => setSearch('') }, '✕'),
           q && h('span', { className: 'searchbar-count' },
             matchCount, matchCount === 1 ? ' match' : ' matches', ' across all states')),
-        !q && h(TopPicks, { picks: payload._picks }),
         !q && h(StateTabs, { filter, setFilter }),
-        h('div', { className: 'toolbar' },
-          h('div', { className: 'toolbar-left' },
-            h('span', null, 'SQM weekly asking-price index · ', regions.length, ' markets · baked ',
-              updated ? updated.toLocaleDateString() : '?'),
-            staleDays > 10 && h('span', { className: 'stale-warn' }, '⚠ data ', Math.floor(staleDays), ' days old — check the GitHub Action'))),
-        !q && filter === 'NAT' && h(StateOpportunity, { picks: payload._picks }),
-        !q && filter === 'NAT' && h(AllStatePicks, { picks: payload._picks }),
-        !q && filter !== 'NAT' && h(StatePicks, { picks: payload._picks, secKey: filter }),
-        visible.length === 0 && h('div', { className: 'spinner-wrap' },
+        h('div', { className: 'srcline' },
+          regions.length, ' markets · updated ', updated ? updated.toLocaleDateString() : '?', ' · ',
+          h('a', { href: 'https://sqmresearch.com.au/property', target: '_blank', rel: 'noopener' }, 'source'),
+          staleDays > 10 && h('span', { className: 'stale-warn' },
+            '  ⚠ ', Math.floor(staleDays), ' days old — check the GitHub Action')),
+
+        // Everything pick-related lives on one tab so it can actually be found.
+        !q && filter === 'PICKS' && h(Fragment, null,
+          h(TopPicks, { picks: payload._picks }),
+          h(StateOpportunity, { picks: payload._picks }),
+          h(AllStatePicks, { picks: payload._picks })),
+
+        !q && filter !== 'PICKS' && filter !== 'NAT'
+          && h(StatePicks, { picks: payload._picks, secKey: filter }),
+
+        filter !== 'PICKS' && visible.length === 0 && h('div', { className: 'spinner-wrap' },
           q ? 'No town, suburb or postcode matches "' + search.trim() + '".' : 'No regions match.'),
         visible.map(({ sec, items }) => h('div', { key: sec.key },
           h('div', { className: 'section-title' }, sec.label),
