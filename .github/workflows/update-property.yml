@@ -1,9 +1,14 @@
-name: Weekly Property Update
+name: Daily Property Freshness Check
 
 on:
   schedule:
-    - cron: '0 16 * * 2'   # Tue 16:00 UTC = Wed 2am AEST — SQM publishes Tuesdays
-  workflow_dispatch:         # manual trigger from GitHub UI
+    - cron: '0 22 * * *'   # 22:00 UTC daily = 8am AEST, same slot as the price bake
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Bake even if SQM has not published new data'
+        type: boolean
+        default: false
 
 jobs:
   update:
@@ -18,13 +23,33 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Fetch SQM data and bake into data/property.json
+      # SQM publishes weekly (Tuesdays). This costs one request and decides
+      # whether the 420-region bake is worth running today.
+      - name: Check whether SQM has published new data
+        id: fresh
+        run: |
+          if [ "${{ inputs.force }}" = "true" ]; then
+            echo "forced by manual dispatch"
+            echo "stale=true" >> "$GITHUB_OUTPUT"
+          elif python check-property-fresh.py; then
+            echo "stale=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "stale=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Bake data/property.json
+        if: steps.fresh.outputs.stale == 'true'
         run: python update-property.py
 
+      - name: Refresh the picks backtest
+        if: steps.fresh.outputs.stale == 'true'
+        run: python backtests/property-backtest.py --years 3 || true
+
       - name: Commit and push
+        if: steps.fresh.outputs.stale == 'true'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/property.json
-          git diff --cached --quiet || git commit -m "chore: weekly property update $(date -u '+%Y-%m-%d')"
+          git add data/property.json backtests/property-picks-history.json
+          git diff --cached --quiet || git commit -m "chore: property update $(date -u '+%Y-%m-%d')"
           git push

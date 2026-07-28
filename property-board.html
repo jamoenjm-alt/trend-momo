@@ -125,6 +125,21 @@
       padding: 9px 12px; max-width: 900px; line-height: 1.5;
     }
 
+    /* ── State picks ─────────────────────────────────────────── */
+    .spick-wrap { display: flex; gap: 12px; flex-wrap: wrap; margin: 14px 0 4px; }
+    .spick {
+      flex: 1 1 340px; background: var(--surface); border: 1px solid var(--border);
+      border-left: 4px solid var(--border); border-radius: 10px; padding: 10px 14px;
+    }
+    .spick-buy  { border-left-color: #15803d; }
+    .spick-sell { border-left-color: #b91c1c; }
+    .spick-tag { font-size: 0.66rem; font-weight: 800; letter-spacing: 0.07em; color: var(--muted); }
+    .spick-buy .spick-tag  { color: #15803d; }
+    .spick-sell .spick-tag { color: #b91c1c; }
+    .spick-name { font-size: 1.05rem; font-weight: 800; margin: 2px 0 4px; }
+    .spick-stats { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.78rem; color: var(--muted); }
+    .spick-runners { margin-top: 6px; font-size: 0.72rem; color: var(--muted); }
+
     /* ── Private portfolio ───────────────────────────────────── */
     .pf-privacy {
       background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;
@@ -767,6 +782,67 @@
           msg && h('div', { className: 'pf-msg' }, msg)));
     }
 
+    // Compact per-state pick — same score, restricted to one state's markets.
+    function StatePickCard({ side, pick, runners }) {
+      if (!pick) return null;
+      const { r, rentG, stockG } = pick;
+      const buying = side === 'buy';
+      return h('div', { className: 'spick ' + (buying ? 'spick-buy' : 'spick-sell') },
+        h('div', { className: 'spick-tag' }, buying ? '▲ Best buy in state' : '▼ Best sell in state'),
+        h('div', { className: 'spick-name' }, r.name,
+          h('span', { className: 'td-sub' }, ' ', r.kind === 'postcode' ? r.param : r.state)),
+        h('div', { className: 'spick-stats' },
+          h('span', null, 'yield ', h('strong', null, r.yield.toFixed(2), '%'),
+            h('span', { className: 'td-sub' }, ' p', r.yield_pct.toFixed(0))),
+          h('span', null, 'vac ', h('strong', null, r.vac.toFixed(2), '%')),
+          h('span', null, 'rent ', h('strong', { className: pctCls(rentG) }, fmtPct(rentG))),
+          h('span', null, 'supply ', h('strong', { className: stockG > 0 ? 'neg' : 'pos' }, fmtPct(stockG))),
+          h('span', { className: 'td-sub' }, fmtMoney(r.px[r.px.length - 1]))),
+        runners.length > 0 && h('div', { className: 'spick-runners' }, 'then ',
+          runners.map((x, i) => h('span', { key: x.code }, i ? ' · ' : '', x.r.name))));
+    }
+
+    function StatePicks({ picks, secKey, label }) {
+      if (!picks) return null;
+      const inSec = (x) => sectionOf(x.r.state) === secKey;
+      const buys = picks.buy.filter(inSec);
+      const sells = picks.sell.filter(inSec);
+      if (!buys.length) return null;
+      return h('div', { className: 'spick-wrap' },
+        h(StatePickCard, { side: 'buy',  pick: buys[0],  runners: buys.slice(1, 4) }),
+        h(StatePickCard, { side: 'sell', pick: sells[0], runners: sells.slice(1, 4) }));
+    }
+
+    // Overview: every state's top buy and sell in one table.
+    function AllStatePicks({ picks }) {
+      if (!picks) return null;
+      const rows = SECTIONS.filter(s => s.key !== 'NAT' && s.key !== 'MINE').map(sec => {
+        const inSec = (x) => sectionOf(x.r.state) === sec.key;
+        return { sec, buy: picks.buy.filter(inSec)[0], sell: picks.sell.filter(inSec)[0] };
+      }).filter(x => x.buy);
+      if (!rows.length) return null;
+      const cell = (x) => x ? h(Fragment, null,
+        h('span', { className: 'td-name' }, x.r.name),
+        h('span', { className: 'td-sub' }, ' ', x.r.yield.toFixed(1), '% yld · ',
+          x.r.vac.toFixed(1), '% vac · rent ', fmtPct(x.rentG))) : '—';
+      return h('div', { style: { marginTop: 18 } },
+        h('div', { className: 'section-title' }, 'State Picks — best buy and sell in every state'),
+        h('div', { className: 'picks-sub' },
+          'Same scoring as the national pick, restricted to each state\'s markets. ',
+          'A state\'s best is not necessarily good — check the score against the national leaders above.'),
+        h('table', null,
+          h('thead', null, h('tr', null,
+            h('th', null, 'State'),
+            h('th', null, 'Best buy'), h('th', { style: { textAlign: 'right' } }, 'Score'),
+            h('th', null, 'Best sell'), h('th', { style: { textAlign: 'right' } }, 'Score'))),
+          h('tbody', null, rows.map(x => h('tr', { key: x.sec.key },
+            h('td', { className: 'td-name' }, x.sec.label),
+            h('td', null, cell(x.buy)),
+            h('td', { className: 'td-num' }, x.buy ? x.buy.buy.toFixed(2) : '—'),
+            h('td', null, cell(x.sell)),
+            h('td', { className: 'td-num' }, x.sell ? x.sell.sell.toFixed(2) : '—'))))));
+    }
+
     function StateTabs({ filter, setFilter }) {
       return h('div', { className: 'snav' },
         SECTIONS.map(s => h('button', {
@@ -830,6 +906,8 @@
             h('span', null, 'SQM weekly asking-price index · ', regions.length, ' markets · baked ',
               updated ? updated.toLocaleDateString() : '?'),
             staleDays > 10 && h('span', { className: 'stale-warn' }, '⚠ data ', Math.floor(staleDays), ' days old — check the GitHub Action'))),
+        !q && filter === 'NAT' && h(AllStatePicks, { picks: payload._picks }),
+        !q && filter !== 'NAT' && h(StatePicks, { picks: payload._picks, secKey: filter }),
         visible.length === 0 && h('div', { className: 'spinner-wrap' },
           q ? 'No town, suburb or postcode matches "' + search.trim() + '".' : 'No regions match.'),
         visible.map(({ sec, items }) => h('div', { key: sec.key },
