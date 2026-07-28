@@ -238,6 +238,13 @@
       background: var(--th-bg); color: var(--th-text); font-size: 0.72rem; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.04em; padding: 8px 8px; text-align: left; white-space: nowrap;
     }
+    .sortbar { display: flex; align-items: center; gap: 8px; margin: 14px 0 2px; }
+    .sortbar label { font-size: 0.74rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
+    .sortsel {
+      padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--surface); color: var(--text); font-size: 0.84rem; cursor: pointer;
+    }
+    .sortsel:focus { outline: none; border-color: #15803d; }
     td { padding: 7px 8px; border-top: 1px solid var(--border); font-size: 0.85rem; white-space: nowrap; }
     tbody tr { cursor: pointer; }
     tbody tr:hover { background: var(--row-hover); }
@@ -538,6 +545,7 @@
         };
         const sell = 0.22 * S.value + 0.12 * S.peak + 0.20 * S.vac
                    + 0.20 * S.rent + 0.16 * S.supply + 0.10 * S.roll;
+        r._buy = buy; r._sell = sell;   // so the tables can sort by score
         rows.push({ code, r, buy, sell, dd, ddmax, rentG, stockG, vacD, risk });
       }
       return {
@@ -622,6 +630,36 @@
                 'Higher percentile = yield high vs its own history = relatively cheap.'),
               h('div', { style: { marginTop: 8 } },
                 h('a', { className: 'sqm-link', href: sqmUrl(r), target: '_blank', rel: 'noopener' }, 'SQM chart page ↗'))))));
+    }
+
+    // Sorting. `desc` puts the most interesting end first for each measure —
+    // highest yield, but LOWEST vacancy, since tight rentals are the good end.
+    const last = (r) => (r.px && r.px.length) ? r.px[r.px.length - 1] : null;
+    const yr12 = (r) => (r.px && r.px.length > 53) ? (r.px[r.px.length - 1] / r.px[r.px.length - 53] - 1) * 100 : null;
+    const SORTS = [
+      { key: 'name',   label: 'Name A–Z',            get: null },
+      { key: 'buy',    label: 'Buy score (best)',    get: r => r._buy,  dir: -1 },
+      { key: 'sell',   label: 'Sell score (best)',   get: r => r._sell, dir: -1 },
+      { key: 'price',  label: 'Asking price (high)', get: last,         dir: -1 },
+      { key: 'pricea', label: 'Asking price (low)',  get: last,         dir: 1 },
+      { key: 'yr',     label: '12m growth (high)',   get: yr12,         dir: -1 },
+      { key: 'yra',    label: '12m growth (low)',    get: yr12,         dir: 1 },
+      { key: 'yield',  label: 'Yield (high)',        get: r => r.yield, dir: -1 },
+      { key: 'vac',    label: 'Vacancy (tightest)',  get: r => r.vac,   dir: 1 },
+      { key: 'rent',   label: 'Rent growth (high)',  get: r => chg(r.rent, r.rent52),   dir: -1 },
+      { key: 'supply', label: 'Supply (tightening)', get: r => chg(r.stock, r.stock12), dir: 1 },
+      { key: 'trend',  label: 'All Signals (bullish)', get: r => r._sigs && r._sigs.allInd, dir: -1 },
+    ];
+    function sortItems(items, key) {
+      const s = SORTS.find(x => x.key === key) || SORTS[0];
+      if (!s.get) return [...items].sort((a, b) => a[1].name.localeCompare(b[1].name));
+      return [...items].sort((a, b) => {
+        const va = s.get(a[1]), vb = s.get(b[1]);
+        if (va == null && vb == null) return a[1].name.localeCompare(b[1].name);
+        if (va == null) return 1;          // missing data always sinks
+        if (vb == null) return -1;
+        return (va - vb) * s.dir || a[1].name.localeCompare(b[1].name);
+      });
     }
 
     const COLS = [
@@ -1186,6 +1224,7 @@
       const [filter, setFilter] = useState('PICKS');
       const [search, setSearch] = useState('');
       const [portfolio, setPortfolio] = useState(loadPortfolio);
+      const [sort, setSort] = useState('name');
 
       const regions = Object.entries(payload.regions);
       const q = search.trim().toLowerCase();
@@ -1247,9 +1286,14 @@
 
         filter !== 'PICKS' && visible.length === 0 && h('div', { className: 'spinner-wrap' },
           q ? 'No town, suburb or postcode matches "' + search.trim() + '".' : 'No regions match.'),
+        filter !== 'PICKS' && visible.length > 0 && h('div', { className: 'sortbar' },
+          h('label', { htmlFor: 'pb-sort' }, 'Sort by'),
+          h('select', { id: 'pb-sort', className: 'sortsel', value: sort,
+            onChange: e => setSort(e.target.value) },
+            SORTS.map(s => h('option', { key: s.key, value: s.key }, s.label)))),
         visible.map(({ sec, items }) => h('div', { key: sec.key },
           h('div', { className: 'section-title' }, sec.label),
-          h(SectionTable, { items }))));
+          h(SectionTable, { items: sortItems(items, sort) }))));
     }
 
     function App() {
