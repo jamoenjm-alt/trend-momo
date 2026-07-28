@@ -331,7 +331,6 @@
 
     // ── Sections ──────────────────────────────────────────────────────────
     const SECTIONS = [
-      { key: 'PICKS', label: '🎯 Picks' },
       { key: 'NAT', label: 'National' },
       { key: 'NSW', label: 'NSW' },
       { key: 'VIC', label: 'VIC' },
@@ -340,6 +339,7 @@
       { key: 'SA',  label: 'SA' },
       { key: 'TAS', label: 'TAS' },
       { key: 'ACTNT', label: 'ACT / NT' },
+      { key: 'PICKS', label: '🎯 Picks' },
       { key: 'MINE', label: '🔒 My Portfolio' },
     ];
     const sectionOf = (state) => (state === 'ACT' || state === 'NT') ? 'ACTNT' : state;
@@ -1191,11 +1191,11 @@
           q && h('span', { className: 'searchbar-count' },
             matchCount, matchCount === 1 ? ' match' : ' matches', ' across all states')),
         !q && h(StateTabs, { filter, setFilter }),
-        h('div', { className: 'srcline' },
-          regions.length, ' markets · updated ', updated ? updated.toLocaleDateString() : '?', ' · ',
-          h('a', { href: 'https://sqmresearch.com.au/property', target: '_blank', rel: 'noopener' }, 'source'),
-          staleDays > 10 && h('span', { className: 'stale-warn' },
-            '  ⚠ ', Math.floor(staleDays), ' days old — check the GitHub Action')),
+        // Only surfaces when something is actually wrong — silently serving
+        // stale data is worse than a line of clutter.
+        staleDays > 10 && h('div', { className: 'srcline' },
+          h('span', { className: 'stale-warn' },
+            '⚠ Data is ', Math.floor(staleDays), ' days old — check the GitHub Action')),
 
         // Everything pick-related lives on one tab so it can actually be found.
         !q && filter === 'PICKS' && h(Fragment, null,
