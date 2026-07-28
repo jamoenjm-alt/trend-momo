@@ -686,13 +686,14 @@
           'A high score is a reason to research a market, not to buy in it.'));
     }
 
-    // ── Address → covered market ─────────────────────────────────────────
-    // The data is postcode-level. A street address adds no precision; we use it
-    // only to find the postcode. If that exact postcode isn't on the board we
+    // ── Suburb / postcode → covered market ───────────────────────────────
+    // The data is suburb/postcode level, so that is all we ask for — offering
+    // a street-address box would imply a precision this data does not have.
+    // If the postcode isn't on the board we
     // fall back to the numerically nearest covered postcode in the same state
     // (AU postcodes are geographically clustered) and SAY SO, rather than
     // pretending the match is exact.
-    function resolveAddress(text, regions) {
+    function resolveLocation(text, regions) {
       const raw = (text || '').trim();
       if (!raw) return null;
       const entries = Object.entries(regions).filter(([, r]) => r.state !== 'NAT');
@@ -793,10 +794,10 @@
       // an explicit pick wins; otherwise fall back to parsing what they typed
       const match = picked
         ? { code: picked.code, r: picked.r, how: 'exact', pc: picked.r.param }
-        : resolveAddress(f.addr, regions);
+        : resolveLocation(f.addr, regions);
 
       const submit = () => {
-        if (!match || !match.code) { setErr('Enter an address, suburb or postcode we can match.'); return; }
+        if (!match || !match.code) { setErr('Enter a suburb or postcode we can match.'); return; }
         if (!f.cost || !f.bought) { setErr('Cost base and the date you acquired it are required — leave nothing to guess.'); return; }
         onAdd({
           label: f.label.trim() || f.addr.trim(),
@@ -813,7 +814,7 @@
       return h('div', { className: 'pf-editor' },
         h('h4', null, 'Add a property'),
         h('div', { className: 'pf-hint' },
-          'Type an address, suburb or postcode. Everything below is yours to enter — ',
+          'Type a suburb or postcode. Everything below is yours to enter — ',
           'nothing is estimated or filled in for you.'),
         h('div', { className: 'pf-ac' },
           h('input', {
@@ -821,7 +822,7 @@
             onFocus: () => setOpen(true),
             onBlur: () => setTimeout(() => setOpen(false), 150),
             autoComplete: 'off', spellCheck: false,
-            placeholder: 'Start typing an address, suburb or postcode…',
+            placeholder: 'Start typing a suburb or postcode — e.g. Ballarat, or 3350',
           }),
           sugg.length > 0 && h('div', { className: 'pf-ac-list' },
             sugg.map((s, i) => h('div', {
@@ -857,7 +858,7 @@
         err && h('div', { className: 'pf-msg pf-err' }, err),
         h('div', { className: 'pf-hint', style: { marginTop: 8 } },
           'Built rather than bought? Put land + construction in Cost base and use the completion date. ',
-          'The analysis is postcode-level — a street number adds no precision, it only helps find the postcode.'));
+          'Figures are for the whole suburb/postcode, not your individual property.'));
     }
 
     function PortfolioView({ regions, items, setItems }) {
