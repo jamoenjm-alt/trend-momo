@@ -389,11 +389,14 @@
       { key: 'WA',  label: 'WA' },
       { key: 'SA',  label: 'SA' },
       { key: 'TAS', label: 'TAS' },
-      { key: 'ACTNT', label: 'ACT / NT' },
+      { key: 'ACT', label: 'ACT' },
+      { key: 'NT',  label: 'NT' },
       { key: 'PICKS', label: '🎯 Picks' },
       { key: 'MINE', label: '🔒 My Portfolio' },
     ];
-    const sectionOf = (state) => (state === 'ACT' || state === 'NT') ? 'ACTNT' : state;
+    // ACT and NT were grouped when each had only a few markets. They now have
+    // enough to stand alone, and Canberra and Darwin share nothing economically.
+    const sectionOf = (state) => state;
 
     // Postcodes that blend genuinely different markets. SQM publishes by
     // postcode, so these CANNOT be split with this data — the honest move is to
