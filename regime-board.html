@@ -1325,6 +1325,25 @@ function assetBadge(ticker) {
 
 // Jungle Rock MA pairs — each pair generates a Trend signal (price vs slow MA)
 // and a Momo signal (fast MA vs slow MA)
+// Copies the PUBLIC url of whichever board you're on — never localhost/file://,
+// since the whole point is handing the link to someone else.
+function shareLink(el) {
+  const SITE = 'https://jamoenjm-alt.github.io/trend-momo/';
+  let page = (location.pathname.split('/').pop() || '');
+  if (!/\.html$/.test(page)) page = '';          // root serves index.html
+  const url = SITE + page;
+  const done = () => {
+    const old = el.textContent;
+    el.textContent = '✓ Copied';
+    setTimeout(() => { el.textContent = old; }, 1900);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(done, () => window.prompt('Copy this link:', url));
+  } else {
+    window.prompt('Copy this link:', url);
+  }
+}
+
 const MA_PAIRS = [
   { slow: 10,  fast: 3,  group: 'canary' },  // Coal Mine Canary
   { slow: 15,  fast: 5,  group: 'canary' },
@@ -2988,6 +3007,7 @@ function App() {
         h('a', { href:'property-board.html', className: 'nav-property' }, '🏠 AU Property →'),
         h('a', { href:'#', className: view==='guide'?'nav-active':'', onClick:(e)=>{e.preventDefault(); setView('guide');} }, 'Guide'),
       ),
+      h('span', { className: 'banner-link', onClick: (e) => shareLink(e.currentTarget) }, '🔗 Share'),
       h('span', { className: 'banner-link', onClick: () => setShowConfig(s=>!s) }, '⚙ Keys'),
     ),
     h('div', { className: 'page-banner' }, h('h1', null, 'Trend Momo'), h('div', { className: 'banner-disclaimer' }, 'General information only — not financial advice. Signals are context, not recommendations. Backtested strategies mostly failed to beat the index; see the Guide.')),

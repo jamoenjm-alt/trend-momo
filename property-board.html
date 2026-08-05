@@ -47,6 +47,13 @@
       white-space: nowrap;
     }
     .topbar-nav a.nav-stocks:hover { background: #2563eb; color: #fff; }
+    .nav-share {
+      background: transparent; border: 1px solid #52525b; color: #d4d4d8;
+      border-radius: 999px; padding: 4px 12px; font-size: 0.78rem; cursor: pointer;
+      white-space: nowrap; font-family: inherit;
+    }
+    .nav-share:hover { background: #3f3f46; color: #fff; }
+    .nav-share.done { background: #15803d; border-color: #15803d; color: #fff; }
 
     .page-banner {
       background: linear-gradient(135deg, #14532d 0%, #15803d 100%);
@@ -348,8 +355,34 @@
       <a href="index.html" class="nav-stocks">← 📈 Stocks &amp; Crypto</a>
       <a href="https://sqmresearch.com.au/property" target="_blank" rel="noopener">Data: SQM Research</a>
     </div>
+    <button class="nav-share" id="shareBtn" type="button"
+            title="Copy this board's public link">🔗 Share</button>
   </div>
   <div class="page-banner"><h1>Australian Property — Trend &amp; Momentum Regime Board</h1></div>
+  <script>
+    // Always copy the PUBLIC url, never localhost/file:// — this button exists
+    // so the link can be handed to someone else.
+    (function () {
+      var SITE = 'https://jamoenjm-alt.github.io/trend-momo/';
+      var btn = document.getElementById('shareBtn');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        var page = (location.pathname.split('/').pop() || 'property-board.html');
+        if (!/\.html$/.test(page)) page = 'property-board.html';
+        var url = SITE + page;
+        var done = function () {
+          btn.textContent = '✓ Link copied';
+          btn.classList.add('done');
+          setTimeout(function () { btn.textContent = '🔗 Share'; btn.classList.remove('done'); }, 1900);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(done, function () { window.prompt('Copy this link:', url); });
+        } else {
+          window.prompt('Copy this link:', url);
+        }
+      });
+    })();
+  </script>
 
   <div class="main">
     <div id="root"><div class="spinner-wrap">Loading property data…</div></div>
