@@ -202,6 +202,27 @@ def fwd(series, asof, months):
     return (b / a - 1) * 100 if b else None
 
 
+def block_bootstrap_ci(vals, block, iters=2000, seed=7):
+    """CI that respects overlap. Resampling single months would pretend
+    overlapping windows are independent and give absurdly tight bounds."""
+    import random as _r
+    if not vals:
+        return (None, None)
+    rng = _r.Random(seed)
+    n = len(vals)
+    nb = max(1, n // block)
+    means = []
+    for _ in range(iters):
+        s = []
+        for _ in range(nb):
+            i = rng.randrange(0, max(1, n - block + 1))
+            s.extend(vals[i:i + block])
+        if s:
+            means.append(sum(s) / len(s))
+    means.sort()
+    return (means[int(0.025 * len(means))], means[int(0.975 * len(means))])
+
+
 def main():
     years = 3
     if "--years" in sys.argv:
@@ -209,6 +230,10 @@ def main():
     only = None
     if "--only" in sys.argv:
         only = set(sys.argv[sys.argv.index("--only") + 1].split(","))
+    step = 1
+    if "--step" in sys.argv:            # months between entries; 12 = non-overlapping annual
+        step = int(sys.argv[sys.argv.index("--step") + 1])
+    oos = "--oos" in sys.argv           # split the window: first half fit, second half test
 
     R = load()
     today = datetime.now(timezone.utc)
@@ -221,11 +246,14 @@ def main():
         last = (datetime(y + (m == 12), m % 12 + 1, 1) - timedelta(days=1)).day
         months.append(datetime(y, m, last))
     months.reverse()
+    months = months[::step]
+    split = months[len(months) // 2].strftime("%Y-%m-%d") if oos else None
 
     names = [k for k in STRATEGIES if not only or k in only]
     # acc[strategy][horizon] = list of (pick_excess, top5_excess, state_basket_excess)
     acc = {n: {6: [], 12: [], 24: []} for n in names}
     ctl = {"random": {6: [], 12: [], 24: []}, "inverse": {6: [], 12: [], 24: []}}
+    half = {n: {"train": [], "test": []} for n in names}   # 12m top-1 excess, split
     import random
     random.seed(11)
     log = []
@@ -236,7 +264,12 @@ def main():
         if len(base) < 30:
             continue
         fw = {hz: {r["code"]: fwd(R[r["code"]]["px"], asof, hz) for r in base} for hz in (6, 12, 24)}
-        med = {hz: (st.median([v for v in fw[hz].values() if v is not None])
+        # Benchmark = MEAN of the eligible universe, not the median. Property
+        # returns are right-skewed, so a random basket beats the median by ~2.6pp
+        # on nothing but skew — which silently credited every strategy, including
+        # the random control. Mean is the apples-to-apples comparison.
+        med = {hz: (sum(v for v in fw[hz].values() if v is not None)
+                    / len([v for v in fw[hz].values() if v is not None])
                     if any(v is not None for v in fw[hz].values()) else None)
                for hz in (6, 12, 24)}
 
@@ -263,6 +296,8 @@ def main():
                 acc[n][hz].append((p1 - med[hz],
                                    sum(t5) / len(t5) - med[hz],
                                    sum(sb) / len(sb) - med[hz]))
+                if hz == 12 and split:
+                    half[n]["train" if asof < split else "test"].append(p1 - med[hz])
         # controls
         rows = score([dict(r) for r in base], STRATEGIES["current"])
         rows.sort(key=lambda r: -r["s"])
@@ -281,7 +316,7 @@ def main():
 
     avg = lambda xs: sum(xs) / len(xs) if xs else None
     print("\n" + "=" * 96)
-    print("EXCESS RETURN vs the MEDIAN eligible market, by theory")
+    print("EXCESS RETURN vs the MEAN of eligible markets, by theory")
     print("  top1 = single best pick   top5 = best five, equal weight   state = best in each state")
     print("=" * 96)
     hdr = f"{'theory':14}{'n':>4}" + "".join(f"{h:>26}" for h in ("6 months", "12 months", "24 months"))
@@ -302,11 +337,49 @@ def main():
         mark = "  <- control" if n in ctl else ""
         print(f"{n:14}{nn:>4}{cells}{mark}")
 
-    print("\nbeat rate (share of months the top-1 pick beat the median):")
+    print("\nbeat rate (share of months the top-1 pick beat the market mean):")
     for n in names:
         v = acc[n][12]
         if v:
             print(f"  {n:14} 12m {100*sum(1 for x in v if x[0] > 0)/len(v):5.0f}%   n={len(v)}")
+
+    # ── Honest error bars ────────────────────────────────────────────────
+    # 12m windows from consecutive months overlap by 11/12. Independent bets
+    # ~= span_in_months / 12, NOT the number of rows.
+    n12 = len(acc[names[0]][12]) if names and acc[names[0]][12] else 0
+    span = n12 * step
+    eff = max(1, round(span / 12))
+    print(f"\n{'='*96}")
+    print(f"12-MONTH EXCESS with 95% block-bootstrap CI   (entries every {step} month(s))")
+    print(f"rows={n12}, spanning ~{span} months  ->  ~{eff} INDEPENDENT 12m windows")
+    print("=" * 96)
+    print(f"{'theory':14}{'mean':>9}{'95% CI':>22}{'':4}verdict")
+    for n in names + ["random", "inverse"]:
+        src = acc.get(n) or ctl[n]
+        v = [x[0] for x in src[12]]
+        if not v:
+            continue
+        mu = avg(v)
+        lo, hi = block_bootstrap_ci(v, block=max(1, 12 // step))
+        # significant if the whole interval sits one side of zero — the old test
+        # only checked lo>0, so it mislabelled every negative result.
+        sig = ("beats the market" if (lo is not None and lo > 0)
+               else "LOSES to the market" if (hi is not None and hi < 0)
+               else "indistinguishable from the market")
+        print(f"{n:14}{mu:>+9.1f}{('[' + format(lo, '+.1f') + ', ' + format(hi, '+.1f') + ']'):>22}    {sig}")
+
+    if split:
+        print(f"\n{'='*96}")
+        print(f"OUT-OF-SAMPLE SPLIT at {split}  — 12m top-1 excess")
+        print("if a theory only works in the first half, it was fitted to it")
+        print("=" * 96)
+        print(f"{'theory':14}{'train':>10}{'test':>10}{'decay':>10}")
+        for n in names:
+            tr, te = half[n]["train"], half[n]["test"]
+            if not tr or not te:
+                continue
+            a, b = avg(tr), avg(te)
+            print(f"{n:14}{a:>+10.1f}{b:>+10.1f}{b-a:>+10.1f}")
 
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump({"generated": today.strftime("%Y-%m-%dT%H:%M:%SZ"), "years": years,

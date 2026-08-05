@@ -1,0 +1,71 @@
+loaded 661 markets from 2026-07-28T14:54:54Z
+
+================================================================================================
+EXCESS RETURN vs the MEAN of eligible markets, by theory
+  top1 = single best pick   top5 = best five, equal weight   state = best in each state
+================================================================================================
+theory           n                  6 months                 12 months                 24 months
+                      top1     top5    state    top1     top5    state    top1     top5    state
+current        137    +5.7     +4.1     +2.4   +10.3     +7.4     +3.9   +16.8    +13.3     +4.7
+pure_value     137    +3.0     +3.0     +2.5    +6.6     +5.5     +3.7   +11.0    +10.3     +5.0
+pure_income    137    +1.6     +2.1     +1.5    +2.9     +4.0     +1.6    +4.8     +5.2     +1.4
+pure_trend     137    +2.4     +2.6     +0.8    +3.5     +3.2     +0.7    +3.9     +3.3     +0.6
+rental_only    137    +2.1     +1.5     +0.4    +4.2     +3.2     +0.9    +5.7     +3.9     +1.6
+supply_only    137    +2.5     +2.0     +0.5    +2.5     +3.4     +0.7    +3.8     +4.5     +0.7
+contrarian     137    +4.3     +3.2     +1.8    +4.2     +3.5     +1.0    +3.3     +3.1     -0.2
+value_rent     137    +2.7     +3.4     +2.3    +6.9     +6.1     +3.4   +10.6    +11.0     +4.5
+no_trend       137    +5.6     +4.0     +2.6    +9.3     +6.9     +4.1   +18.6    +14.1     +5.4
+equal          137    +7.7     +6.0     +3.7   +12.5    +10.0     +5.2   +20.9    +16.0     +6.2
+random         137    -0.4     -0.4     -0.4    +1.3     +1.3     +1.3    +0.4     +0.4     +0.4  <- control
+inverse        137    -6.8     -6.8     -6.8    -9.2     -9.2     -9.2   -13.2    -13.2    -13.2  <- control
+
+beat rate (share of months the top-1 pick beat the market mean):
+  current        12m    87%   n=131
+  pure_value     12m    66%   n=131
+  pure_income    12m    56%   n=131
+  pure_trend     12m    63%   n=131
+  rental_only    12m    62%   n=131
+  supply_only    12m    53%   n=131
+  contrarian     12m    66%   n=131
+  value_rent     12m    68%   n=131
+  no_trend       12m    79%   n=131
+  equal          12m    88%   n=131
+
+================================================================================================
+12-MONTH EXCESS with 95% block-bootstrap CI   (entries every 1 month(s))
+rows=131, spanning ~131 months  ->  ~11 INDEPENDENT 12m windows
+================================================================================================
+theory             mean                95% CI    verdict
+current           +10.3         [+8.3, +12.4]    beats the market
+pure_value         +6.6          [+5.2, +8.7]    beats the market
+pure_income        +2.9          [+0.0, +6.6]    beats the market
+pure_trend         +3.5          [+0.8, +6.0]    beats the market
+rental_only        +4.2          [+1.3, +6.4]    beats the market
+supply_only        +2.5          [+0.3, +3.9]    beats the market
+contrarian         +4.2          [+1.9, +6.5]    beats the market
+value_rent         +6.9          [+5.2, +9.0]    beats the market
+no_trend           +9.3         [+6.9, +11.5]    beats the market
+equal             +12.5         [+9.5, +15.1]    beats the market
+random             +1.3          [+0.6, +2.0]    beats the market
+inverse            -9.2         [-11.2, -7.7]    LOSES to the market
+
+================================================================================================
+OUT-OF-SAMPLE SPLIT at 2020-08-31  — 12m top-1 excess
+if a theory only works in the first half, it was fitted to it
+================================================================================================
+theory             train      test     decay
+current            +10.0     +10.6      +0.7
+pure_value          +5.0      +8.6      +3.6
+pure_income         -1.1      +7.8      +8.9
+pure_trend          +3.0      +4.3      +1.3
+rental_only         +5.5      +2.5      -3.0
+supply_only         +3.8      +0.9      -2.9
+contrarian          +2.9      +5.8      +2.9
+value_rent          +5.0      +9.3      +4.3
+no_trend           +10.1      +8.3      -1.8
+equal              +10.4     +15.0      +4.6
+
+wrote C:\Users\jwmit\Claude\Projects\STOCK TRACKER WEBSITE\backtests\property-lab-results.json
+
+Read the controls first. If 'random' is near zero and 'inverse' is negative,
+the ranking carries information. If not, nothing above it means anything.
