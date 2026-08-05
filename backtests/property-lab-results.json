@@ -1,0 +1,793 @@
+{
+ "generated": "2026-08-05T10:13:11Z",
+ "years": 3,
+ "strategies": {
+  "current": {
+   "w": {
+    "value": 0.2,
+    "income": 0.1,
+    "dip": 0.12,
+    "vac": 0.2,
+    "rent": 0.2,
+    "supply": 0.1,
+    "trend": 0.08
+   },
+   "use_risk": true
+  },
+  "pure_value": {
+   "w": {
+    "value": 1.0
+   },
+   "use_risk": false
+  },
+  "pure_income": {
+   "w": {
+    "income": 1.0
+   },
+   "use_risk": false
+  },
+  "pure_trend": {
+   "w": {
+    "trend": 1.0
+   },
+   "use_risk": false
+  },
+  "rental_only": {
+   "w": {
+    "vac": 0.5,
+    "rent": 0.5
+   },
+   "use_risk": false
+  },
+  "supply_only": {
+   "w": {
+    "supply": 1.0
+   },
+   "use_risk": false
+  },
+  "contrarian": {
+   "w": {
+    "dip": 1.0
+   },
+   "use_risk": false
+  },
+  "value_rent": {
+   "w": {
+    "value": 0.5,
+    "rent": 0.5
+   },
+   "use_risk": false
+  },
+  "no_trend": {
+   "w": {
+    "value": 0.22,
+    "income": 0.11,
+    "dip": 0.13,
+    "vac": 0.22,
+    "rent": 0.22,
+    "supply": 0.1
+   },
+   "use_risk": true
+  },
+  "equal": {
+   "w": {
+    "value": 1,
+    "income": 1,
+    "dip": 1,
+    "vac": 1,
+    "rent": 1,
+    "supply": 1,
+    "trend": 1
+   },
+   "use_risk": false
+  }
+ },
+ "monthly_picks": [
+  {
+   "asof": "2023-08-31",
+   "eligible": 449,
+   "current": "Bowen (QLD)",
+   "pure_value": "Thornlie (WA)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Port Macquarie (NSW)",
+   "rental_only": "Bankstown (NSW)",
+   "supply_only": "Tweed Heads (NSW)",
+   "contrarian": "Ballina (NSW)",
+   "value_rent": "Thornlie (WA)",
+   "no_trend": "Bowen (QLD)",
+   "equal": "Bentley (WA)"
+  },
+  {
+   "asof": "2023-09-30",
+   "eligible": 467,
+   "current": "Clarkson (WA)",
+   "pure_value": "Kingaroy (QLD)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Grafton (NSW)",
+   "rental_only": "Granville (NSW)",
+   "supply_only": "Tweed Heads (NSW)",
+   "contrarian": "Lismore (NSW)",
+   "value_rent": "Kingaroy (QLD)",
+   "no_trend": "Canning Vale (WA)",
+   "equal": "Kelmscott (WA)"
+  },
+  {
+   "asof": "2023-10-31",
+   "eligible": 471,
+   "current": "Canning Vale (WA)",
+   "pure_value": "Mudgeeraba (QLD)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Grafton (NSW)",
+   "rental_only": "Singleton (NSW)",
+   "supply_only": "Tweed Heads (NSW)",
+   "contrarian": "Ballina (NSW)",
+   "value_rent": "Mudgeeraba (QLD)",
+   "no_trend": "Canning Vale (WA)",
+   "equal": "Proserpine (QLD)"
+  },
+  {
+   "asof": "2023-11-30",
+   "eligible": 480,
+   "current": "Success (WA)",
+   "pure_value": "Kogarah (NSW)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Cowra (NSW)",
+   "rental_only": "Griffith (NSW)",
+   "supply_only": "Tweed Heads (NSW)",
+   "contrarian": "Ballina (NSW)",
+   "value_rent": "Kogarah (NSW)",
+   "no_trend": "Busselton (WA)",
+   "equal": "Ellenbrook (WA)"
+  },
+  {
+   "asof": "2023-12-31",
+   "eligible": 455,
+   "current": "Karrinyup (WA)",
+   "pure_value": "Bassendean (WA)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Newcastle (NSW)",
+   "rental_only": "Mernda (VIC)",
+   "supply_only": "Morisset (NSW)",
+   "contrarian": "Ballina (NSW)",
+   "value_rent": "Bassendean (WA)",
+   "no_trend": "Karrinyup (WA)",
+   "equal": "Roma (QLD)"
+  },
+  {
+   "asof": "2024-01-31",
+   "eligible": 434,
+   "current": "Karrinyup (WA)",
+   "pure_value": "South Perth (WA)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Broken Hill (NSW)",
+   "rental_only": "Central Coast (Gosford) (NSW)",
+   "supply_only": "Kogarah (NSW)",
+   "contrarian": "Newcastle (NSW)",
+   "value_rent": "South Perth (WA)",
+   "no_trend": "Karrinyup (WA)",
+   "equal": "Roma (QLD)"
+  },
+  {
+   "asof": "2024-02-29",
+   "eligible": 467,
+   "current": "Busselton (WA)",
+   "pure_value": "Victoria Park (WA)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Cowra (NSW)",
+   "rental_only": "Wollongong (NSW)",
+   "supply_only": "Murwillumbah (NSW)",
+   "contrarian": "Newcastle (NSW)",
+   "value_rent": "Victoria Park (WA)",
+   "no_trend": "Busselton (WA)",
+   "equal": "Roma (QLD)"
+  },
+  {
+   "asof": "2024-03-31",
+   "eligible": 485,
+   "current": "Wanneroo (WA)",
+   "pure_value": "Homebush (NSW)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Bathurst (NSW)",
+   "rental_only": "Belmont (NSW) (NSW)",
+   "supply_only": "Granville (NSW)",
+   "contrarian": "Ballina (NSW)",
+   "value_rent": "Homebush (NSW)",
+   "no_trend": "Wanneroo (WA)",
+   "equal": "Roma (QLD)"
+  },
+  {
+   "asof": "2024-04-30",
+   "eligible": 461,
+   "current": "Port Pirie (SA)",
+   "pure_value": "Karama (NT)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Orange (NSW)",
+   "rental_only": "Belmont (NSW) (NSW)",
+   "supply_only": "Muswellbrook (NSW)",
+   "contrarian": "Ballina (NSW)",
+   "value_rent": "Keysborough (VIC)",
+   "no_trend": "Wanneroo (WA)",
+   "equal": "Port Pirie (SA)"
+  },
+  {
+   "asof": "2024-05-31",
+   "eligible": 480,
+   "current": "Success (WA)",
+   "pure_value": "Mudgeeraba (QLD)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Orange (NSW)",
+   "rental_only": "Charlestown (NSW)",
+   "supply_only": "Muswellbrook (NSW)",
+   "contrarian": "Ulladulla (NSW)",
+   "value_rent": "Mudgeeraba (QLD)",
+   "no_trend": "Success (WA)",
+   "equal": "Currambine (WA)"
+  },
+  {
+   "asof": "2024-06-30",
+   "eligible": 453,
+   "current": "Cairns (QLD)",
+   "pure_value": "Springvale (VIC)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Central Coast (Gosford) (NSW)",
+   "rental_only": "Jindabyne (NSW)",
+   "supply_only": "Muswellbrook (NSW)",
+   "contrarian": "Ulladulla (NSW)",
+   "value_rent": "Springvale (VIC)",
+   "no_trend": "Cairns (QLD)",
+   "equal": "Emerald (QLD)"
+  },
+  {
+   "asof": "2024-07-31",
+   "eligible": 453,
+   "current": "Port Pirie (SA)",
+   "pure_value": "Rosebery (NT)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Central Coast (Gosford) (NSW)",
+   "rental_only": "Mount Druitt (NSW)",
+   "supply_only": "Muswellbrook (NSW)",
+   "contrarian": "Ballina (NSW)",
+   "value_rent": "Portland (VIC)",
+   "no_trend": "Cannington (WA)",
+   "equal": "Port Pirie (SA)"
+  },
+  {
+   "asof": "2024-08-31",
+   "eligible": 478,
+   "current": "Port Pirie (SA)",
+   "pure_value": "Rosebery (NT)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Central Coast (Gosford) (NSW)",
+   "rental_only": "Charlestown (NSW)",
+   "supply_only": "Muswellbrook (NSW)",
+   "contrarian": "Ballina (NSW)",
+   "value_rent": "Rosebery (NT)",
+   "no_trend": "Port Pirie (SA)",
+   "equal": "Balcatta (WA)"
+  },
+  {
+   "asof": "2024-09-30",
+   "eligible": 471,
+   "current": "Karrinyup (WA)",
+   "pure_value": "Esperance (WA)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Wollongong (NSW)",
+   "rental_only": "Charlestown (NSW)",
+   "supply_only": "Muswellbrook (NSW)",
+   "contrarian": "Ballina (NSW)",
+   "value_rent": "Esperance (WA)",
+   "no_trend": "Karrinyup (WA)",
+   "equal": "Roma (QLD)"
+  },
+  {
+   "asof": "2024-10-31",
+   "eligible": 487,
+   "current": "Esperance (WA)",
+   "pure_value": "Portland (VIC)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Wollongong (NSW)",
+   "rental_only": "Port Macquarie (NSW)",
+   "supply_only": "Townsville (QLD)",
+   "contrarian": "Ballina (NSW)",
+   "value_rent": "Portland (VIC)",
+   "no_trend": "Esperance (WA)",
+   "equal": "Roma (QLD)"
+  },
+  {
+   "asof": "2024-11-30",
+   "eligible": 507,
+   "current": "Esperance (WA)",
+   "pure_value": "Esperance (WA)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Newcastle (NSW)",
+   "rental_only": "Charlestown (NSW)",
+   "supply_only": "Mackay (QLD)",
+   "contrarian": "Byron Bay (NSW)",
+   "value_rent": "Esperance (WA)",
+   "no_trend": "Warrnambool (VIC)",
+   "equal": "Dianella (WA)"
+  },
+  {
+   "asof": "2024-12-31",
+   "eligible": 449,
+   "current": "Busselton (WA)",
+   "pure_value": "Mudgeeraba (QLD)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Ballina (NSW)",
+   "rental_only": "Warrnambool (VIC)",
+   "supply_only": "Surry Hills (NSW)",
+   "contrarian": "Byron Bay (NSW)",
+   "value_rent": "Mudgeeraba (QLD)",
+   "no_trend": "Busselton (WA)",
+   "equal": "Currambine (WA)"
+  },
+  {
+   "asof": "2025-01-31",
+   "eligible": 460,
+   "current": "Busselton (WA)",
+   "pure_value": "Mount Isa (QLD)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Tweed Heads (NSW)",
+   "rental_only": "Central Coast (Gosford) (NSW)",
+   "supply_only": "Mackay (QLD)",
+   "contrarian": "Byron Bay (NSW)",
+   "value_rent": "Mount Isa (QLD)",
+   "no_trend": "Busselton (WA)",
+   "equal": "Emerald (QLD)"
+  },
+  {
+   "asof": "2025-02-28",
+   "eligible": 478,
+   "current": "Busselton (WA)",
+   "pure_value": "Balcatta (WA)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Grafton (NSW)",
+   "rental_only": "Central Coast (Gosford) (NSW)",
+   "supply_only": "Melton (VIC)",
+   "contrarian": "Katoomba (NSW)",
+   "value_rent": "Balcatta (WA)",
+   "no_trend": "Busselton (WA)",
+   "equal": "Karratha (WA)"
+  },
+  {
+   "asof": "2025-03-31",
+   "eligible": 474,
+   "current": "Esperance (WA)",
+   "pure_value": "Mount Isa (QLD)",
+   "pure_income": "Byron Bay (NSW)",
+   "pure_trend": "Grafton (NSW)",
+   "rental_only": "Central Coast (Gosford) (NSW)",
+   "supply_only": "Gunnedah (NSW)",
+   "contrarian": "Schofields (NSW)",
+   "value_rent": "Mount Isa (QLD)",
+   "no_trend": "Esperance (WA)",
+   "equal": "Karratha (WA)"
+  },
+  {
+   "asof": "2025-04-30",
+   "eligible": 460,
+   "current": "Esperance (WA)",
+   "pure_value": "Tamborine (QLD)",
+   "pure_income": "Byron Bay (NSW)",
+   "pure_trend": "Cessnock (NSW)",
+   "rental_only": "Charlestown (NSW)",
+   "supply_only": "Caringbah (NSW)",
+   "contrarian": "Byron Bay (NSW)",
+   "value_rent": "Tamborine (QLD)",
+   "no_trend": "Esperance (WA)",
+   "equal": "Karratha (WA)"
+  },
+  {
+   "asof": "2025-05-31",
+   "eligible": 480,
+   "current": "Wangaratta (VIC)",
+   "pure_value": "Darwin City (NT)",
+   "pure_income": "Byron Bay (NSW)",
+   "pure_trend": "Newcastle (NSW)",
+   "rental_only": "Charlestown (NSW)",
+   "supply_only": "Toronto (NSW)",
+   "contrarian": "Cowra (NSW)",
+   "value_rent": "Esperance (WA)",
+   "no_trend": "Wangaratta (VIC)",
+   "equal": "Roma (QLD)"
+  },
+  {
+   "asof": "2025-06-30",
+   "eligible": 448,
+   "current": "Alice Springs (NT)",
+   "pure_value": "Alice Springs (NT)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Coffs Harbour (NSW)",
+   "rental_only": "Lismore (NSW)",
+   "supply_only": "Cessnock (NSW)",
+   "contrarian": "Schofields (NSW)",
+   "value_rent": "Alice Springs (NT)",
+   "no_trend": "Alice Springs (NT)",
+   "equal": "Roma (QLD)"
+  },
+  {
+   "asof": "2025-07-31",
+   "eligible": 429,
+   "current": "Alice Springs (NT)",
+   "pure_value": "Alice Springs (NT)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Port Macquarie (NSW)",
+   "rental_only": "Central Coast (Gosford) (NSW)",
+   "supply_only": "Tamworth (NSW)",
+   "contrarian": "Newcastle (NSW)",
+   "value_rent": "Alice Springs (NT)",
+   "no_trend": "Alice Springs (NT)",
+   "equal": "Margaret River (WA)"
+  },
+  {
+   "asof": "2025-08-31",
+   "eligible": 454,
+   "current": "Albany (WA)",
+   "pure_value": "Numurkah (VIC)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Ballina (NSW)",
+   "rental_only": "Charlestown (NSW)",
+   "supply_only": "Cessnock (NSW)",
+   "contrarian": "Ballina (NSW)",
+   "value_rent": "Numurkah (VIC)",
+   "no_trend": "Alice Springs (NT)",
+   "equal": "Karratha (WA)"
+  },
+  {
+   "asof": "2025-09-30",
+   "eligible": 432,
+   "current": "Albany (WA)",
+   "pure_value": "Alice Springs (NT)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Lismore (NSW)",
+   "rental_only": "Charlestown (NSW)",
+   "supply_only": "Tamworth (NSW)",
+   "contrarian": "Ballina (NSW)",
+   "value_rent": "Alice Springs (NT)",
+   "no_trend": "Alice Springs (NT)",
+   "equal": "Karratha (WA)"
+  },
+  {
+   "asof": "2025-10-31",
+   "eligible": 470,
+   "current": "Albany (WA)",
+   "pure_value": "Alice Springs (NT)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Wollongong (NSW)",
+   "rental_only": "Byron Bay (NSW)",
+   "supply_only": "Tamworth (NSW)",
+   "contrarian": "Ballina (NSW)",
+   "value_rent": "Roxby Downs (SA)",
+   "no_trend": "Albany (WA)",
+   "equal": "Albany (WA)"
+  },
+  {
+   "asof": "2025-11-30",
+   "eligible": 451,
+   "current": "Scarborough (WA)",
+   "pure_value": "Mount Isa (QLD)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Central Coast (Gosford) (NSW)",
+   "rental_only": "Jindabyne (NSW)",
+   "supply_only": "Wollongong (NSW)",
+   "contrarian": "Ballina (NSW)",
+   "value_rent": "Alice Springs (NT)",
+   "no_trend": "Scarborough (WA)",
+   "equal": "Scarborough (WA)"
+  },
+  {
+   "asof": "2025-12-31",
+   "eligible": 399,
+   "current": "Scarborough (WA)",
+   "pure_value": "Scarborough (WA)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Dubbo (NSW)",
+   "rental_only": "Charlestown (NSW)",
+   "supply_only": "Wollongong (NSW)",
+   "contrarian": "Jindabyne (NSW)",
+   "value_rent": "Scarborough (WA)",
+   "no_trend": "Scarborough (WA)",
+   "equal": "Scarborough (WA)"
+  },
+  {
+   "asof": "2026-01-31",
+   "eligible": 406,
+   "current": "Scarborough (WA)",
+   "pure_value": "Katherine (NT)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Belmont (NSW) (NSW)",
+   "rental_only": "Ballina (NSW)",
+   "supply_only": "Port Macquarie (NSW)",
+   "contrarian": "Jindabyne (NSW)",
+   "value_rent": "Katherine (NT)",
+   "no_trend": "Scarborough (WA)",
+   "equal": "Scarborough (WA)"
+  },
+  {
+   "asof": "2026-02-28",
+   "eligible": 432,
+   "current": "Scarborough (WA)",
+   "pure_value": "Footscray (VIC)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Katoomba (NSW)",
+   "rental_only": "Dubbo (NSW)",
+   "supply_only": "Port Macquarie (NSW)",
+   "contrarian": "Narellan (NSW)",
+   "value_rent": "Katherine (NT)",
+   "no_trend": "Scarborough (WA)",
+   "equal": "Scarborough (WA)"
+  },
+  {
+   "asof": "2026-03-31",
+   "eligible": 437,
+   "current": "New Norfolk (TAS)",
+   "pure_value": "Tamborine (QLD)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Tamworth (NSW)",
+   "rental_only": "Jindabyne (NSW)",
+   "supply_only": "Port Macquarie (NSW)",
+   "contrarian": "Narellan (NSW)",
+   "value_rent": "Tamborine (QLD)",
+   "no_trend": "Scarborough (WA)",
+   "equal": "Scarborough (WA)"
+  },
+  {
+   "asof": "2026-04-30",
+   "eligible": 440,
+   "current": "Bowen (QLD)",
+   "pure_value": "Keysborough (VIC)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Coffs Harbour (NSW)",
+   "rental_only": "Jindabyne (NSW)",
+   "supply_only": "Port Macquarie (NSW)",
+   "contrarian": "Ballina (NSW)",
+   "value_rent": "Leongatha (VIC)",
+   "no_trend": "Bowen (QLD)",
+   "equal": "Bowen (QLD)"
+  },
+  {
+   "asof": "2026-05-31",
+   "eligible": 472,
+   "current": "Albany (WA)",
+   "pure_value": "Bright (VIC)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Sydney (NSW)",
+   "rental_only": "Jindabyne (NSW)",
+   "supply_only": "Dubbo (NSW)",
+   "contrarian": "Ballina (NSW)",
+   "value_rent": "Bright (VIC)",
+   "no_trend": "Albany (WA)",
+   "equal": "Katherine (NT)"
+  },
+  {
+   "asof": "2026-06-30",
+   "eligible": 457,
+   "current": "Albany (WA)",
+   "pure_value": "Alice Springs (NT)",
+   "pure_income": "Broken Hill (NSW)",
+   "pure_trend": "Sydney (NSW)",
+   "rental_only": "Lismore (NSW)",
+   "supply_only": "Dubbo (NSW)",
+   "contrarian": "Ballina (NSW)",
+   "value_rent": "Alice Springs (NT)",
+   "no_trend": "Albany (WA)",
+   "equal": "Albany (WA)"
+  },
+  {
+   "asof": "2026-07-31",
+   "eligible": 457,
+   "current": "Albany (WA)",
+   "pure_value": "Healesville (VIC)",
+   "pure_income": "Moranbah (QLD)",
+   "pure_trend": "Sydney (NSW)",
+   "rental_only": "Inverell (NSW)",
+   "supply_only": "Dubbo (NSW)",
+   "contrarian": "Newcastle (NSW)",
+   "value_rent": "Healesville (VIC)",
+   "no_trend": "Albany (WA)",
+   "equal": "Albany (WA)"
+  }
+ ],
+ "summary": {
+  "current": {
+   "6": {
+    "n": 29,
+    "top1": 8.838717072839504,
+    "top5": 7.123158877923102,
+    "state": 3.4886984846633684
+   },
+   "12": {
+    "n": 23,
+    "top1": 14.897417824987011,
+    "top5": 11.33106579487225,
+    "state": 6.494750731989152
+   },
+   "24": {
+    "n": 11,
+    "top1": 27.045170663600526,
+    "top5": 21.62937388904205,
+    "state": 7.988106454605366
+   }
+  },
+  "pure_value": {
+   "6": {
+    "n": 29,
+    "top1": 5.950813824591361,
+    "top5": 5.957273283255969,
+    "state": 3.564437734906113
+   },
+   "12": {
+    "n": 23,
+    "top1": 10.024288172128166,
+    "top5": 9.31858489191859,
+    "state": 4.038360538914642
+   },
+   "24": {
+    "n": 11,
+    "top1": 21.506820740855776,
+    "top5": 18.256579020609454,
+    "state": 5.173035128775924
+   }
+  },
+  "pure_income": {
+   "6": {
+    "n": 29,
+    "top1": 3.9210756991887554,
+    "top5": 5.038426378941718,
+    "state": 3.240355027435023
+   },
+   "12": {
+    "n": 23,
+    "top1": 6.6257730235116545,
+    "top5": 6.697288615587751,
+    "state": 3.218395113586328
+   },
+   "24": {
+    "n": 11,
+    "top1": 14.948443360039539,
+    "top5": 7.418062978480382,
+    "state": 4.760998615220951
+   }
+  },
+  "pure_trend": {
+   "6": {
+    "n": 29,
+    "top1": 2.571520105086015,
+    "top5": 2.901748456411837,
+    "state": 2.6277769679690297
+   },
+   "12": {
+    "n": 23,
+    "top1": 3.587102157283353,
+    "top5": 2.693581440490179,
+    "state": 2.223742891766751
+   },
+   "24": {
+    "n": 11,
+    "top1": -2.3883672065895243,
+    "top5": -2.3405801028618773,
+    "state": 3.461494884324276
+   }
+  },
+  "rental_only": {
+   "6": {
+    "n": 29,
+    "top1": -0.4752937554286518,
+    "top5": 0.60297526087774,
+    "state": 1.0081454984551796
+   },
+   "12": {
+    "n": 23,
+    "top1": 3.1722769977185465,
+    "top5": 1.077845679920547,
+    "state": 2.4715387607818475
+   },
+   "24": {
+    "n": 11,
+    "top1": -3.887546128080299,
+    "top5": -4.200488935915067,
+    "state": 2.7699062399088246
+   }
+  },
+  "supply_only": {
+   "6": {
+    "n": 29,
+    "top1": 4.448257581957105,
+    "top5": 2.6486647637566665,
+    "state": 2.2267587968575087
+   },
+   "12": {
+    "n": 23,
+    "top1": 2.1340682370434205,
+    "top5": 3.6469117358318623,
+    "state": 3.7868925703780376
+   },
+   "24": {
+    "n": 11,
+    "top1": 3.5705838352989407,
+    "top5": 4.169827817083379,
+    "state": 4.752086444022738
+   }
+  },
+  "contrarian": {
+   "6": {
+    "n": 29,
+    "top1": 5.101650905979488,
+    "top5": 2.7073984878401207,
+    "state": 3.6417689024349547
+   },
+   "12": {
+    "n": 23,
+    "top1": 4.031016621430866,
+    "top5": 0.29242781074418916,
+    "state": 3.35855777291392
+   },
+   "24": {
+    "n": 11,
+    "top1": -0.22989145861176075,
+    "top5": -5.331988017631588,
+    "state": 3.3733117078471055
+   }
+  },
+  "value_rent": {
+   "6": {
+    "n": 29,
+    "top1": 5.865351022931662,
+    "top5": 6.9631960046385775,
+    "state": 3.8937839765365836
+   },
+   "12": {
+    "n": 23,
+    "top1": 10.608582671252378,
+    "top5": 10.604828714320218,
+    "state": 4.503994728816041
+   },
+   "24": {
+    "n": 11,
+    "top1": 18.67877579464605,
+    "top5": 18.119351033352572,
+    "state": 4.621596446055009
+   }
+  },
+  "no_trend": {
+   "6": {
+    "n": 29,
+    "top1": 7.14825893345114,
+    "top5": 7.27289403290007,
+    "state": 3.8344345979662675
+   },
+   "12": {
+    "n": 23,
+    "top1": 13.196744450970955,
+    "top5": 11.514473443453468,
+    "state": 6.526730787769142
+   },
+   "24": {
+    "n": 11,
+    "top1": 28.30276086968712,
+    "top5": 24.071909025623484,
+    "state": 8.22026719264163
+   }
+  },
+  "equal": {
+   "6": {
+    "n": 29,
+    "top1": 9.134963511376005,
+    "top5": 8.187183789046273,
+    "state": 5.843814468094411
+   },
+   "12": {
+    "n": 23,
+    "top1": 18.023041348614807,
+    "top5": 15.132366608464276,
+    "state": 7.8801363709475005
+   },
+   "24": {
+    "n": 11,
+    "top1": 33.3345041221626,
+    "top5": 29.796199186648895,
+    "state": 11.688451506722874
+   }
+  }
+ }
+}
