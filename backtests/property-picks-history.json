@@ -1,52 +1,11 @@
 {
- "generated": "2026-07-28T02:00:33Z",
+ "generated": "2026-08-05T09:22:08Z",
  "years": 3,
  "months": [
   {
-   "asof": "2023-07-31",
-   "eligible": 308,
-   "median_buy_score": 0.489,
-   "buy": {
-    "code": "WNR",
-    "name": "Wanneroo",
-    "state": "WA",
-    "score": 0.848,
-    "yield": 5.41,
-    "yield_pctile": 98.4,
-    "vacancy": 0.34,
-    "rent_12m": 20.0,
-    "listings_12m": -27.5,
-    "listings": 462,
-    "fwd_6m": 7.7971418553718586,
-    "fwd_12m": 18.701249866612013,
-    "fwd_24m": 32.56885784312895
-   },
-   "sell": {
-    "code": "TOM",
-    "name": "Tomerong / Jervis Bay",
-    "state": "NSW",
-    "score": 0.865,
-    "yield": 2.74,
-    "yield_pctile": 6.9,
-    "vacancy": 3.33,
-    "rent_12m": -5.2,
-    "listings_12m": 29.6,
-    "listings": 735,
-    "fwd_6m": 4.062544322257877,
-    "fwd_12m": 2.175755955016756,
-    "fwd_24m": 4.38171871295201
-   },
-   "bench_6m": 6.620296874549525,
-   "universe_median_6m": 3.5790078439189132,
-   "bench_12m": 9.524686380803304,
-   "universe_median_12m": 7.425164876524648,
-   "bench_24m": 16.63183817258751,
-   "universe_median_24m": 18.17772918141425
-  },
-  {
    "asof": "2023-08-31",
-   "eligible": 314,
-   "median_buy_score": 0.479,
+   "eligible": 449,
+   "median_buy_score": 0.485,
    "buy": {
     "code": "BWN",
     "name": "Bowen",
@@ -78,16 +37,16 @@
     "fwd_24m": 8.071019122317402
    },
    "bench_6m": 5.513255774519132,
-   "universe_median_6m": 4.794316258650455,
+   "universe_median_6m": 4.674681334327757,
    "bench_12m": 9.09436076644623,
-   "universe_median_12m": 8.06362615491203,
+   "universe_median_12m": 8.626492619162661,
    "bench_24m": 17.564177707001672,
-   "universe_median_24m": 18.61063789513533
+   "universe_median_24m": 19.089870016400944
   },
   {
    "asof": "2023-09-30",
-   "eligible": 321,
-   "median_buy_score": 0.485,
+   "eligible": 467,
+   "median_buy_score": 0.478,
    "buy": {
     "code": "CLK",
     "name": "Clarkson",
@@ -121,14 +80,14 @@
    "bench_6m": 4.747616586806203,
    "universe_median_6m": 5.111846334580039,
    "bench_12m": 7.721438047490592,
-   "universe_median_12m": 8.362065485082159,
+   "universe_median_12m": 8.514818688586324,
    "bench_24m": 16.182408331822696,
-   "universe_median_24m": 19.89023236646654
+   "universe_median_24m": 19.632179054054056
   },
   {
    "asof": "2023-10-31",
-   "eligible": 324,
-   "median_buy_score": 0.49,
+   "eligible": 471,
+   "median_buy_score": 0.483,
    "buy": {
     "code": "CNV",
     "name": "Canning Vale",
@@ -160,15 +119,15 @@
     "fwd_24m": 3.3004794241704882
    },
    "bench_6m": 4.1837879559844415,
-   "universe_median_6m": 4.326097952160879,
+   "universe_median_6m": 4.714464548281283,
    "bench_12m": 7.280528874351155,
-   "universe_median_12m": 8.344774098170626,
+   "universe_median_12m": 8.354072398190038,
    "bench_24m": 15.975203866090858,
-   "universe_median_24m": 20.678911913152454
+   "universe_median_24m": 20.308960768324734
   },
   {
    "asof": "2023-11-30",
-   "eligible": 328,
+   "eligible": 480,
    "median_buy_score": 0.471,
    "buy": {
     "code": "SUC",
@@ -201,30 +160,30 @@
     "fwd_24m": 1.2484376441391998
    },
    "bench_6m": 4.688924186070675,
-   "universe_median_6m": 4.033515260619569,
+   "universe_median_6m": 4.408615024411011,
    "bench_12m": 7.118042809074687,
-   "universe_median_12m": 7.351029183867941,
+   "universe_median_12m": 7.299293651477301,
    "bench_24m": 17.293032467637115,
-   "universe_median_24m": 21.496716142119745
+   "universe_median_24m": 20.50982019448164
   },
   {
    "asof": "2023-12-31",
-   "eligible": 321,
-   "median_buy_score": 0.463,
+   "eligible": 455,
+   "median_buy_score": 0.46,
    "buy": {
-    "code": "SUC",
-    "name": "Success",
+    "code": "KAR",
+    "name": "Karrinyup",
     "state": "WA",
-    "score": 0.832,
-    "yield": 5.79,
-    "yield_pctile": 100.0,
-    "vacancy": 0.43,
-    "rent_12m": 20.5,
-    "listings_12m": -23.0,
-    "listings": 1097,
-    "fwd_6m": 19.361396712889523,
-    "fwd_12m": 30.407317357948884,
-    "fwd_24m": 43.718878563726406
+    "score": 0.848,
+    "yield": 5.15,
+    "yield_pctile": 98.8,
+    "vacancy": 0.36,
+    "rent_12m": 11.9,
+    "listings_12m": -36.6,
+    "listings": 242,
+    "fwd_6m": 25.74583530833683,
+    "fwd_12m": 36.71014777083563,
+    "fwd_24m": 59.51617545763994
    },
    "sell": {
     "code": "BDN",
@@ -242,57 +201,57 @@
     "fwd_24m": -11.425110338251187
    },
    "bench_6m": 2.6664894162378827,
-   "universe_median_6m": 3.302771109743796,
+   "universe_median_6m": 3.784324934434835,
    "bench_12m": 5.6613265630620635,
-   "universe_median_12m": 7.565196334476054,
+   "universe_median_12m": 7.2260876698435395,
    "bench_24m": 17.34777750553038,
-   "universe_median_24m": 22.242306259503476
+   "universe_median_24m": 21.75388762879271
   },
   {
    "asof": "2024-01-31",
-   "eligible": 312,
-   "median_buy_score": 0.472,
+   "eligible": 434,
+   "median_buy_score": 0.471,
    "buy": {
-    "code": "BWN",
-    "name": "Bowen",
-    "state": "QLD",
-    "score": 0.805,
-    "yield": 6.98,
-    "yield_pctile": 95.5,
-    "vacancy": 0.66,
-    "rent_12m": 17.2,
-    "listings_12m": -20.6,
-    "listings": 358,
-    "fwd_6m": 16.901321418385784,
-    "fwd_12m": 33.4081186424565,
-    "fwd_24m": 59.72216940773838
+    "code": "KAR",
+    "name": "Karrinyup",
+    "state": "WA",
+    "score": 0.824,
+    "yield": 6.04,
+    "yield_pctile": 100.0,
+    "vacancy": 0.32,
+    "rent_12m": 20.3,
+    "listings_12m": -36.9,
+    "listings": 217,
+    "fwd_6m": 24.467062217114986,
+    "fwd_12m": 35.90192813599727,
+    "fwd_24m": 48.68029526953484
    },
    "sell": {
-    "code": "SDB",
-    "name": "Sandy Bay",
-    "state": "TAS",
-    "score": 0.747,
-    "yield": 3.14,
-    "yield_pctile": 15.2,
-    "vacancy": 2.16,
-    "rent_12m": -11.3,
-    "listings_12m": 38.2,
-    "listings": 105,
-    "fwd_6m": 1.1693869379649335,
-    "fwd_12m": -8.776838679692666,
-    "fwd_24m": 4.989251749489565
+    "code": "NRM",
+    "name": "Narooma",
+    "state": "NSW",
+    "score": 0.763,
+    "yield": 2.77,
+    "yield_pctile": 9.4,
+    "vacancy": 3.0,
+    "rent_12m": -29.4,
+    "listings_12m": 11.7,
+    "listings": 200,
+    "fwd_6m": -0.3240338888342076,
+    "fwd_12m": -8.446655709767448,
+    "fwd_24m": -0.8984259648683213
    },
    "bench_6m": 2.7240493521333065,
-   "universe_median_6m": 3.448745641000861,
+   "universe_median_6m": 3.3654354958196686,
    "bench_12m": 6.67012660767321,
-   "universe_median_12m": 7.88856754020415,
+   "universe_median_12m": 7.791039104400022,
    "bench_24m": 17.728388815958752,
    "universe_median_24m": 22.980720526782328
   },
   {
    "asof": "2024-02-29",
-   "eligible": 326,
-   "median_buy_score": 0.484,
+   "eligible": 467,
+   "median_buy_score": 0.475,
    "buy": {
     "code": "BSN",
     "name": "Busselton",
@@ -324,16 +283,16 @@
     "fwd_24m": -4.450309428467413
    },
    "bench_6m": 3.393636505764075,
-   "universe_median_6m": 2.6990025813440788,
+   "universe_median_6m": 2.9755278734870494,
    "bench_12m": 6.707093927438801,
-   "universe_median_12m": 6.813137710051076,
+   "universe_median_12m": 6.808585060092631,
    "bench_24m": 18.703998560619482,
-   "universe_median_24m": 22.329692682080736
+   "universe_median_24m": 21.848094032290334
   },
   {
    "asof": "2024-03-31",
-   "eligible": 332,
-   "median_buy_score": 0.481,
+   "eligible": 485,
+   "median_buy_score": 0.473,
    "buy": {
     "code": "WNR",
     "name": "Wanneroo",
@@ -365,16 +324,16 @@
     "fwd_24m": 15.182138257743416
    },
    "bench_6m": 2.839034965745424,
-   "universe_median_6m": 2.9558413429706887,
+   "universe_median_6m": 3.5936137871627416,
    "bench_12m": 5.78414414383388,
-   "universe_median_12m": 7.09043898984123,
+   "universe_median_12m": 6.520997717589072,
    "bench_24m": 16.779872762604708,
-   "universe_median_24m": 20.6377166815334
+   "universe_median_24m": 20.214951395062087
   },
   {
    "asof": "2024-04-30",
-   "eligible": 322,
-   "median_buy_score": 0.475,
+   "eligible": 461,
+   "median_buy_score": 0.465,
    "buy": {
     "code": "PPI",
     "name": "Port Pirie",
@@ -406,16 +365,16 @@
     "fwd_24m": 8.929312562864533
    },
    "bench_6m": 2.9723827277954307,
-   "universe_median_6m": 3.8605384870525006,
+   "universe_median_6m": 3.6781319796954204,
    "bench_12m": 7.201564918595538,
-   "universe_median_12m": 8.003422942060446,
+   "universe_median_12m": 7.67964780076118,
    "bench_24m": 15.750517184624812,
-   "universe_median_24m": 20.205297683106703
+   "universe_median_24m": 19.038814664724878
   },
   {
    "asof": "2024-05-31",
-   "eligible": 326,
-   "median_buy_score": 0.477,
+   "eligible": 480,
+   "median_buy_score": 0.455,
    "buy": {
     "code": "SUC",
     "name": "Success",
@@ -447,16 +406,16 @@
     "fwd_24m": 0.6762225796866916
    },
    "bench_6m": 1.7275655415425195,
-   "universe_median_6m": 2.736490939222458,
+   "universe_median_6m": 2.5867810993358997,
    "bench_12m": 7.108638422921509,
    "universe_median_12m": 7.085681106664854,
    "bench_24m": 13.5938329047794,
-   "universe_median_24m": 18.293284873244865
+   "universe_median_24m": 17.442676969562477
   },
   {
    "asof": "2024-06-30",
-   "eligible": 312,
-   "median_buy_score": 0.457,
+   "eligible": 453,
+   "median_buy_score": 0.443,
    "buy": {
     "code": "CNS",
     "name": "Cairns",
@@ -488,16 +447,16 @@
     "fwd_24m": 15.104282433133287
    },
    "bench_6m": 2.9170542051772053,
-   "universe_median_6m": 3.365622015440617,
+   "universe_median_6m": 3.152155392741518,
    "bench_12m": 6.927199744753532,
-   "universe_median_12m": 7.627481642989342,
+   "universe_median_12m": 6.785172989855459,
    "bench_24m": 11.292117572484162,
-   "universe_median_24m": 17.71331752182126
+   "universe_median_24m": 16.738314559141408
   },
   {
    "asof": "2024-07-31",
-   "eligible": 314,
-   "median_buy_score": 0.456,
+   "eligible": 453,
+   "median_buy_score": 0.441,
    "buy": {
     "code": "PPI",
     "name": "Port Pirie",
@@ -511,7 +470,7 @@
     "listings": 131,
     "fwd_6m": 37.024974911480136,
     "fwd_12m": 30.901861284153533,
-    "fwd_24m": null
+    "fwd_24m": 61.10730312612424
    },
    "sell": {
     "code": "STH",
@@ -526,19 +485,19 @@
     "listings": 167,
     "fwd_6m": 0.9496692650914129,
     "fwd_12m": 11.358704144169174,
-    "fwd_24m": null
+    "fwd_24m": 25.265890032813076
    },
    "bench_6m": 3.8414346790525578,
-   "universe_median_6m": 3.8759242144177364,
+   "universe_median_6m": 3.3715296544436058,
    "bench_12m": 6.489086640315533,
-   "universe_median_12m": 6.877962668617155,
-   "bench_24m": null,
-   "universe_median_24m": null
+   "universe_median_12m": 6.870205584535127,
+   "bench_24m": 10.537113065038618,
+   "universe_median_24m": 16.38572575587971
   },
   {
    "asof": "2024-08-31",
-   "eligible": 325,
-   "median_buy_score": 0.46,
+   "eligible": 478,
+   "median_buy_score": 0.431,
    "buy": {
     "code": "PPI",
     "name": "Port Pirie",
@@ -570,29 +529,29 @@
     "fwd_24m": null
    },
    "bench_6m": 3.2043527769987312,
-   "universe_median_6m": 3.169484433837999,
+   "universe_median_6m": 2.9271290206163814,
    "bench_12m": 7.763753214236235,
-   "universe_median_12m": 8.155126780387123,
+   "universe_median_12m": 7.970352572058337,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2024-09-30",
-   "eligible": 319,
-   "median_buy_score": 0.474,
+   "eligible": 471,
+   "median_buy_score": 0.446,
    "buy": {
-    "code": "ESP",
-    "name": "Esperance",
+    "code": "KAR",
+    "name": "Karrinyup",
     "state": "WA",
     "score": 0.818,
-    "yield": 7.38,
-    "yield_pctile": 100.0,
-    "vacancy": 0.07,
-    "rent_12m": 46.8,
-    "listings_12m": -27.3,
-    "listings": 184,
-    "fwd_6m": 7.516248508535828,
-    "fwd_12m": 15.810707844781756,
+    "yield": 4.95,
+    "yield_pctile": 95.2,
+    "vacancy": 0.41,
+    "rent_12m": 35.6,
+    "listings_12m": -23.1,
+    "listings": 216,
+    "fwd_6m": 12.66682929647629,
+    "fwd_12m": 28.13998574849299,
     "fwd_24m": null
    },
    "sell": {
@@ -611,16 +570,16 @@
     "fwd_24m": null
    },
    "bench_6m": 2.863804759612365,
-   "universe_median_6m": 3.7067767779465743,
+   "universe_median_6m": 3.2422050946306014,
    "bench_12m": 7.854490654499036,
-   "universe_median_12m": 9.251911690946324,
+   "universe_median_12m": 8.919059749884205,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2024-10-31",
-   "eligible": 325,
-   "median_buy_score": 0.447,
+   "eligible": 487,
+   "median_buy_score": 0.427,
    "buy": {
     "code": "ESP",
     "name": "Esperance",
@@ -652,16 +611,16 @@
     "fwd_24m": null
    },
    "bench_6m": 4.107103359917197,
-   "universe_median_6m": 3.5929611072151646,
+   "universe_median_6m": 3.58191323239867,
    "bench_12m": 8.346249671353267,
-   "universe_median_12m": 10.804640476558092,
+   "universe_median_12m": 10.173501186565792,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2024-11-30",
-   "eligible": 340,
-   "median_buy_score": 0.44,
+   "eligible": 507,
+   "median_buy_score": 0.42,
    "buy": {
     "code": "ESP",
     "name": "Esperance",
@@ -678,31 +637,31 @@
     "fwd_24m": null
    },
    "sell": {
-    "code": "PHL",
-    "name": "Phillip (Woden)",
-    "state": "ACT",
-    "score": 0.697,
-    "yield": 3.25,
-    "yield_pctile": 9.7,
-    "vacancy": 2.65,
-    "rent_12m": -1.7,
-    "listings_12m": 63.5,
-    "listings": 327,
-    "fwd_6m": -13.681355368424143,
-    "fwd_12m": 6.891183599396378,
+    "code": "GLE",
+    "name": "Glebe",
+    "state": "NSW",
+    "score": 0.83,
+    "yield": 2.25,
+    "yield_pctile": 7.1,
+    "vacancy": 2.85,
+    "rent_12m": -3.8,
+    "listings_12m": 40.3,
+    "listings": 108,
+    "fwd_6m": 3.8516606032155787,
+    "fwd_12m": 8.668220251367774,
     "fwd_24m": null
    },
    "bench_6m": 5.2896900193502905,
-   "universe_median_6m": 3.4940811470224986,
+   "universe_median_6m": 3.4361746961054207,
    "bench_12m": 9.498856954190394,
-   "universe_median_12m": 11.025942673676203,
+   "universe_median_12m": 10.791006450804774,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2024-12-31",
-   "eligible": 317,
-   "median_buy_score": 0.42,
+   "eligible": 449,
+   "median_buy_score": 0.411,
    "buy": {
     "code": "BSN",
     "name": "Busselton",
@@ -719,31 +678,31 @@
     "fwd_24m": null
    },
    "sell": {
-    "code": "BWL",
-    "name": "Bowral",
+    "code": "BURW",
+    "name": "Burwood",
     "state": "NSW",
-    "score": 0.722,
-    "yield": 2.44,
-    "yield_pctile": 8.8,
-    "vacancy": 3.65,
-    "rent_12m": -7.8,
-    "listings_12m": 15.8,
-    "listings": 249,
-    "fwd_6m": 3.3565745567460503,
-    "fwd_12m": 5.196873029070326,
+    "score": 0.777,
+    "yield": 2.52,
+    "yield_pctile": 29.5,
+    "vacancy": 4.17,
+    "rent_12m": -4.1,
+    "listings_12m": 37.0,
+    "listings": 163,
+    "fwd_6m": 10.780422933694012,
+    "fwd_12m": 4.953856854017791,
     "fwd_24m": null
    },
    "bench_6m": 3.8964830178501053,
-   "universe_median_6m": 3.717133601688727,
+   "universe_median_6m": 3.3565745567460503,
    "bench_12m": 11.060291709941271,
-   "universe_median_12m": 12.514573250912765,
+   "universe_median_12m": 12.301564883339932,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2025-01-31",
-   "eligible": 319,
-   "median_buy_score": 0.439,
+   "eligible": 460,
+   "median_buy_score": 0.426,
    "buy": {
     "code": "BSN",
     "name": "Busselton",
@@ -760,31 +719,31 @@
     "fwd_24m": null
    },
    "sell": {
-    "code": "SLD",
-    "name": "Sutherland",
+    "code": "BURW",
+    "name": "Burwood",
     "state": "NSW",
-    "score": 0.671,
-    "yield": 2.85,
-    "yield_pctile": 12.3,
-    "vacancy": 0.8,
-    "rent_12m": -6.2,
-    "listings_12m": 27.7,
-    "listings": 129,
-    "fwd_6m": -6.661840399708751,
-    "fwd_12m": 3.9711965706692,
+    "score": 0.792,
+    "yield": 2.37,
+    "yield_pctile": 22.7,
+    "vacancy": 2.77,
+    "rent_12m": -5.3,
+    "listings_12m": 50.5,
+    "listings": 167,
+    "fwd_6m": 11.658974529493914,
+    "fwd_12m": -0.02323158431424277,
     "fwd_24m": null
    },
    "bench_6m": 4.4037107225316285,
-   "universe_median_6m": 3.933188238078955,
+   "universe_median_6m": 4.004309227238068,
    "bench_12m": 11.694320542209047,
-   "universe_median_12m": 12.812523649814779,
+   "universe_median_12m": 12.371944731125662,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2025-02-28",
-   "eligible": 325,
-   "median_buy_score": 0.428,
+   "eligible": 478,
+   "median_buy_score": 0.416,
    "buy": {
     "code": "BSN",
     "name": "Busselton",
@@ -801,31 +760,31 @@
     "fwd_24m": null
    },
    "sell": {
-    "code": "PHL",
-    "name": "Phillip (Woden)",
-    "state": "ACT",
-    "score": 0.684,
-    "yield": 2.9,
-    "yield_pctile": 5.5,
-    "vacancy": 2.68,
-    "rent_12m": -1.3,
-    "listings_12m": 46.7,
-    "listings": 308,
-    "fwd_6m": 4.76734224508788,
-    "fwd_12m": -9.043876035939514,
+    "code": "BEE",
+    "name": "Beechworth",
+    "state": "VIC",
+    "score": 0.815,
+    "yield": 2.45,
+    "yield_pctile": 6.0,
+    "vacancy": 2.13,
+    "rent_12m": -6.1,
+    "listings_12m": 58.0,
+    "listings": 139,
+    "fwd_6m": 0.2364927725474697,
+    "fwd_12m": 4.536631607457231,
     "fwd_24m": null
    },
    "bench_6m": 4.4178373436334795,
-   "universe_median_6m": 4.065720722524535,
+   "universe_median_6m": 3.935904701390447,
    "bench_12m": 11.242836995765826,
-   "universe_median_12m": 12.726473299765972,
+   "universe_median_12m": 12.351221096489805,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2025-03-31",
-   "eligible": 324,
-   "median_buy_score": 0.449,
+   "eligible": 474,
+   "median_buy_score": 0.432,
    "buy": {
     "code": "ESP",
     "name": "Esperance",
@@ -859,14 +818,14 @@
    "bench_6m": 4.851741491139316,
    "universe_median_6m": 5.056495535429861,
    "bench_12m": 10.394495987810814,
-   "universe_median_12m": 12.699143046044469,
+   "universe_median_12m": 12.388096179203023,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2025-04-30",
-   "eligible": 319,
-   "median_buy_score": 0.406,
+   "eligible": 460,
+   "median_buy_score": 0.394,
    "buy": {
     "code": "ESP",
     "name": "Esperance",
@@ -900,14 +859,14 @@
    "bench_6m": 3.839807841244536,
    "universe_median_6m": 5.129099697009543,
    "bench_12m": 7.974652489934275,
-   "universe_median_12m": 11.545281085690796,
+   "universe_median_12m": 11.567114638499998,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2025-05-31",
-   "eligible": 326,
-   "median_buy_score": 0.421,
+   "eligible": 480,
+   "median_buy_score": 0.392,
    "buy": {
     "code": "WGT",
     "name": "Wangaratta",
@@ -939,16 +898,16 @@
     "fwd_24m": null
    },
    "bench_6m": 3.997700946851057,
-   "universe_median_6m": 6.432078114176654,
+   "universe_median_6m": 6.217196457024299,
    "bench_12m": 6.054781927346431,
-   "universe_median_12m": 10.843652748962661,
+   "universe_median_12m": 10.663699446193453,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2025-06-30",
-   "eligible": 312,
-   "median_buy_score": 0.386,
+   "eligible": 448,
+   "median_buy_score": 0.376,
    "buy": {
     "code": "ASP",
     "name": "Alice Springs",
@@ -980,16 +939,16 @@
     "fwd_24m": null
    },
    "bench_6m": 6.895140705446567,
-   "universe_median_6m": 7.732701550354748,
+   "universe_median_6m": 7.615906202478651,
    "bench_12m": 4.082139846690236,
-   "universe_median_12m": 9.778083570114028,
+   "universe_median_12m": 9.095092060363008,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2025-07-31",
-   "eligible": 303,
-   "median_buy_score": 0.401,
+   "eligible": 429,
+   "median_buy_score": 0.387,
    "buy": {
     "code": "ASP",
     "name": "Alice Springs",
@@ -1002,7 +961,7 @@
     "listings_12m": 1.3,
     "listings": 237,
     "fwd_6m": 3.3972650786386227,
-    "fwd_12m": null,
+    "fwd_12m": 7.408967838796188,
     "fwd_24m": null
    },
    "sell": {
@@ -1017,20 +976,20 @@
     "listings_12m": 28.8,
     "listings": 255,
     "fwd_6m": -3.471258401694066,
-    "fwd_12m": null,
+    "fwd_12m": -1.7741820219732252,
     "fwd_24m": null
    },
    "bench_6m": 7.893989822231928,
-   "universe_median_6m": 8.137590092455383,
-   "bench_12m": null,
-   "universe_median_12m": null,
+   "universe_median_6m": 7.532888020301609,
+   "bench_12m": 3.8013533146320944,
+   "universe_median_12m": 7.565252592436433,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2025-08-31",
-   "eligible": 312,
-   "median_buy_score": 0.414,
+   "eligible": 454,
+   "median_buy_score": 0.392,
    "buy": {
     "code": "ALY",
     "name": "Albany",
@@ -1062,7 +1021,7 @@
     "fwd_24m": null
    },
    "bench_6m": 6.536239234367236,
-   "universe_median_6m": 7.854846039142904,
+   "universe_median_6m": 7.868069427149327,
    "bench_12m": null,
    "universe_median_12m": null,
    "bench_24m": null,
@@ -1070,8 +1029,8 @@
   },
   {
    "asof": "2025-09-30",
-   "eligible": 296,
-   "median_buy_score": 0.41,
+   "eligible": 432,
+   "median_buy_score": 0.399,
    "buy": {
     "code": "ALY",
     "name": "Albany",
@@ -1103,7 +1062,7 @@
     "fwd_24m": null
    },
    "bench_6m": 5.286277955755181,
-   "universe_median_6m": 6.9489431511486455,
+   "universe_median_6m": 6.759078420126885,
    "bench_12m": null,
    "universe_median_12m": null,
    "bench_24m": null,
@@ -1111,8 +1070,8 @@
   },
   {
    "asof": "2025-10-31",
-   "eligible": 313,
-   "median_buy_score": 0.405,
+   "eligible": 470,
+   "median_buy_score": 0.381,
    "buy": {
     "code": "ALY",
     "name": "Albany",
@@ -1144,7 +1103,7 @@
     "fwd_24m": null
    },
    "bench_6m": 3.942943907630503,
-   "universe_median_6m": 5.680456984594073,
+   "universe_median_6m": 5.543570487830918,
    "bench_12m": null,
    "universe_median_12m": null,
    "bench_24m": null,
@@ -1152,8 +1111,8 @@
   },
   {
    "asof": "2025-11-30",
-   "eligible": 305,
-   "median_buy_score": 0.421,
+   "eligible": 451,
+   "median_buy_score": 0.406,
    "buy": {
     "code": "SCB",
     "name": "Scarborough",
@@ -1170,22 +1129,22 @@
     "fwd_24m": null
    },
    "sell": {
-    "code": "WYV",
-    "name": "Wyndham Vale",
-    "state": "VIC",
-    "score": 0.7,
-    "yield": 3.66,
-    "yield_pctile": 32.3,
-    "vacancy": 8.04,
-    "rent_12m": -4.5,
-    "listings_12m": 6.7,
-    "listings": 1299,
-    "fwd_6m": -0.14592709789403857,
+    "code": "NRM",
+    "name": "Narooma",
+    "state": "NSW",
+    "score": 0.767,
+    "yield": 2.61,
+    "yield_pctile": 6.4,
+    "vacancy": 3.06,
+    "rent_12m": -4.6,
+    "listings_12m": 25.1,
+    "listings": 249,
+    "fwd_6m": 0.1459731708999934,
     "fwd_12m": null,
     "fwd_24m": null
    },
    "bench_6m": 1.978006207605154,
-   "universe_median_6m": 3.5355854945572807,
+   "universe_median_6m": 3.2895897354959125,
    "bench_12m": null,
    "universe_median_12m": null,
    "bench_24m": null,
@@ -1193,8 +1152,8 @@
   },
   {
    "asof": "2025-12-31",
-   "eligible": 287,
-   "median_buy_score": 0.397,
+   "eligible": 399,
+   "median_buy_score": 0.388,
    "buy": {
     "code": "SCB",
     "name": "Scarborough",
@@ -1226,7 +1185,7 @@
     "fwd_24m": null
    },
    "bench_6m": -2.631551668478249,
-   "universe_median_6m": 0.8684360179498141,
+   "universe_median_6m": 1.4507552986195105,
    "bench_12m": null,
    "universe_median_12m": null,
    "bench_24m": null,
@@ -1234,8 +1193,8 @@
   },
   {
    "asof": "2026-01-31",
-   "eligible": 290,
-   "median_buy_score": 0.428,
+   "eligible": 406,
+   "median_buy_score": 0.415,
    "buy": {
     "code": "SCB",
     "name": "Scarborough",
@@ -1275,8 +1234,8 @@
   },
   {
    "asof": "2026-02-28",
-   "eligible": 295,
-   "median_buy_score": 0.427,
+   "eligible": 432,
+   "median_buy_score": 0.396,
    "buy": {
     "code": "SCB",
     "name": "Scarborough",
@@ -1316,8 +1275,8 @@
   },
   {
    "asof": "2026-03-31",
-   "eligible": 301,
-   "median_buy_score": 0.433,
+   "eligible": 437,
+   "median_buy_score": 0.425,
    "buy": {
     "code": "NNF",
     "name": "New Norfolk",
@@ -1357,8 +1316,8 @@
   },
   {
    "asof": "2026-04-30",
-   "eligible": 302,
-   "median_buy_score": 0.423,
+   "eligible": 440,
+   "median_buy_score": 0.412,
    "buy": {
     "code": "BWN",
     "name": "Bowen",
@@ -1398,8 +1357,8 @@
   },
   {
    "asof": "2026-05-31",
-   "eligible": 319,
-   "median_buy_score": 0.422,
+   "eligible": 472,
+   "median_buy_score": 0.415,
    "buy": {
     "code": "ALY",
     "name": "Albany",
@@ -1416,16 +1375,16 @@
     "fwd_24m": null
    },
    "sell": {
-    "code": "BRT",
-    "name": "Barton",
-    "state": "ACT",
-    "score": 0.733,
-    "yield": 2.54,
-    "yield_pctile": 20.4,
-    "vacancy": 5.25,
-    "rent_12m": -10.2,
-    "listings_12m": 14.3,
-    "listings": 112,
+    "code": "GLO",
+    "name": "Gloucester",
+    "state": "NSW",
+    "score": 0.804,
+    "yield": 2.55,
+    "yield_pctile": 2.5,
+    "vacancy": 2.38,
+    "rent_12m": -5.1,
+    "listings_12m": 27.1,
+    "listings": 108,
     "fwd_6m": null,
     "fwd_12m": null,
     "fwd_24m": null
@@ -1439,8 +1398,8 @@
   },
   {
    "asof": "2026-06-30",
-   "eligible": 311,
-   "median_buy_score": 0.43,
+   "eligible": 457,
+   "median_buy_score": 0.426,
    "buy": {
     "code": "ALY",
     "name": "Albany",
@@ -1467,6 +1426,47 @@
     "rent_12m": -11.8,
     "listings_12m": 24.1,
     "listings": 108,
+    "fwd_6m": null,
+    "fwd_12m": null,
+    "fwd_24m": null
+   },
+   "bench_6m": null,
+   "universe_median_6m": null,
+   "bench_12m": null,
+   "universe_median_12m": null,
+   "bench_24m": null,
+   "universe_median_24m": null
+  },
+  {
+   "asof": "2026-07-31",
+   "eligible": 475,
+   "median_buy_score": 0.428,
+   "buy": {
+    "code": "ASP",
+    "name": "Alice Springs",
+    "state": "NT",
+    "score": 0.813,
+    "yield": 9.06,
+    "yield_pctile": 100.0,
+    "vacancy": 0.4,
+    "rent_12m": 23.8,
+    "listings_12m": -21.1,
+    "listings": 187,
+    "fwd_6m": null,
+    "fwd_12m": null,
+    "fwd_24m": null
+   },
+   "sell": {
+    "code": "SUN",
+    "name": "Sunbury",
+    "state": "VIC",
+    "score": 0.805,
+    "yield": 3.75,
+    "yield_pctile": 25.7,
+    "vacancy": 2.53,
+    "rent_12m": -3.6,
+    "listings_12m": 94.4,
+    "listings": 1390,
     "fwd_6m": null,
     "fwd_12m": null,
     "fwd_24m": null
