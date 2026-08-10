@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-05T09:22:08Z",
+ "generated": "2026-08-10T23:21:56Z",
  "years": 3,
  "months": [
   {
@@ -492,7 +492,7 @@
    "bench_12m": 6.489086640315533,
    "universe_median_12m": 6.870205584535127,
    "bench_24m": 10.537113065038618,
-   "universe_median_24m": 16.38572575587971
+   "universe_median_24m": 16.392630733598445
   },
   {
    "asof": "2024-08-31",
@@ -982,7 +982,7 @@
    "bench_6m": 7.893989822231928,
    "universe_median_6m": 7.532888020301609,
    "bench_12m": 3.8013533146320944,
-   "universe_median_12m": 7.565252592436433,
+   "universe_median_12m": 7.5110653235653135,
    "bench_24m": null,
    "universe_median_24m": null
   },
@@ -1206,7 +1206,7 @@
     "rent_12m": 13.4,
     "listings_12m": -37.9,
     "listings": 139,
-    "fwd_6m": null,
+    "fwd_6m": 15.961960301493594,
     "fwd_12m": null,
     "fwd_24m": null
    },
@@ -1221,12 +1221,12 @@
     "rent_12m": -4.1,
     "listings_12m": 23.6,
     "listings": 1389,
-    "fwd_6m": null,
+    "fwd_6m": -1.277770633665909,
     "fwd_12m": null,
     "fwd_24m": null
    },
-   "bench_6m": null,
-   "universe_median_6m": null,
+   "bench_6m": -3.5507070814838504,
+   "universe_median_6m": -0.09312629603172029,
    "bench_12m": null,
    "universe_median_12m": null,
    "bench_24m": null,
@@ -1440,7 +1440,7 @@
   {
    "asof": "2026-07-31",
    "eligible": 475,
-   "median_buy_score": 0.428,
+   "median_buy_score": 0.427,
    "buy": {
     "code": "ASP",
     "name": "Alice Springs",
