@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-10T23:21:56Z",
+ "generated": "2026-08-17T23:16:02Z",
  "years": 3,
  "months": [
   {
@@ -1440,7 +1440,7 @@
   {
    "asof": "2026-07-31",
    "eligible": 475,
-   "median_buy_score": 0.427,
+   "median_buy_score": 0.422,
    "buy": {
     "code": "ASP",
     "name": "Alice Springs",
@@ -1457,16 +1457,16 @@
     "fwd_24m": null
    },
    "sell": {
-    "code": "SUN",
-    "name": "Sunbury",
-    "state": "VIC",
-    "score": 0.805,
-    "yield": 3.75,
-    "yield_pctile": 25.7,
-    "vacancy": 2.53,
-    "rent_12m": -3.6,
-    "listings_12m": 94.4,
-    "listings": 1390,
+    "code": "GLO",
+    "name": "Gloucester",
+    "state": "NSW",
+    "score": 0.823,
+    "yield": 2.59,
+    "yield_pctile": 4.1,
+    "vacancy": 3.85,
+    "rent_12m": -8.6,
+    "listings_12m": 25.6,
+    "listings": 103,
     "fwd_6m": null,
     "fwd_12m": null,
     "fwd_24m": null
