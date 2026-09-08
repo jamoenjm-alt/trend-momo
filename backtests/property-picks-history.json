@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-01T01:46:01Z",
+ "generated": "2026-09-08T00:49:13Z",
  "years": 3,
  "months": [
   {
@@ -470,7 +470,7 @@
     "listings": 135,
     "fwd_6m": 35.96724675244531,
     "fwd_12m": 24.37285939090994,
-    "fwd_24m": null
+    "fwd_24m": 58.42358604091456
    },
    "sell": {
     "code": "STH",
@@ -485,14 +485,14 @@
     "listings": 170,
     "fwd_6m": -3.823206780385169,
     "fwd_12m": 11.630686702191696,
-    "fwd_24m": null
+    "fwd_24m": 25.365578253667653
    },
    "bench_6m": 3.2043527769987312,
    "universe_median_6m": 2.9271290206163814,
    "bench_12m": 7.763753214236235,
    "universe_median_12m": 7.970352572058337,
-   "bench_24m": null,
-   "universe_median_24m": null
+   "bench_24m": 9.843165545414912,
+   "universe_median_24m": 14.290570527468782
   },
   {
    "asof": "2024-09-30",
@@ -961,7 +961,7 @@
     "listings_12m": -12.0,
     "listings": 410,
     "fwd_6m": 11.055670919127847,
-    "fwd_12m": null,
+    "fwd_12m": 1.5730851074765795,
     "fwd_24m": null
    },
    "sell": {
@@ -976,13 +976,13 @@
     "listings_12m": 16.4,
     "listings": 333,
     "fwd_6m": 9.645692750639467,
-    "fwd_12m": null,
+    "fwd_12m": 7.593926654910543,
     "fwd_24m": null
    },
    "bench_6m": 6.536239234367236,
    "universe_median_6m": 7.868069427149327,
-   "bench_12m": null,
-   "universe_median_12m": null,
+   "bench_12m": 1.9296027366871416,
+   "universe_median_12m": 6.143735996942734,
    "bench_24m": null,
    "universe_median_24m": null
   },
@@ -1206,7 +1206,7 @@
     "rent_12m": 19.3,
     "listings_12m": -32.4,
     "listings": 138,
-    "fwd_6m": null,
+    "fwd_6m": 4.8047697289570035,
     "fwd_12m": null,
     "fwd_24m": null
    },
@@ -1221,12 +1221,12 @@
     "rent_12m": -4.2,
     "listings_12m": 33.9,
     "listings": 1544,
-    "fwd_6m": null,
+    "fwd_6m": -0.03293977637383039,
     "fwd_12m": null,
     "fwd_24m": null
    },
-   "bench_6m": null,
-   "universe_median_6m": null,
+   "bench_6m": -4.324008929530576,
+   "universe_median_6m": -1.4833624099158782,
    "bench_12m": null,
    "universe_median_12m": null,
    "bench_24m": null,
@@ -1439,19 +1439,19 @@
   },
   {
    "asof": "2026-08-31",
-   "eligible": 473,
-   "median_buy_score": 0.434,
+   "eligible": 471,
+   "median_buy_score": 0.438,
    "buy": {
     "code": "ALY",
     "name": "Albany",
     "state": "WA",
-    "score": 0.833,
+    "score": 0.854,
     "yield": 4.99,
     "yield_pctile": 100.0,
     "vacancy": 0.31,
     "rent_12m": 26.6,
-    "listings_12m": -7.4,
-    "listings": 363,
+    "listings_12m": -11.7,
+    "listings": 362,
     "fwd_6m": null,
     "fwd_12m": null,
     "fwd_24m": null
