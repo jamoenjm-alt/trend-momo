@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-08T00:49:13Z",
+ "generated": "2026-09-15T01:05:58Z",
  "years": 3,
  "months": [
   {
@@ -1440,7 +1440,7 @@
   {
    "asof": "2026-08-31",
    "eligible": 471,
-   "median_buy_score": 0.438,
+   "median_buy_score": 0.439,
    "buy": {
     "code": "ALY",
     "name": "Albany",
@@ -1448,7 +1448,7 @@
     "score": 0.854,
     "yield": 4.99,
     "yield_pctile": 100.0,
-    "vacancy": 0.31,
+    "vacancy": 0.4,
     "rent_12m": 26.6,
     "listings_12m": -11.7,
     "listings": 362,
@@ -1463,7 +1463,7 @@
     "score": 0.808,
     "yield": 2.49,
     "yield_pctile": 3.7,
-    "vacancy": 3.85,
+    "vacancy": 4.49,
     "rent_12m": -3.8,
     "listings_12m": 19.6,
     "listings": 396,
