@@ -154,3 +154,11 @@ Baked `data/prices.json` is the primary path; live APIs are best-effort fallback
 - GitHub Actions bake can silently stop (last seen stale on 2026-07-08 — prices were 2 days
   old). If `updated` in data/prices.json is > 1 trading day old, check the repo's Actions tab.
 - SPCX (SpaceX) is not publicly listed — its row intentionally shows NO DATA.
+- **Loading hang (fixed 2026-09-20).** Root cause: the boot `fetch('data/prices.json')` had
+  no timeout and the render was gated on it, so a stalled connection (or a hung esm.sh import)
+  left an infinite “Loading…” spinner. Both boards now: (a) time out the boot fetch with an
+  8s AbortController, (b) set `window.__appMounted=true` right after `createRoot().render()`, and
+  (c) run a **plain (non-module) watchdog `<script>` before `</body>`** that, after 15s, if
+  `!window.__appMounted`, replaces `#root` with a Reload message. The watchdog is plain JS on
+  purpose so it runs even when the esm.sh module never loads. Do NOT remove any of these, and
+  never re-introduce a bare boot fetch with no timeout or a render gated on the data fetch.

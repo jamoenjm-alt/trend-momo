@@ -1534,7 +1534,8 @@
       useEffect(() => {
         (async () => {
           try {
-            const res = await fetch('data/property.json?t=' + Date.now());
+            const _c = new AbortController(); const _t = setTimeout(function(){ _c.abort(); }, 8000);
+            const res = await fetch('data/property.json?t=' + Date.now(), { signal: _c.signal }).finally(function(){ clearTimeout(_t); });
             if (!res.ok) throw new Error('HTTP ' + res.status);
             const data = await res.json();
             for (const r of Object.values(data.regions || {})) {
@@ -1555,8 +1556,24 @@
       return h(Board, { payload });
     }
 
-    createRoot(document.getElementById('root')).render(h(App));
+    createRoot(document.getElementById('root')).render(h(App)); window.__appMounted = true;
   </script>
 
+<script>
+/* Boot watchdog: if React never mounts within 15s (CDN / module / network hang), replace
+   the spinner with an actionable message instead of an infinite "Loading...". Plain script
+   (no ES module) so it runs even when the esm.sh import itself fails. */
+window.setTimeout(function(){
+  if (window.__appMounted) return;
+  var r = document.getElementById('root'); if (!r) return;
+  r.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif;color:#374151">'
+    + '<div style="text-align:center;max-width:440px;line-height:1.6;padding:20px">'
+    + '<div style="font-size:20px;margin-bottom:8px">\u26a0 Couldn\u2019t finish loading</div>'
+    + 'Almost always a temporary network or CDN hiccup \u2014 a reload usually fixes it.<br><br>'
+    + '<button onclick="location.reload()" style="padding:9px 20px;border-radius:8px;border:1px solid #2563eb;background:#2563eb;color:#fff;cursor:pointer;font-size:14px">Reload</button><br><br>'
+    + '<small style="color:#9ca3af">If you opened the file directly from disk, run <b>serve.bat</b> instead of double-clicking it.</small>'
+    + '</div></div>';
+}, 15000);
+</script>
 </body>
 </html>
