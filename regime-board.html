@@ -2300,21 +2300,25 @@ function BtcSignalPage({ data }) {
   return h('div', { className: 'outlook' },
     h('div', { className: 'outlook-head' },
       h('h2', null, 'Signal'),
-      h('p', null, 'The BTC trend filter — the only rule that beat buy-and-hold in our backtests — plus the board’s daily extremes, recomputed automatically from each day’s data.'),
+      h('p', null, 'The BTC trend filter — the only rule that beat buy-and-hold in our backtests — plus the board’s strongest and weakest names, recomputed automatically from each day’s data.'),
     ),
     body,
     h('div', { className: 'outlook-head', style: { marginTop: 26 } },
       h('h2', null, 'Today’s Extremes — ' + new Date().toDateString()),
-      h('p', null, 'Mechanical output of the board’s scoring formula: the lowest score on the board (max fear) and the highest (max greed). Forex and index ETFs are excluded. Backtest honesty: 2010–2026, the max-fear side out-earned the max-greed side roughly 3-to-1 over the following month — but neither approach beat simply holding the index. Extremes worth studying, not instructions.'),
+      h('p', null, 'Mechanical output of the board’s scoring formula. Our backtests are consistent: the STRONGEST-trend names outperformed the most beaten-down over the following 1–3 months (~2% vs ~1% on a 24-year mega-cap test) — momentum persisted, the opposite of a “buy max fear” idea. The edge only shows up over weeks, not days, and does not reliably beat the index after costs. A watch-list, not instructions.'),
     ),
-    pickCard('📉 Buy of the Day — max fear', picks.buy, '#15803d', 'Lowest score on the board: the most beaten-down name by the trend formula. In testing, this side earned ~1.4%/month forward on average — best odds when it sits at support with a quality balance sheet, and still no guarantee.'),
-    pickCard('📈 Sell of the Day — max greed', picks.sell, '#b91c1c', 'Highest score on the board: the most extended name by the trend formula. In testing, this side earned only ~0.4%/month forward — historically the worst side to chase. If you own it, this is where trimming into strength was statistically kindest.'),
+    pickCard('📈 Buy of the Day — strongest uptrend, on a dip (~1 month hold)', picks.buy, '#15803d', 'A name in a confirmed long-term uptrend that has pulled back short-term — the best-entry side. In a 24-year mega-cap test this “dip in an uptrend” earned ~1.9% over the next month vs the index’s ~1.3%. Best held weeks-to-months, not days; a strong trend can still break.'),
+    pickCard('⚠ Weakest on the board — falling knife (avoid)', picks.sell, '#b91c1c', 'The lowest score: the strongest downtrend, most unstable name. Our tracking since launch and the 24-year test both show this side kept falling over the following weeks (below even a random stock). A caution flag — not a “buy the dip”.'),
   );
 }
 
 function dailyPicks(data) {
+  // BUY = "dip in an uptrend" (confirmed long-term uptrend + biggest short-term pullback) — the
+  // side that beat the index in backtests. SELL = weakest trend on the board (falling knife) —
+  // NOT a buy. (The old logic had these inverted: it "bought" the lowest score = max downtrend,
+  // which backtested as the worst side. Fixed 2026-09-20.)
   const seen = {};
-  let buy = null, sell = null;
+  let buy = null, sell = null, strongest = null;
   for (const a of WATCHLIST) {
     if (a.cls === 'Forex' || a.cls === 'Index') continue;
     if (seen[a.ticker]) continue;
@@ -2322,12 +2326,17 @@ function dailyPicks(data) {
     const closes = d && d.closes;
     if (!closes || closes.length < 260 || !d.sigs) continue;
     seen[a.ticker] = 1;
-    const bs = buyScore(d.sigs);
+    const sg = d.sigs;
+    const bs = buyScore(sg);
     if (bs == null) continue;
-    const rec = { ticker: a.ticker, name: a.name, score: bs, regime: scoreToRegime(d.sigs.allInd).label, stability: d.sigs.stability || 'stable', price: closes[closes.length - 1] };
-    if (!buy || bs < buy.score || (bs === buy.score && rec.ticker < buy.ticker)) buy = rec;
-    if (!sell || bs > sell.score || (bs === sell.score && rec.ticker < sell.ticker)) sell = rec;
+    const rec = { ticker: a.ticker, name: a.name, score: bs, regime: scoreToRegime(sg.allInd).label, stability: sg.stability || 'stable', price: closes[closes.length - 1], canary: sg.canary, ltTrend: sg.ltTrend };
+    if (rec.ltTrend != null && rec.ltTrend > 0 && rec.canary != null) {
+      if (!buy || rec.canary < buy.canary || (rec.canary === buy.canary && rec.ticker < buy.ticker)) buy = rec;
+    }
+    if (!strongest || bs > strongest.score || (bs === strongest.score && rec.ticker < strongest.ticker)) strongest = rec;
+    if (!sell || bs < sell.score || (bs === sell.score && rec.ticker < sell.ticker)) sell = rec;
   }
+  if (!buy) buy = strongest;
   return { buy, sell };
 }
 
