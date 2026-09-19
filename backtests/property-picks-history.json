@@ -1,48 +1,7 @@
 {
- "generated": "2026-08-05T09:22:08Z",
+ "generated": "2026-09-15T01:05:58Z",
  "years": 3,
  "months": [
-  {
-   "asof": "2023-08-31",
-   "eligible": 449,
-   "median_buy_score": 0.485,
-   "buy": {
-    "code": "BWN",
-    "name": "Bowen",
-    "state": "QLD",
-    "score": 0.847,
-    "yield": 7.84,
-    "yield_pctile": 99.1,
-    "vacancy": 0.44,
-    "rent_12m": 21.8,
-    "listings_12m": -25.5,
-    "listings": 394,
-    "fwd_6m": -0.4738940482727383,
-    "fwd_12m": 16.343973070403695,
-    "fwd_24m": 48.68909208107528
-   },
-   "sell": {
-    "code": "BAY",
-    "name": "Batemans Bay",
-    "state": "NSW",
-    "score": 0.863,
-    "yield": 3.22,
-    "yield_pctile": 7.9,
-    "vacancy": 4.11,
-    "rent_12m": -16.7,
-    "listings_12m": 42.9,
-    "listings": 390,
-    "fwd_6m": 3.2124936494790868,
-    "fwd_12m": 1.6452198846119037,
-    "fwd_24m": 8.071019122317402
-   },
-   "bench_6m": 5.513255774519132,
-   "universe_median_6m": 4.674681334327757,
-   "bench_12m": 9.09436076644623,
-   "universe_median_12m": 8.626492619162661,
-   "bench_24m": 17.564177707001672,
-   "universe_median_24m": 19.089870016400944
-  },
   {
    "asof": "2023-09-30",
    "eligible": 467,
@@ -492,7 +451,7 @@
    "bench_12m": 6.489086640315533,
    "universe_median_12m": 6.870205584535127,
    "bench_24m": 10.537113065038618,
-   "universe_median_24m": 16.38572575587971
+   "universe_median_24m": 16.392630733598445
   },
   {
    "asof": "2024-08-31",
@@ -511,7 +470,7 @@
     "listings": 135,
     "fwd_6m": 35.96724675244531,
     "fwd_12m": 24.37285939090994,
-    "fwd_24m": null
+    "fwd_24m": 58.42358604091456
    },
    "sell": {
     "code": "STH",
@@ -526,14 +485,14 @@
     "listings": 170,
     "fwd_6m": -3.823206780385169,
     "fwd_12m": 11.630686702191696,
-    "fwd_24m": null
+    "fwd_24m": 25.365578253667653
    },
    "bench_6m": 3.2043527769987312,
    "universe_median_6m": 2.9271290206163814,
    "bench_12m": 7.763753214236235,
    "universe_median_12m": 7.970352572058337,
-   "bench_24m": null,
-   "universe_median_24m": null
+   "bench_24m": 9.843165545414912,
+   "universe_median_24m": 14.290570527468782
   },
   {
    "asof": "2024-09-30",
@@ -982,7 +941,7 @@
    "bench_6m": 7.893989822231928,
    "universe_median_6m": 7.532888020301609,
    "bench_12m": 3.8013533146320944,
-   "universe_median_12m": 7.565252592436433,
+   "universe_median_12m": 7.5110653235653135,
    "bench_24m": null,
    "universe_median_24m": null
   },
@@ -1002,7 +961,7 @@
     "listings_12m": -12.0,
     "listings": 410,
     "fwd_6m": 11.055670919127847,
-    "fwd_12m": null,
+    "fwd_12m": 1.5730851074765795,
     "fwd_24m": null
    },
    "sell": {
@@ -1017,13 +976,13 @@
     "listings_12m": 16.4,
     "listings": 333,
     "fwd_6m": 9.645692750639467,
-    "fwd_12m": null,
+    "fwd_12m": 7.593926654910543,
     "fwd_24m": null
    },
    "bench_6m": 6.536239234367236,
    "universe_median_6m": 7.868069427149327,
-   "bench_12m": null,
-   "universe_median_12m": null,
+   "bench_12m": 1.9296027366871416,
+   "universe_median_12m": 6.143735996942734,
    "bench_24m": null,
    "universe_median_24m": null
   },
@@ -1206,7 +1165,7 @@
     "rent_12m": 13.4,
     "listings_12m": -37.9,
     "listings": 139,
-    "fwd_6m": null,
+    "fwd_6m": 15.961960301493594,
     "fwd_12m": null,
     "fwd_24m": null
    },
@@ -1221,12 +1180,12 @@
     "rent_12m": -4.1,
     "listings_12m": 23.6,
     "listings": 1389,
-    "fwd_6m": null,
+    "fwd_6m": -1.277770633665909,
     "fwd_12m": null,
     "fwd_24m": null
    },
-   "bench_6m": null,
-   "universe_median_6m": null,
+   "bench_6m": -3.5507070814838504,
+   "universe_median_6m": -0.09312629603172029,
    "bench_12m": null,
    "universe_median_12m": null,
    "bench_24m": null,
@@ -1247,7 +1206,7 @@
     "rent_12m": 19.3,
     "listings_12m": -32.4,
     "listings": 138,
-    "fwd_6m": null,
+    "fwd_6m": 4.8047697289570035,
     "fwd_12m": null,
     "fwd_24m": null
    },
@@ -1262,12 +1221,12 @@
     "rent_12m": -4.2,
     "listings_12m": 33.9,
     "listings": 1544,
-    "fwd_6m": null,
+    "fwd_6m": -0.03293977637383039,
     "fwd_12m": null,
     "fwd_24m": null
    },
-   "bench_6m": null,
-   "universe_median_6m": null,
+   "bench_6m": -4.324008929530576,
+   "universe_median_6m": -1.4833624099158782,
    "bench_12m": null,
    "universe_median_12m": null,
    "bench_24m": null,
@@ -1440,7 +1399,7 @@
   {
    "asof": "2026-07-31",
    "eligible": 475,
-   "median_buy_score": 0.428,
+   "median_buy_score": 0.422,
    "buy": {
     "code": "ASP",
     "name": "Alice Springs",
@@ -1457,16 +1416,57 @@
     "fwd_24m": null
    },
    "sell": {
-    "code": "SUN",
-    "name": "Sunbury",
-    "state": "VIC",
-    "score": 0.805,
-    "yield": 3.75,
-    "yield_pctile": 25.7,
-    "vacancy": 2.53,
-    "rent_12m": -3.6,
-    "listings_12m": 94.4,
-    "listings": 1390,
+    "code": "GLO",
+    "name": "Gloucester",
+    "state": "NSW",
+    "score": 0.823,
+    "yield": 2.59,
+    "yield_pctile": 4.1,
+    "vacancy": 3.85,
+    "rent_12m": -8.6,
+    "listings_12m": 25.6,
+    "listings": 103,
+    "fwd_6m": null,
+    "fwd_12m": null,
+    "fwd_24m": null
+   },
+   "bench_6m": null,
+   "universe_median_6m": null,
+   "bench_12m": null,
+   "universe_median_12m": null,
+   "bench_24m": null,
+   "universe_median_24m": null
+  },
+  {
+   "asof": "2026-08-31",
+   "eligible": 471,
+   "median_buy_score": 0.439,
+   "buy": {
+    "code": "ALY",
+    "name": "Albany",
+    "state": "WA",
+    "score": 0.854,
+    "yield": 4.99,
+    "yield_pctile": 100.0,
+    "vacancy": 0.4,
+    "rent_12m": 26.6,
+    "listings_12m": -11.7,
+    "listings": 362,
+    "fwd_6m": null,
+    "fwd_12m": null,
+    "fwd_24m": null
+   },
+   "sell": {
+    "code": "BDN",
+    "name": "Braddon",
+    "state": "ACT",
+    "score": 0.808,
+    "yield": 2.49,
+    "yield_pctile": 3.7,
+    "vacancy": 4.49,
+    "rent_12m": -3.8,
+    "listings_12m": 19.6,
+    "listings": 396,
     "fwd_6m": null,
     "fwd_12m": null,
     "fwd_24m": null
