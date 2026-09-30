@@ -857,6 +857,9 @@
   /* Buys-by-hold-period grid (Signal page) */
   .hz-banner { background:linear-gradient(180deg,#0f1420,#0c1018); border:1px solid #22304a; border-left:3px solid #38bdf8; border-radius:10px; padding:11px 14px; margin:8px 0 12px; font-size:0.72rem; color:#9fb0c3; line-height:1.55; }
   .hz-banner b { color:#e6edf3; }
+  .hz-head { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:4px; }
+  .hz-sel { background:#0f1420; color:#e6edf3; border:1px solid #22304a; border-radius:8px; padding:5px 10px; font-size:0.72rem; font-family:inherit; cursor:pointer; }
+  .hz-sel:hover { border-color:#38bdf8; }
   .hz-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(178px,1fr)); gap:11px; margin:4px 0; }
   .hz-card { position:relative; background:#0f1420; border:1px solid #22304a; border-radius:12px; padding:13px 15px 14px; overflow:hidden; }
   .hz-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:#33415a; }
@@ -2348,6 +2351,7 @@ function ReversalsPage({ data }) {
 }
 
 function BtcSignalPage({ data }) {
+  const [hzSection, setHzSection] = useState('All');
   let closes = null;
   for (const k in data) { if (k.indexOf('BTC__') === 0 && data[k] && data[k].closes) { closes = data[k].closes; break; } }
   let body;
@@ -2375,7 +2379,7 @@ function BtcSignalPage({ data }) {
     );
   }
   const picks = dailyPicks(data);
-  const hbuys = horizonBuys(data);
+  const hbuys = horizonBuys(data, hzSection);
   const extDist = boardExtensions(data);
   const pickCard = (title, p, color, note) => p && h('div', { className: 'btc-card' },
     h('h3', { className: 'plan-h' }, title),
@@ -2396,7 +2400,12 @@ function BtcSignalPage({ data }) {
       h('h2', null, 'Today’s Buys & Avoid — ' + new Date().toDateString()),
       h('p', null, 'Each hold uses the signal that actually won it in testing (25 years, split in two halves, costs on, every pick judged against the average stock to cancel survivor bias): trend distance for a week, 6-month momentum in the 1–6 month middle, 12-month momentum at a year, and froth-screened momentum for 5 years — so short and long horizons surface different names, not the same one five times. Cards are colour-graded by how real that edge was, not by the (survivor-inflated) back-test number. A watch-list, not instructions.'),
     ),
-    h('h3', { className: 'plan-h', style: { marginTop: 4 } }, '📈 Best buy — by how long you’ll hold it'),
+    h('div', { className: 'hz-head' },
+      h('h3', { className: 'plan-h', style: { margin: 0 } }, '📈 Best buy — by how long you’ll hold it'),
+      h('select', { className: 'hz-sel', value: hzSection, onChange: function(e){ setHzSection(e.target.value); } },
+        [['All','All markets'],['Watch','Watchlist'],['Top20','US Top 100'],['Crypto','Crypto'],['ASX','ASX 50'],['HK','Hong Kong 30'],['Commodity','Commodities']].map(function(o){ return h('option', { key: o[0], value: o[0] }, o[1]); })
+      )
+    ),
     h('div', { className: 'hz-banner' },
       h('b', null, 'Five holds, matched signals. '),
       'Each card uses the signal that won its horizon in testing — trend distance for a week, 6-month momentum in the middle, 12-month momentum at a year, froth-screened momentum for 5 years — so the names differ by horizon (1mo and 6mo share the 6-month signal, so those two can match). ',
@@ -2471,7 +2480,7 @@ function dailyPicks(data) {
   return { buy, sell };
 }
 
-function horizonBuys(data) {
+function horizonBuys(data, section) {
   // Each horizon ranks the signal that won it out-of-sample (see
   // backtests/horizon-differentiate.py): trend distance (1wk), 6-month momentum
   // (1mo/6mo), 12-month momentum (1yr), froth-screened 6-month momentum (5yr) —
@@ -2479,6 +2488,7 @@ function horizonBuys(data) {
   const seen = {}, cand = [];
   for (const a of WATCHLIST) {
     if (a.cls === 'Forex' || a.cls === 'Index') continue;
+    if (section && section !== 'All' && a.cls !== section) continue;
     if (seen[a.ticker]) continue;
     const d = data[a.ticker + '__' + a.cls]; const closes = d && d.closes;
     if (!closes || closes.length < 260 || !d.sigs) continue;
