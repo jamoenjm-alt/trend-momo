@@ -1,48 +1,7 @@
 {
- "generated": "2026-09-29T02:22:57Z",
+ "generated": "2026-10-06T02:50:58Z",
  "years": 3,
  "months": [
-  {
-   "asof": "2023-09-30",
-   "eligible": 467,
-   "median_buy_score": 0.478,
-   "buy": {
-    "code": "CLK",
-    "name": "Clarkson",
-    "state": "WA",
-    "score": 0.85,
-    "yield": 5.25,
-    "yield_pctile": 95.4,
-    "vacancy": 0.26,
-    "rent_12m": 19.8,
-    "listings_12m": -16.6,
-    "listings": 322,
-    "fwd_6m": 17.189415327496317,
-    "fwd_12m": 25.94075421760895,
-    "fwd_24m": 37.38870607305422
-   },
-   "sell": {
-    "code": "SWN",
-    "name": "Swansea",
-    "state": "TAS",
-    "score": 0.871,
-    "yield": 2.69,
-    "yield_pctile": 3.9,
-    "vacancy": 3.42,
-    "rent_12m": -8.5,
-    "listings_12m": 98.5,
-    "listings": 133,
-    "fwd_6m": 0.5788482023205477,
-    "fwd_12m": -2.368080451739263,
-    "fwd_24m": -6.3246646889711045
-   },
-   "bench_6m": 4.747616586806203,
-   "universe_median_6m": 5.111846334580039,
-   "bench_12m": 7.721438047490592,
-   "universe_median_12m": 8.514818688586324,
-   "bench_24m": 16.182408331822696,
-   "universe_median_24m": 19.632179054054056
-  },
   {
    "asof": "2023-10-31",
    "eligible": 471,
@@ -511,7 +470,7 @@
     "listings": 216,
     "fwd_6m": 12.66682929647629,
     "fwd_12m": 28.13998574849299,
-    "fwd_24m": null
+    "fwd_24m": 23.433243672951455
    },
    "sell": {
     "code": "PHL",
@@ -526,14 +485,14 @@
     "listings": 302,
     "fwd_6m": 9.660286703872512,
     "fwd_12m": 15.182250113882457,
-    "fwd_24m": null
+    "fwd_24m": 1.3868211905361694
    },
    "bench_6m": 2.863804759612365,
    "universe_median_6m": 3.2422050946306014,
    "bench_12m": 7.854490654499036,
    "universe_median_12m": 8.919059749884205,
-   "bench_24m": null,
-   "universe_median_24m": null
+   "bench_24m": 8.479979906649637,
+   "universe_median_24m": 12.354708916330083
   },
   {
    "asof": "2024-10-31",
@@ -1002,7 +961,7 @@
     "listings_12m": -23.7,
     "listings": 342,
     "fwd_6m": 11.401273474443418,
-    "fwd_12m": null,
+    "fwd_12m": -0.7047332735518608,
     "fwd_24m": null
    },
    "sell": {
@@ -1017,13 +976,13 @@
     "listings_12m": 29.0,
     "listings": 178,
     "fwd_6m": 10.043256742569229,
-    "fwd_12m": null,
+    "fwd_12m": 18.5202630731786,
     "fwd_24m": null
    },
    "bench_6m": 5.286277955755181,
    "universe_median_6m": 6.759078420126885,
-   "bench_12m": null,
-   "universe_median_12m": null,
+   "bench_12m": 0.5799380705939328,
+   "universe_median_12m": 4.00733734881864,
    "bench_24m": null,
    "universe_median_24m": null
   },
@@ -1247,7 +1206,7 @@
     "rent_12m": 24.5,
     "listings_12m": -33.9,
     "listings": 193,
-    "fwd_6m": null,
+    "fwd_6m": 15.705658403105938,
     "fwd_12m": null,
     "fwd_24m": null
    },
@@ -1262,12 +1221,12 @@
     "rent_12m": -4.7,
     "listings_12m": 37.6,
     "listings": 1636,
-    "fwd_6m": null,
+    "fwd_6m": 0.850953702819357,
     "fwd_12m": null,
     "fwd_24m": null
    },
-   "bench_6m": null,
-   "universe_median_6m": null,
+   "bench_6m": -4.470041088487331,
+   "universe_median_6m": -3.133176648898861,
    "bench_12m": null,
    "universe_median_12m": null,
    "bench_24m": null,
@@ -1467,6 +1426,47 @@
     "rent_12m": -3.8,
     "listings_12m": 19.6,
     "listings": 396,
+    "fwd_6m": null,
+    "fwd_12m": null,
+    "fwd_24m": null
+   },
+   "bench_6m": null,
+   "universe_median_6m": null,
+   "bench_12m": null,
+   "universe_median_12m": null,
+   "bench_24m": null,
+   "universe_median_24m": null
+  },
+  {
+   "asof": "2026-09-30",
+   "eligible": 475,
+   "median_buy_score": 0.437,
+   "buy": {
+    "code": "ALY",
+    "name": "Albany",
+    "state": "WA",
+    "score": 0.819,
+    "yield": 5.06,
+    "yield_pctile": 100.0,
+    "vacancy": 0.4,
+    "rent_12m": 20.2,
+    "listings_12m": 21.6,
+    "listings": 416,
+    "fwd_6m": null,
+    "fwd_12m": null,
+    "fwd_24m": null
+   },
+   "sell": {
+    "code": "COO",
+    "name": "Cooma",
+    "state": "NSW",
+    "score": 0.83,
+    "yield": 3.38,
+    "yield_pctile": 3.4,
+    "vacancy": 2.34,
+    "rent_12m": -5.1,
+    "listings_12m": 30.8,
+    "listings": 119,
     "fwd_6m": null,
     "fwd_12m": null,
     "fwd_24m": null
