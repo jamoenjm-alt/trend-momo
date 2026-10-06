@@ -858,8 +858,10 @@
   .hz-banner { background:linear-gradient(180deg,#0f1420,#0c1018); border:1px solid #22304a; border-left:3px solid #38bdf8; border-radius:10px; padding:11px 14px; margin:8px 0 12px; font-size:0.72rem; color:#9fb0c3; line-height:1.55; }
   .hz-banner b { color:#e6edf3; }
   .hz-head { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:4px; }
-  .hz-sel { background:#0f1420; color:#e6edf3; border:1px solid #22304a; border-radius:8px; padding:5px 10px; font-size:0.72rem; font-family:inherit; cursor:pointer; }
-  .hz-sel:hover { border-color:#38bdf8; }
+  .hz-pills { display:flex; flex-wrap:wrap; gap:5px; }
+  .hz-pill { background:#0f1420; color:#94a3b8; border:1px solid #22304a; border-radius:16px; padding:5px 12px; font-size:0.68rem; font-weight:600; font-family:inherit; cursor:pointer; transition:background .12s,border-color .12s,color .12s; }
+  .hz-pill:hover { border-color:#38bdf8; color:#e6edf3; }
+  .hz-pill.active { background:#1e3a5f; color:#fff; border-color:#38bdf8; }
   .hz-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(178px,1fr)); gap:11px; margin:4px 0; }
   .hz-card { position:relative; background:#0f1420; border:1px solid #22304a; border-radius:12px; padding:13px 15px 14px; overflow:hidden; }
   .hz-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:#33415a; }
@@ -2402,8 +2404,10 @@ function BtcSignalPage({ data }) {
     ),
     h('div', { className: 'hz-head' },
       h('h3', { className: 'plan-h', style: { margin: 0 } }, '📈 Best buy — by how long you’ll hold it'),
-      h('select', { className: 'hz-sel', value: hzSection, onChange: function(e){ setHzSection(e.target.value); } },
-        [['All','All markets'],['Watch','Watchlist'],['Top20','US Top 100'],['Crypto','Crypto'],['ASX','ASX 50'],['HK','Hong Kong 30'],['Commodity','Commodities']].map(function(o){ return h('option', { key: o[0], value: o[0] }, o[1]); })
+      h('div', { className: 'hz-pills' },
+        [['All','All'],['Watch','Watch'],['Top20','US'],['Crypto','Crypto'],['ASX','ASX'],['HK','HK'],['Commodity','Cmdty']].map(function(o){
+          return h('button', { key: o[0], type: 'button', className: 'hz-pill' + (hzSection === o[0] ? ' active' : ''), onClick: function(){ setHzSection(o[0]); } }, o[1]);
+        })
       )
     ),
     h('div', { className: 'hz-banner' },
