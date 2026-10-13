@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-06T02:50:58Z",
+ "generated": "2026-10-13T04:02:51Z",
  "years": 3,
  "months": [
   {
@@ -601,7 +601,7 @@
     "state": "NSW",
     "score": 0.777,
     "yield": 2.52,
-    "yield_pctile": 29.5,
+    "yield_pctile": 29.6,
     "vacancy": 4.17,
     "rent_12m": -4.1,
     "listings_12m": 37.0,
@@ -640,9 +640,9 @@
     "code": "BURW",
     "name": "Burwood",
     "state": "NSW",
-    "score": 0.792,
+    "score": 0.791,
     "yield": 2.37,
-    "yield_pctile": 22.7,
+    "yield_pctile": 22.8,
     "vacancy": 2.77,
     "rent_12m": -5.3,
     "listings_12m": 50.5,
@@ -1440,7 +1440,7 @@
   {
    "asof": "2026-09-30",
    "eligible": 475,
-   "median_buy_score": 0.437,
+   "median_buy_score": 0.428,
    "buy": {
     "code": "ALY",
     "name": "Albany",
@@ -1448,7 +1448,7 @@
     "score": 0.819,
     "yield": 5.06,
     "yield_pctile": 100.0,
-    "vacancy": 0.4,
+    "vacancy": 0.43,
     "rent_12m": 20.2,
     "listings_12m": 21.6,
     "listings": 416,
@@ -1460,10 +1460,10 @@
     "code": "COO",
     "name": "Cooma",
     "state": "NSW",
-    "score": 0.83,
+    "score": 0.868,
     "yield": 3.38,
     "yield_pctile": 3.4,
-    "vacancy": 2.34,
+    "vacancy": 2.6,
     "rent_12m": -5.1,
     "listings_12m": 30.8,
     "listings": 119,
