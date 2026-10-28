@@ -54,6 +54,23 @@
     }
     .nav-share:hover { background: #3f3f46; color: #fff; }
     .nav-share.done { background: #15803d; border-color: #15803d; color: #fff; }
+    .nav-ask { background: #1e3a8a; border: 1px solid #2563eb; color: #fff; border-radius: 999px; padding: 4px 12px; font-size: 0.78rem; cursor: pointer; white-space: nowrap; font-family: inherit; margin-right: 8px; }
+    .nav-ask:hover { background: #2563eb; }
+    .ask-ov { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: flex-start; justify-content: center; z-index: 9999; padding: 40px 16px; }
+    .ask-box { background: #fff; width: 100%; max-width: 560px; border-radius: 14px; padding: 16px 18px; box-shadow: 0 20px 60px rgba(0,0,0,.35); font-family: inherit; }
+    .ask-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .ask-title { font-weight: 800; font-size: 1rem; color: #111; }
+    .ask-x { background: none; border: none; font-size: 1rem; cursor: pointer; color: #555; padding: 4px 6px; }
+    .ask-cfg { display: flex; gap: 6px; margin-bottom: 8px; }
+    .ask-cfg input { flex: 1; padding: 7px 9px; border: 1px solid #d4d4d8; border-radius: 8px; font-size: 0.82rem; font-family: inherit; }
+    #askQ { width: 100%; box-sizing: border-box; padding: 9px 11px; border: 1px solid #d4d4d8; border-radius: 10px; font-size: 0.9rem; font-family: inherit; resize: vertical; }
+    .ask-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; gap: 10px; }
+    .ask-pf { font-size: 0.75rem; color: #555; display: flex; align-items: center; gap: 5px; }
+    .ask-send { background: #1e3a8a; color: #fff; border: none; border-radius: 999px; padding: 7px 18px; font-size: 0.85rem; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .ask-send:hover { background: #2563eb; }
+    .ask-send:disabled { opacity: .6; cursor: default; }
+    .ask-out { margin-top: 12px; font-size: 0.9rem; line-height: 1.5; color: #111; white-space: pre-wrap; min-height: 20px; }
+    .ask-foot { margin-top: 12px; font-size: 0.68rem; color: #888; line-height: 1.4; border-top: 1px solid #eee; padding-top: 8px; }
 
     .page-banner {
       background: linear-gradient(135deg, #14532d 0%, #15803d 100%);
@@ -355,6 +372,7 @@
       <a href="index.html" class="nav-stocks">← 📈 Stocks &amp; Crypto</a>
       <a href="https://sqmresearch.com.au/property" target="_blank" rel="noopener">Data: SQM Research</a>
     </div>
+    <button class="nav-ask" id="askBtn" type="button" title="Ask questions about this board's data">✨ Ask AI</button>
     <button class="nav-share" id="shareBtn" type="button"
             title="Copy this board's public link">🔗 Share</button>
   </div>
@@ -1544,7 +1562,7 @@
               r._stability = sigs ? computeStabilityState(r.px) : 'stable';
             }
             data._picks = scorePicks(data.regions || {});
-            setPayload(data);
+            setPayload(data); window.__TM_PROPERTY = data;
           } catch (e) { setErr(e.message); }
         })();
       }, []);
@@ -1574,6 +1592,78 @@ window.setTimeout(function(){
     + '<small style="color:#9ca3af">If you opened the file directly from disk, run <b>serve.bat</b> instead of double-clicking it.</small>'
     + '</div></div>';
 }, 15000);
+</script>
+<div id="askModal" class="ask-ov" style="display:none">
+  <div class="ask-box">
+    <div class="ask-head">
+      <span class="ask-title">✨ Ask the board</span>
+      <span>
+        <button id="askCfg" class="ask-x" type="button" title="Set AI endpoint URL">⚙</button>
+        <button id="askClose" class="ask-x" type="button" title="Close">✕</button>
+      </span>
+    </div>
+    <div id="askCfgRow" class="ask-cfg" style="display:none">
+      <input id="askUrl" type="text" placeholder="https://your-worker.workers.dev" />
+      <button id="askSave" class="ask-send" type="button">Save</button>
+    </div>
+    <textarea id="askQ" rows="3" placeholder="e.g. Which VIC towns have the highest yield and tightest vacancy? How is Albany tracking?"></textarea>
+    <div class="ask-row">
+      <label class="ask-pf"><input type="checkbox" id="askPf" /> include my portfolio</label>
+      <button id="askGo" class="ask-send" type="button">Ask</button>
+    </div>
+    <div id="askOut" class="ask-out"></div>
+    <div class="ask-foot">Answers from this board's SQM data only · decision support, not financial advice · each question uses your own Claude API quota.</div>
+  </div>
+</div>
+<script>
+(function(){
+  var URLKEY='tm_ai_worker', PFKEY='tm_property_portfolio_v1';
+  function $(id){ return document.getElementById(id); }
+  function getUrl(){ try{ return localStorage.getItem(URLKEY)||''; }catch(e){ return ''; } }
+  function reg(v){ if(v==null)return ''; if(v>0.6)return 'StrongUp'; if(v>0.2)return 'WeakUp'; if(v>-0.2)return 'Sideways'; if(v>-0.6)return 'WeakDown'; return 'StrongDown'; }
+  function pct(a,b){ if(a==null||b==null||!b)return ''; return ((a/b-1)*100).toFixed(1); }
+  function buildContext(includePf){
+    var d=window.__TM_PROPERTY; if(!d||!d.regions) return '';
+    var hdr=['name','state','askingPrice','12m%','0-6M','6M-1Y','1-2Y','2-5Y','allSignals','yield%','yieldPctile','vacancy%','rent12m%','supply12m%'];
+    var lines=[hdr.join('\t')], R=d.regions;
+    Object.keys(R).forEach(function(code){
+      var r=R[code]; if(!r||r.state==='NAT') return;
+      var px=r.px||[], last=px.length?px[px.length-1]:null;
+      var yr=px.length>53?pct(last,px[px.length-53]):'';
+      var s=r._sigs, c=s?s.cols:{};
+      lines.push([r.name,r.state,last!=null?Math.round(last):'',yr,
+        s?reg(c.h1):'',s?reg(c.h2):'',s?reg(c.h3):'',s?reg(c.h4):'',s?reg(s.allInd):'',
+        r.yield!=null?r.yield.toFixed(1):'',r.yield_pct!=null?Math.round(r.yield_pct):'',
+        r.vac!=null?r.vac.toFixed(1):'',pct(r.rent,r.rent52),pct(r.stock,r.stock12)].join('\t'));
+    });
+    var ctx=lines.join('\n');
+    if(includePf){ try{ var pf=localStorage.getItem(PFKEY); if(pf && pf!=='[]') ctx+='\n\nMY PORTFOLIO (private, user holdings):\n'+pf; }catch(e){} }
+    return ctx;
+  }
+  function ask(){
+    var url=getUrl();
+    if(!url){ $('askCfgRow').style.display='flex'; $('askOut').textContent='Set your AI endpoint URL first (gear icon), then Ask.'; return; }
+    var q=$('askQ').value.trim(); if(!q){ $('askOut').textContent='Type a question first.'; return; }
+    var ctx=buildContext($('askPf').checked);
+    if(!ctx){ $('askOut').textContent='Board data not loaded yet — give it a second and retry.'; return; }
+    $('askOut').textContent='Thinking…'; $('askGo').disabled=true;
+    fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,context:ctx})})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ $('askOut').textContent = (j && (j.answer||j.error)) || 'No answer.'; })
+      .catch(function(e){ $('askOut').textContent='Request failed: '+e.message+' — check the worker URL (gear).'; })
+      .finally(function(){ $('askGo').disabled=false; });
+  }
+  function show(v){ $('askModal').style.display = v?'flex':'none'; }
+  var b=$('askBtn');
+  if(b){
+    b.addEventListener('click',function(){ show(true); var u=getUrl(); $('askUrl').value=u; if(!u) $('askCfgRow').style.display='flex'; $('askQ').focus(); });
+    $('askClose').addEventListener('click',function(){ show(false); });
+    $('askCfg').addEventListener('click',function(){ var e=$('askCfgRow'); e.style.display=(e.style.display==='none'?'flex':'none'); });
+    $('askSave').addEventListener('click',function(){ try{ localStorage.setItem(URLKEY,$('askUrl').value.trim()); }catch(e){} $('askCfgRow').style.display='none'; $('askOut').textContent='Endpoint saved.'; });
+    $('askGo').addEventListener('click',ask);
+    $('askModal').addEventListener('click',function(e){ if(e.target===$('askModal')) show(false); });
+  }
+})();
 </script>
 </body>
 </html>
