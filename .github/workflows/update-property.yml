@@ -45,12 +45,19 @@ jobs:
         if: steps.fresh.outputs.stale == 'true'
         run: python backtests/property-backtest.py --years 3 || true
 
+      # Full-window decile validation (2014→). The history file is gitignored, so
+      # the runner is the only place this ever sees fresh data — its small output
+      # JSON is what gets committed and what the board should read.
+      - name: Decile validation on fresh history
+        if: steps.fresh.outputs.stale == 'true'
+        run: python backtests/property-decile-validation.py || true
+
       - name: Commit and push
         if: steps.fresh.outputs.stale == 'true'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/property.json backtests/property-picks-history.json
+          git add data/property.json backtests/property-picks-history.json backtests/property-decile-results.json
           if git diff --cached --quiet; then
             echo "nothing to commit"; exit 0
           fi

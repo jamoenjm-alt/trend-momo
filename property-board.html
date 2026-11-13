@@ -859,6 +859,79 @@
             i ? ' · ' : '', x.r.name, ' ', h('span', { className: 'td-sub' }, x.r.state)))));
     }
 
+    // ── Decile validation strip ──────────────────────────────────────────
+    // Reads backtests/property-decile-results.json (written by
+    // backtests/property-decile-validation.py on every property bake, on FRESH
+    // history). This is the validated readout: 139 monthly cross-sections since
+    // 2014, monotone deciles at every horizon, positive in every era. A single
+    // "top pick" is the noisiest possible view of the same score, so the pinned
+    // markets and decile curve sit above it. Self-contained: own fetch with a
+    // timeout, renders nothing until loaded, never gates the board.
+    const DECILE_TRIGGER = { vac: 1.8, rent12: 0 };   // vacancy ≥ / rent growth <  → alarm
+    function DecileStrip() {
+      const [d, setD] = useState(null);
+      useEffect(() => {
+        (async () => {
+          try {
+            const c = new AbortController(); const t = setTimeout(() => c.abort(), 8000);
+            const res = await fetch('backtests/property-decile-results.json?t=' + Date.now(), { signal: c.signal })
+              .finally(() => clearTimeout(t));
+            if (res.ok) setD(await res.json());
+          } catch (e) { /* strip is optional */ }
+        })();
+      }, []);
+      if (!d || !d.deciles || !d.pinned) return null;
+      const d12 = d.deciles.h12 || [], d24 = d.deciles.h24 || [];
+      const sp = d.spread_top_minus_bottom || {}, mono = d.monotone_steps_of_9 || {};
+      const okAll = ['h6','h12','h24','h36'].every(k => !mono[k] || mono[k] === 9);
+      const ageDays = d.placement_asof ? (Date.now() - new Date(d.placement_asof)) / 86400000 : null;
+      const fmt = (v, dp = 1, sign = false) => (v == null ? '—' : (sign && v > 0 ? '+' : '') + Number(v).toFixed(dp));
+      const cell = (txt, style) => h('td', { style: Object.assign({ padding: '4px 8px', whiteSpace: 'nowrap' }, style || {}) }, txt);
+      const head = (txt, right) => h('th', { style: { padding: '4px 8px', textAlign: right ? 'right' : 'left', fontWeight: 600, opacity: .8 } }, txt);
+      const trig = (r) => r.eligible && (r.vac >= DECILE_TRIGGER.vac || r.rent12 < DECILE_TRIGGER.rent12);
+      const decileColor = (k) => k == null ? 'inherit' : k >= 8 ? '#2e8b57' : k >= 5 ? '#6b8e23' : k >= 3 ? '#b8860b' : '#b22222';
+      return h('div', { className: 'picks-wrap' },
+        h('h2', { className: 'picks-title' }, 'Decile validation — the honest readout'),
+        h('div', { className: 'picks-sub' },
+          'Every eligible market ranked by buy score each month since ', (d.window && d.window.start || '2014').slice(0, 7),
+          ' (', d.window && d.window.months, ' months), bucketed into deciles, forward change measured as excess over that month\'s universe median. ',
+          'Top-minus-bottom: ', fmt(sp.h12, 1, true), 'pp at 12m, ', fmt(sp.h24, 1, true), 'pp at 24m. ',
+          okAll ? 'Monotone 9/9 at every horizon. ' : '⚠ NOT monotone at every horizon this run — treat the decile view as suspect. ',
+          'Driver is rental tightness (vacancy, yield percentile, listings, rent growth); trailing price momentum is negative.'),
+        h('div', { style: { overflowX: 'auto', margin: '10px 0' } },
+          h('table', { style: { borderCollapse: 'collapse', fontSize: '13px', minWidth: '720px' } },
+            h('thead', null, h('tr', null, head('Decile'), ...d12.map((_, i) => head('D' + i, true)))),
+            h('tbody', null,
+              h('tr', null, cell('12m excess'), ...d12.map((v, i) => cell(fmt(v, 1, true), { textAlign: 'right', color: decileColor(i) }))),
+              h('tr', null, cell('24m excess'), ...d24.map((v, i) => cell(fmt(v, 1, true), { textAlign: 'right', color: decileColor(i) })))))),
+        h('h3', { style: { margin: '14px 0 6px', fontSize: '15px' } }, 'Pinned markets — placement as at ', d.placement_asof || '?'),
+        ageDays != null && ageDays > 60 && h('div', { className: 'srcline' },
+          h('span', { className: 'stale-warn' }, '⚠ Placement is ', Math.floor(ageDays), ' days old — the history file this was scored on predates the current bake. Re-run the property Action.')),
+        h('div', { style: { overflowX: 'auto' } },
+          h('table', { style: { borderCollapse: 'collapse', fontSize: '13px', minWidth: '860px' } },
+            h('thead', null, h('tr', null, head('Market'), head('Decile', true), head('%ile', true), head('Vacancy', true), head('Δ12m', true),
+              head('Yield', true), head('Yld %ile', true), head('Rent 12m', true), head('Listings 12m', true), head('Fcast 12m', true), head('Fcast 24m', true), head('Trigger'))),
+            h('tbody', null, ...d.pinned.map(r => r.eligible
+              ? h('tr', { key: r.code, style: trig(r) ? { background: 'rgba(178,34,34,.10)' } : null },
+                  cell((r.name || r.code) + ' (' + r.state + ')'),
+                  cell('D' + r.decile, { textAlign: 'right', fontWeight: 700, color: decileColor(r.decile) }),
+                  cell(fmt(r.percentile, 0), { textAlign: 'right' }),
+                  cell(fmt(r.vac, 2) + '%', { textAlign: 'right' }),
+                  cell(fmt(r.vac_delta12, 2, true), { textAlign: 'right' }),
+                  cell(fmt(r.yield, 2) + '%', { textAlign: 'right' }),
+                  cell(fmt(r.yield_pctile, 0), { textAlign: 'right' }),
+                  cell(fmt(r.rent12, 1, true) + '%', { textAlign: 'right' }),
+                  cell(fmt(r.listings12, 1, true) + '%', { textAlign: 'right' }),
+                  cell(fmt(r.fcast_excess_12m, 1, true) + 'pp', { textAlign: 'right' }),
+                  cell(fmt(r.fcast_excess_24m, 1, true) + 'pp', { textAlign: 'right' }),
+                  cell(trig(r) ? '⚠ vacancy ≥ ' + DECILE_TRIGGER.vac + '% or rent < 0' : '—', trig(r) ? { color: '#b22222', fontWeight: 700 } : { opacity: .6 }))
+              : h('tr', { key: r.code }, cell(r.code), cell('not eligible (listings < 100 or history < 5y)', { opacity: .6 }), ...Array(10).fill(0).map((_, i) => h('td', { key: i }))))))),
+        h('div', { className: 'picks-warn' },
+          'Forecast = fitted mean forward excess for that decile over the full window, not a prediction for this market specifically. ',
+          'The index is asking prices, not transactions; ~8% round-trip costs make this a 24-month-plus input. ',
+          okAll ? '' : 'Monotonicity failed this run — do not act on the decile view until the validation passes again.'));
+    }
+
     function TopPicks({ picks }) {
       if (!picks || !picks.buy.length) return null;
       return h('div', { className: 'picks-wrap' },
@@ -867,7 +940,8 @@
           'Scored across ', picks.n, ' markets with 5y+ history and 100+ listings. ',
           'Weighted for a 2–5 year hold: yield vs the town\'s own history, rental demand, ',
           'rent and supply direction do ~90% of the work; trend does ~10%. ',
-          'Discounted for markets with deep historical busts or thin listings.'),
+          'Discounted for markets with deep historical busts or thin listings. ',
+          'A single top pick is the noisiest view of this score — the decile table above is the validated readout.'),
         h('div', { className: 'picks-grid' },
           h(PickCard, { side: 'buy',  pick: picks.buy[0],  runners: picks.buy.slice(1, 5) }),
           h(PickCard, { side: 'sell', pick: picks.sell[0], runners: picks.sell.slice(1, 5) })),
@@ -1527,6 +1601,7 @@
 
         // Everything pick-related lives on one tab so it can actually be found.
         !q && filter === 'PICKS' && h(Fragment, null,
+          h(DecileStrip, null),
           h(TopPicks, { picks: payload._picks }),
           h(StateOpportunity, { picks: payload._picks }),
           h(AllStatePicks, { picks: payload._picks })),
