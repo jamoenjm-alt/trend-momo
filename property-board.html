@@ -867,7 +867,109 @@
     // "top pick" is the noisiest possible view of the same score, so the pinned
     // markets and decile curve sit above it. Self-contained: own fetch with a
     // timeout, renders nothing until loaded, never gates the board.
+    // ── 10-year probability fan ───────────────────────────────────────────
+    // Reads data/property-forecast.json (backtests/property-forecast.py, run on
+    // every property bake). A FAN, NOT A LINE: pooled empirical distribution of
+    // h-year outcomes across every market and start date, conformally widened so
+    // its 80% band would have been honest out-of-sample at 3y and 5y, plus the
+    // validated decile tilt for the selected market (shipped only because it beat
+    // the untilted fan on pinball loss at both horizons). Years 6-10 cannot be
+    // scored out-of-sample with this history — the chart says so on its face.
+    function ForecastFan({ regions }) {
+      const [fc, setFc] = useState(null);
+      const [code, setCode] = useState('TOM');
+      useEffect(() => {
+        (async () => {
+          try {
+            const c = new AbortController(); const t = setTimeout(() => c.abort(), 8000);
+            const res = await fetch('data/property-forecast.json?t=' + Date.now(), { signal: c.signal })
+              .finally(() => clearTimeout(t));
+            if (res.ok) setFc(await res.json());
+          } catch (e) { /* optional */ }
+        })();
+      }, []);
+      if (!fc || !fc.base || !fc.markets) return null;
+      const H = fc.horizons_m, B = fc.base, Q = fc.quantiles;
+      const mk = fc.markets[code]; const d = mk ? mk.d : null;
+      const tilt = (d != null && fc.tilt_pp && fc.tilt_pp[String(d)]) ? fc.tilt_pp[String(d)] : H.map(() => 0);
+      const tilted = d != null && fc.model === 'B_tilted';
+      // series: index 0 = today (ratio 1), then each horizon
+      const ratio = (hi, qi, withTilt) => B[hi][qi] + (withTilt ? tilt[hi] / 100 : 0);
+      const pts = (qi, withTilt) => [[0, 1]].concat(H.map((h, i) => [h / 12, ratio(i, qi, withTilt)]));
+      const P10 = pts(0, tilted), P25 = pts(1, tilted), P50 = pts(2, tilted), P75 = pts(3, tilted), P90 = pts(4, tilted);
+      const U50 = pts(2, false);
+      const W = 820, Hh = 340, L = 54, R = 70, T = 18, Bm = 30;
+      const pct = (r) => (r - 1) * 100;
+      const allY = [].concat(P10, P90, U50).map(p => pct(p[1]));
+      let yMin = Math.min(-30, Math.floor(Math.min(...allY) / 10) * 10 - 10);
+      let yMax = Math.ceil(Math.max(...allY) / 10) * 10 + 10;
+      const X = (yr) => L + (yr / 10) * (W - L - R);
+      const Y = (pc) => T + (1 - (pc - yMin) / (yMax - yMin)) * (Hh - T - Bm);
+      const line = (ps) => ps.map((p, i) => (i ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(pct(p[1])).toFixed(1)).join(' ');
+      const band = (lo, hi) => line(hi) + ' ' + lo.slice().reverse().map(p => 'L' + X(p[0]).toFixed(1) + ' ' + Y(pct(p[1])).toFixed(1)).join(' ') + ' Z';
+      const ticks = []; for (let v = yMin; v <= yMax; v += (yMax - yMin > 200 ? 50 : 25)) ticks.push(v);
+      const last = (ps) => ps[ps.length - 1][1];
+      const cagr = (r, yrs) => ((Math.pow(r, 1 / yrs) - 1) * 100);
+      const fmtP = (r) => (pct(r) >= 0 ? '+' : '') + pct(r).toFixed(0) + '%';
+      const cal = fc.calibration || {}; const c36 = cal.h36 || {}, c60 = cal.h60 || {};
+      const names = Object.keys(fc.markets).map(k => [k, (regions && regions[k] && regions[k].name) || k, (regions && regions[k] && regions[k].state) || '']);
+      const pinnedFirst = ['TOM', 'SEA', 'ARD', 'NRA', 'ULL', 'WOL', 'BAY', 'GOS'];
+      names.sort((a, b) => { const ia = pinnedFirst.indexOf(a[0]), ib = pinnedFirst.indexOf(b[0]); if (ia !== -1 || ib !== -1) return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib); return a[1].localeCompare(b[1]); });
+      const untestFrom = (fc.untestable_beyond_m || 60) / 12;
+      const persist = fc.persistence_5y || []; const lastRho = persist.length ? persist[persist.length - 1].rho : null;
+      const mname = (regions && regions[code] && regions[code].name) || code;
+      return h('div', { className: 'picks-wrap' },
+        h('h2', { className: 'picks-title' }, '10-year outlook — a probability fan, not a line'),
+        h('div', { className: 'picks-sub' },
+          'Where an Australian postcode index has actually gone over 6 months to 10 years, pooled across every market and start date since 2009, ',
+          'widened so the 80% band would have been honest out-of-sample, then tilted by the selected market\'s validated decile. ',
+          'Nominal. Index of asking prices, not a valuation of any house.'),
+        h('div', { style: { display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', margin: '8px 0' } },
+          h('label', { style: { fontSize: '13px' } }, 'Market '),
+          h('select', { value: code, onChange: (e) => setCode(e.target.value), style: { fontSize: '13px', padding: '4px 6px' } },
+            ...names.map(n => h('option', { key: n[0], value: n[0] }, n[1] + (n[2] ? ' (' + n[2] + ')' : '')))),
+          d != null
+            ? h('span', { style: { fontSize: '13px' } }, 'Decile ', h('b', null, 'D' + d), ' as at ', fc.deciles_asof, tilted ? '' : ' (tilt not applied — failed its test)')
+            : h('span', { style: { fontSize: '13px', opacity: .7 } }, 'not eligible for the decile tilt — showing the universe fan')),
+        h('svg', { viewBox: '0 0 ' + W + ' ' + Hh, style: { width: '100%', maxWidth: W + 'px', height: 'auto', display: 'block', background: 'rgba(127,127,127,.04)', borderRadius: '6px' } },
+          // untestable zone
+          h('rect', { x: X(untestFrom), y: T, width: X(10) - X(untestFrom), height: Hh - T - Bm, fill: 'rgba(178,34,34,.05)' }),
+          h('text', { x: X(untestFrom) + 6, y: T + 14, fontSize: 11, fill: '#b22222', opacity: .8 }, 'cannot be tested out-of-sample beyond ' + untestFrom + 'y'),
+          // gridlines
+          ...ticks.map(v => h(Fragment, { key: 'g' + v },
+            h('line', { x1: L, x2: W - R, y1: Y(v), y2: Y(v), stroke: v === 0 ? 'rgba(0,0,0,.35)' : 'rgba(0,0,0,.08)', strokeWidth: v === 0 ? 1.2 : 1 }),
+            h('text', { x: L - 6, y: Y(v) + 4, fontSize: 11, textAnchor: 'end', fill: 'rgba(0,0,0,.55)' }, (v > 0 ? '+' : '') + v + '%'))),
+          ...[0, 2, 4, 6, 8, 10].map(yr => h('text', { key: 'x' + yr, x: X(yr), y: Hh - 10, fontSize: 11, textAnchor: 'middle', fill: 'rgba(0,0,0,.55)' }, yr ? yr + 'y' : 'now')),
+          // bands
+          h('path', { d: band(P10, P90), fill: 'rgba(46,139,87,.14)', stroke: 'none' }),
+          h('path', { d: band(P25, P75), fill: 'rgba(46,139,87,.22)', stroke: 'none' }),
+          // universe median (dashed) and market median
+          h('path', { d: line(U50), fill: 'none', stroke: 'rgba(0,0,0,.35)', strokeWidth: 1.2, strokeDasharray: '5 4' }),
+          h('path', { d: line(P50), fill: 'none', stroke: '#2e8b57', strokeWidth: 2.4 }),
+          h('path', { d: line(P10), fill: 'none', stroke: 'rgba(178,34,34,.6)', strokeWidth: 1 }),
+          h('path', { d: line(P90), fill: 'none', stroke: 'rgba(46,139,87,.6)', strokeWidth: 1 }),
+          // end labels
+          h('text', { x: W - R + 6, y: Y(pct(last(P90))) + 4, fontSize: 11, fill: '#2e8b57' }, 'p90 ' + fmtP(last(P90))),
+          h('text', { x: W - R + 6, y: Y(pct(last(P50))) + 4, fontSize: 12, fontWeight: 700, fill: '#2e8b57' }, 'p50 ' + fmtP(last(P50))),
+          h('text', { x: W - R + 6, y: Y(pct(last(P10))) + 4, fontSize: 11, fill: '#b22222' }, 'p10 ' + fmtP(last(P10)))),
+        h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: '8px', margin: '10px 0', fontSize: '13px' } },
+          ...[[3, 7], [5, 11], [10, 21]].map(([yrs, i]) => h('div', { key: yrs, style: { padding: '8px 10px', background: 'rgba(127,127,127,.07)', borderRadius: '6px' } },
+            h('div', { style: { opacity: .7 } }, yrs + ' years' + (yrs > untestFrom ? ' · untested' : '')),
+            h('div', null, h('b', null, fmtP(P50[i][1])), ' median  (', cagr(P50[i][1], yrs).toFixed(1), '%/yr)'),
+            h('div', { style: { opacity: .8 } }, 'p10 ', fmtP(P10[i][1]), ' · p90 ', fmtP(P90[i][1]))))),
+        h('div', { className: 'picks-warn' },
+          h('b', null, 'How much to trust this. '),
+          'Rebuilt at every past month using only data available then, the raw 80% band held the real outcome ',
+          h('b', null, (c36.untilted_all || {}).coverage_80, '%'), ' of the time at 3y and ', h('b', null, (c60.untilted_all || {}).coverage_80, '%'), ' at 5y — too narrow and biased low, because 2009–19 contained nothing like 2020–22. ',
+          'It is widened ×', fc.conformal && fc.conformal.k36, ' (3y) and ×', fc.conformal && fc.conformal.k60, ' (5y) so it would have been honest. ',
+          tilted ? 'The decile tilt is applied because it beat the untilted fan on out-of-sample pinball loss at both horizons. ' : '',
+          'Years 6–10 reuse the 5-year widening and ', h('b', null, 'cannot be scored'), ' with 17 years of data. ',
+          'One macro history: this sample contains a record fall in interest rates; a decade unlike it is not in the fan. ',
+          lastRho != null ? h(Fragment, null, 'Past 5-year winners tend to underperform the next 5 (cross-market ρ ', h('b', null, lastRho), ' at the latest split) — which is why this is built from the pooled distribution and not ', mname, '\'s own history.') : null));
+    }
+
     const DECILE_TRIGGER = { vac: 1.8, rent12: 0 };   // vacancy ≥ / rent growth <  → alarm
+    const TRIGGER_SCOPE = ['TOM', 'SEA', 'ARD'];       // the trigger is a SELL rule for held markets; comparables show '—'
     function DecileStrip() {
       const [d, setD] = useState(null);
       useEffect(() => {
@@ -888,7 +990,7 @@
       const fmt = (v, dp = 1, sign = false) => (v == null ? '—' : (sign && v > 0 ? '+' : '') + Number(v).toFixed(dp));
       const cell = (txt, style) => h('td', { style: Object.assign({ padding: '4px 8px', whiteSpace: 'nowrap' }, style || {}) }, txt);
       const head = (txt, right) => h('th', { style: { padding: '4px 8px', textAlign: right ? 'right' : 'left', fontWeight: 600, opacity: .8 } }, txt);
-      const trig = (r) => r.eligible && (r.vac >= DECILE_TRIGGER.vac || r.rent12 < DECILE_TRIGGER.rent12);
+      const trig = (r) => r.eligible && TRIGGER_SCOPE.includes(r.code) && (r.vac >= DECILE_TRIGGER.vac || r.rent12 < DECILE_TRIGGER.rent12);
       const decileColor = (k) => k == null ? 'inherit' : k >= 8 ? '#2e8b57' : k >= 5 ? '#6b8e23' : k >= 3 ? '#b8860b' : '#b22222';
       return h('div', { className: 'picks-wrap' },
         h('h2', { className: 'picks-title' }, 'Decile validation — the honest readout'),
@@ -1601,6 +1703,7 @@
 
         // Everything pick-related lives on one tab so it can actually be found.
         !q && filter === 'PICKS' && h(Fragment, null,
+          h(ForecastFan, { regions: payload.regions }),
           h(DecileStrip, null),
           h(TopPicks, { picks: payload._picks }),
           h(StateOpportunity, { picks: payload._picks }),

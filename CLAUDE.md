@@ -154,6 +154,17 @@ Baked `data/prices.json` is the primary path; live APIs are best-effort fallback
 - GitHub Actions bake can silently stop (last seen stale on 2026-07-08 — prices were 2 days
   old). If `updated` in data/prices.json is > 1 trading day old, check the repo's Actions tab.
 - SPCX (SpaceX) is not publicly listed — its row intentionally shows NO DATA.
+- **Stale prices / silent bake failure (fixed 2026-11-16).** Prices went 44h stale (last bake
+  2026-11-14 02:09Z; the 14th and 15th produced nothing). Cause: under Yahoo/CoinGecko
+  throttling on GitHub's shared IPs the bake had stretched to ~4h, with no job timeout, no
+  checkpoint (the only write was at the very end, so a kill lost everything), one attempt per
+  day, and no CoinGecko key. Guards now in place — do NOT remove: (a) `BAKE_BUDGET_MIN`
+  (default 150) stops fetching and keeps previous data for the rest; (b) atomic checkpoint
+  `save_data()` every `CHECKPOINT_EVERY`=25 tickers and before the P/E scrape; (c) `d["bake"]`
+  status block in prices.json; (d) workflow `timeout-minutes: 200`, a second catch-up cron at
+  10:00 UTC, and the commit step runs `if: always()`; (e) `CG_KEY` read from env — set the repo
+  secret `CG_KEY` to a free CoinGecko Demo key to remove 429 throttling. If prices are stale,
+  check the Actions tab, then re-run via workflow_dispatch.
 - **Loading hang (fixed 2026-09-20).** Root cause: the boot `fetch('data/prices.json')` had
   no timeout and the render was gated on it, so a stalled connection (or a hung esm.sh import)
   left an infinite “Loading…” spinner. Both boards now: (a) time out the boot fetch with an

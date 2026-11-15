@@ -275,6 +275,18 @@ HISTORY_DAYS = 420
 # Pause between Yahoo Finance requests to be polite (seconds)
 REQUEST_PAUSE = 0.4
 
+# ── Robustness (added 2026-11-16 after the stale-price incident) ─────────────
+# Under Yahoo/CoinGecko throttling on GitHub's shared IPs the bake stretched to
+# ~4h, then a run produced nothing: no checkpoint, no timeout, one try per day.
+# Now: a hard time budget (remaining tickers keep yesterday's data), an atomic
+# checkpoint every N tickers, and a bake-status block written into prices.json.
+BAKE_BUDGET_MIN  = float(os.environ.get("BAKE_BUDGET_MIN", "150"))
+CHECKPOINT_EVERY = 25
+_BAKE_T0 = time.time()
+
+def over_budget() -> bool:
+    return (time.time() - _BAKE_T0) > BAKE_BUDGET_MIN * 60
+
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -414,8 +426,10 @@ CRYPTO_CG = {
 }
 
 # CoinGecko free tier is rate-limited — pause longer between calls than Yahoo.
-CG_KEY = ""   # <-- paste a FREE CoinGecko Demo API key here (coingecko.com/en/api/pricing -> Demo)
-              #     to stop the 429 rate-limit errors. Leave "" to use the throttled public tier.
+# Read from the environment so the key lives in a GitHub Actions secret (CG_KEY),
+# never in the repo. A FREE CoinGecko Demo key (coingecko.com/en/api/pricing -> Demo)
+# lifts the public-tier 429 throttling that was stretching the bake to hours.
+CG_KEY = os.environ.get("CG_KEY", "").strip()
 CG_PAUSE = 4.0
 
 def fetch_coingecko(cg_id, days=365, retries=3):
@@ -572,6 +586,9 @@ def main():
     err_count = 0
 
     for board_ticker, yahoo_symbol in ALL_TICKERS.items():
+        if over_budget():
+            print(f"\n  ⏱  time budget ({BAKE_BUDGET_MIN:.0f} min) reached — remaining equities keep previous data")
+            break
         label = f"{board_ticker:10s} ({yahoo_symbol})"
         print(f"  → {label:28s}", end="  ", flush=True)
 
@@ -595,6 +612,8 @@ def main():
         if wc and len(wc) >= 30:
             weekly[board_ticker] = {"c": wc[-200:], "h": wh[-200:], "l": wl[-200:]}
         time.sleep(REQUEST_PAUSE)
+        if (ok_count + err_count) % CHECKPOINT_EVERY == 0:
+            save_data(dp, d)   # atomic checkpoint — a killed run still leaves fresh data
 
     # ── Crypto via CoinGecko (staggered to respect free-tier rate limits) ──────
     # Major coins refresh EVERY run; the long-tail alts are split across two days
@@ -610,6 +629,9 @@ def main():
     print(f"  Fetching {len(todays_crypto)} of {len(CRYPTO_CG)} cryptos from CoinGecko")
     print(f"  (majors daily + half the alts; the other half refreshes next run)")
     for board_ticker, cg_id in todays_crypto:
+        if over_budget():
+            print(f"\n  ⏱  time budget reached — remaining cryptos keep previous data")
+            break
         print(f"  → {board_ticker:8s} ({cg_id:22s})", end="  ", flush=True)
         closes = fetch_coingecko(cg_id)
         if closes and len(closes) >= 21:
@@ -621,11 +643,16 @@ def main():
             print("⚠  kept previous" if board_ticker in prices else "✗  no data")
         time.sleep(CG_PAUSE)
 
+    save_data(dp, d)   # checkpoint: prices are safe before the (slow, optional) P/E scrape
+
     # -- Trailing P/E from stockanalysis (auto-refresh; curated PE_RATIOS is fallback) --
     print()
     print(f"  Fetching trailing P/E for {len(PE_STOCKS)} stocks from stockanalysis")
     pe_out = {}
     for t in PE_STOCKS:
+        if over_budget():
+            print("  ⏱  time budget reached — skipping remaining P/E (curated values kept)")
+            break
         v = fetch_pe(t)
         if v is not None:
             pe_out[t] = v
@@ -638,6 +665,12 @@ def main():
         sys.exit(1)
 
     d["pe"].update(pe_out)   # merge: failed P/E fetches keep the previous value
+    d["bake"] = {                      # status block so the board can show partial bakes honestly
+        "ok": ok_count, "failed": err_count,
+        "elapsed_min": round((time.time() - _BAKE_T0) / 60, 1),
+        "budget_min": BAKE_BUDGET_MIN, "budget_hit": over_budget(),
+        "cg_key": bool(CG_KEY),
+    }
     save_data(dp, d)
     sync_index(html_path)
 

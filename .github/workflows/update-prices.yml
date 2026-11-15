@@ -2,12 +2,19 @@ name: Daily Price Update
 
 on:
   schedule:
-    - cron: '0 22 * * *'   # 22:00 UTC = 8am AEST / 10pm London
-  workflow_dispatch:         # allows manual trigger from GitHub UI
+    - cron: '0 22 * * *'   # 22:00 UTC = 8am AEST  — main daily bake
+    - cron: '0 10 * * *'   # 10:00 UTC = 9pm AEDT  — catch-up if the 22:00 run failed or stalled
+  workflow_dispatch:         # manual trigger from the GitHub UI
 
 jobs:
   update:
     runs-on: ubuntu-latest
+    # Hard stop well under GitHub's 6h kill. The baker budgets itself to 150 min and
+    # checkpoints as it goes, so even a timeout here leaves fresh data to commit.
+    timeout-minutes: 200
+    env:
+      CG_KEY: ${{ secrets.CG_KEY }}   # optional FREE CoinGecko Demo key (repo Settings -> Secrets)
+      BAKE_BUDGET_MIN: "150"
 
     steps:
       - name: Checkout repo
@@ -21,7 +28,10 @@ jobs:
       - name: Fetch prices and bake into data/prices.json
         run: python update-prices.py
 
+      # Runs EVEN IF the bake step failed or timed out: the baker writes atomic
+      # checkpoints, so whatever it managed to refresh still gets published.
       - name: Commit and push
+        if: always()
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -30,7 +40,6 @@ jobs:
             echo "nothing to commit"; exit 0
           fi
           git commit -m "chore: daily price update $(date -u '+%Y-%m-%d')"
-          # Same non-fast-forward guard as the property bake.
           for i in 1 2 3; do
             git pull --rebase --autostash origin main && git push && exit 0
             echo "push attempt $i failed; retrying in 15s"
