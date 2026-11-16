@@ -78,6 +78,13 @@ claude-publish.bat feat: my change description
   5 pages per region (prices/rents/yield weekly; vacancy/stock monthly), 0.5s between
   requests, atomic write, failed regions keep previous bake. SQM data is personal-reference
   only — keep attribution, don't resell.
+- `data/property-types.json` — houses vs units split (added 2026-11-16), written by `update-property.py` alongside
+  property.json: per region `{h:{px,end,ddmax,hist_w,flat,noise,rent,rent52,yield,yield_pct}, u:{...}}`. `px` is in
+  $100 units, delta-encoded (decode = running sum × 100). Fetched by the board in the background AFTER first render
+  (never gate boot on it). The board's Houses | Units | All switch (`DtypeBar`, `buildTypedView`, localStorage
+  `tm_property_dtype`) remaps each region to the typed series so every panel works unchanged. Vacancy and stock on
+  market stay all-dwellings (SQM doesn't split them). Typed picks are NOT separately backtested — keep that label.
+  Portfolio holdings track their own `type` (house/unit) series automatically.
 - `.github/workflows/update-property.yml` — weekly bake Tue 16:00 UTC (Wed 2am AEST; SQM
   publishes Tuesdays), commits `data/property.json`.
 - `update-prices-daily.bat` — legacy local daily task. Redundant with the Action;

@@ -358,6 +358,15 @@
     .note strong { color: var(--text); }
 
     .spinner-wrap { padding: 40px; text-align: center; color: var(--muted); }
+    /* Houses / Units / All switch (added 2026-11-16) */
+    .dtype-bar { display: flex; gap: 0; margin: 10px 0 4px; border: 1px solid #334155; border-radius: 10px; overflow: hidden; width: fit-content; max-width: 100%; }
+    .dtype-btn { background: #1e293b; color: #cbd5e1; border: 0; border-right: 1px solid #334155; padding: 9px 18px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .dtype-btn:last-child { border-right: 0; }
+    .dtype-btn:hover { background: #293548; color: #fff; }
+    .dtype-btn.active { background: #1d4ed8; color: #fff; }
+    .dtype-note { font-size: 12.5px; line-height: 1.5; color: var(--muted); margin: 4px 0 10px; max-width: 980px; }
+    .dtype-note b { color: inherit; }
+    .thin-tag { display: inline-block; margin-left: 6px; padding: 0 5px; border-radius: 4px; font-size: 10.5px; font-weight: 600; background: #fef3c7; color: #92400e; vertical-align: middle; }
 
     @media (max-width: 900px) {
       td, th { padding: 6px 5px; }
@@ -407,7 +416,8 @@
 
     <div class="note">
       <strong>How to read this board.</strong> Signals are moving-average trend/momentum pairs computed on the
-      <strong>SQM Research weekly asking-price index (combined houses + units)</strong> for each city or town —
+      <strong>SQM Research weekly asking-price index</strong> for each city or town — combined houses + units by default,
+      or houses / units only via the switch at the top —
       asking prices, not settled sales. Columns: <strong>0–6M</strong> (12/4w, 18/6w, 26/9w),
       <strong>6M–1Y</strong> (33/11w, 39/13w, 52/17w), <strong>1–2Y</strong> (65/22w, 78/26w, 104/35w),
       <strong>2–5Y</strong> (130/43w, 195/65w, 260/87w), <strong>All Signals</strong> = every pair. Each pair contributes
@@ -428,7 +438,7 @@
   </div>
 
   <script type="module">
-    import { createElement as h, useState, useEffect, Fragment, Component } from 'https://esm.sh/react@18';
+    import { createElement as h, useState, useEffect, useRef, Fragment, Component } from 'https://esm.sh/react@18';
     import { createRoot } from 'https://esm.sh/react-dom@18/client';
 
     // ── Sections ──────────────────────────────────────────────────────────
@@ -790,7 +800,8 @@
         h('tr', { onClick: () => setOpen(o => !o) },
           h('td', { className: 'td-name' }, r.name, ' ',
             h('span', { className: 'td-sub' }, r.kind === 'postcode' ? r.param : r.state),
-            h(BlendMark, { pc: r.param })),
+            h(BlendMark, { pc: r.param }),
+            r._thin && h('span', { className: 'thin-tag', title: 'Sparse or noisy index for this dwelling type — treat signals with caution' }, 'thin data')),
           h('td', { className: 'td-num' }, fmtMoney(px[px.length - 1])),
           h('td', { className: 'td-num ' + pctCls(yr) }, fmtPct(yr)),
           COLS.map(c => h('td', { key: c.key }, h(Badge, { score: sigs ? sigs.cols[c.key] : null }))),
@@ -1396,7 +1407,9 @@
           'Figures are for the whole suburb/postcode, not your individual property.'));
     }
 
-    function PortfolioView({ regions, items, setItems }) {
+    function PortfolioView({ regions, typed, items, setItems }) {
+      // Track each holding against its own dwelling type when the split is loaded.
+      const mapFor = (p) => (typed && typed[p.type === 'unit' ? 'u' : 'h'] && typed[p.type === 'unit' ? 'u' : 'h'].regions) || regions;
       const [raw, setRaw] = useState('');
       const [msg, setMsg] = useState('');
       const [open, setOpen] = useState(-1);
@@ -1426,7 +1439,8 @@
       }
 
       const rows = items.map((p, idx) => {
-        const r = regions[p.code];
+        const rmap = mapFor(p);
+        const r = rmap[p.code] || regions[p.code];
         const s = r && r._sigs;
         const seg = p.type === 'unit' ? 'u' : 'h';
         const snap = (r && r.snap_px) || {};
@@ -1439,7 +1453,7 @@
         const lvr = (value && p.loan) ? (p.loan / value) * 100 : null;
         const myYield = (value && p.rent) ? (p.rent * 52 / value) * 100 : null;
         const mExp = monthsUntil(p.fixedTo);
-        return { p, r, s, idx, segNow, segPrev, at, sincePurchase, gain, lvr, myYield, mExp };
+        return { p, r, s, idx, segNow, segPrev, at, sincePurchase, gain, lvr, myYield, mExp, rmap };
       });
 
       const totVal = items.reduce((s, p) => s + (p.value || 0), 0);
@@ -1513,7 +1527,7 @@
                     const n = items.filter((_, i) => i !== x.idx); setItems(n); savePortfolio(n); setOpen(-1); },
                 }, 'remove'))),
                 open === x.idx && x.r && h(DeepDive, {
-                  p: x.p, r: x.r, sigs: x.s, regions, colSpan: 16 }));
+                  p: x.p, r: x.r, sigs: x.s, regions: x.rmap || regions, colSpan: 16 }));
             }))),
           h('div', { style: { fontSize: '0.72rem', color: 'var(--muted)', marginTop: 6 } },
             '* purchase predates the 10-year price history held on the board, so the "since you bought" figure is measured from the start of that window.')),
@@ -1681,7 +1695,7 @@
         }, s.label)));
     }
 
-    function Board({ payload }) {
+    function Board({ payload, dtype, setDtype, typesState, typed }) {
       const [filter, setFilter] = useState('PICKS');
       const [search, setSearch] = useState('');
       const [portfolio, setPortfolio] = useState(loadPortfolio);
@@ -1712,12 +1726,16 @@
         return h(Fragment, null,
           h(StateTabs, { filter, setFilter }),
           h('div', { className: 'section-title' }, '🔒 My Portfolio'),
-          h(PortfolioView, { regions: payload.regions, items: portfolio, setItems: setPortfolio }));
+          h('div', { className: 'dtype-note' }, typed
+            ? 'Each holding is tracked against its own type — houses against the house index, units against the unit index.'
+            : 'Holdings are tracked against the combined index until the houses / units split loads.'),
+          h(PortfolioView, { regions: payload.regions, typed, items: portfolio, setItems: setPortfolio }));
       }
 
       const matchCount = q ? visible.reduce((n, v) => n + v.items.length, 0) : 0;
 
       return h(Fragment, null,
+        safe('Houses / units switch', h(DtypeBar, { dtype, setDtype, typesState, view: payload })),
         h('div', { className: 'searchbar' },
           h('span', { className: 'searchbar-icon' }, '🔍'),
           h('input', {
@@ -1759,9 +1777,101 @@
           h(SectionTable, { items: sortItems(items, sort) }))));
     }
 
+    // ── Houses / Units split ─────────────────────────────────────────────
+    // data/property-types.json carries per-type price series ($100 units,
+    // delta-encoded), rents and yields. Vacancy + stock on market are not split
+    // by SQM, so typed views keep the all-dwellings values for those.
+    const DTYPE_KEY = 'tm_property_dtype';
+    const DTYPES = [
+      { key: 'A', label: '🏘 All dwellings' },
+      { key: 'H', label: '🏠 Houses' },
+      { key: 'U', label: '🏢 Units' },
+    ];
+    const loadDtype = () => { try { const v = localStorage.getItem(DTYPE_KEY); return (v === 'H' || v === 'U') ? v : 'A'; } catch (e) { return 'A'; } };
+    const saveDtype = (v) => { try { localStorage.setItem(DTYPE_KEY, v); } catch (e) { /* private mode */ } };
+    const decodePx = (d) => { const out = new Array(d.length); let acc = 0; for (let i = 0; i < d.length; i++) { acc += d[i]; out[i] = acc * 100; } return out; };
+    const nz = (v) => (v == null ? null : v);
+
+    function buildTypedView(base, types, t) {          // t = 'h' | 'u'
+      const regions = {};
+      let missing = 0;
+      for (const [code, r] of Object.entries(base.regions || {})) {
+        const x = types && types.regions && types.regions[code] && types.regions[code][t];
+        if (!x || !Array.isArray(x.px) || x.px.length < 2) { missing++; continue; }
+        const v = Object.assign({}, r, {
+          px: decodePx(x.px), px_end: x.end, ddmax: nz(x.ddmax), hist_w: nz(x.hist_w),
+          rent: nz(x.rent), rent52: nz(x.rent52), yield: nz(x.yield), yield_pct: nz(x.yield_pct),
+          _buy: null, _sell: null, _dtype: t,
+          _thin: (x.flat != null && x.flat > 0.15) || (x.noise != null && x.noise > 2.0),
+        });
+        const sigs = computeSignals(v.px);
+        v._sigs = sigs;
+        v._stability = sigs ? computeStabilityState(v.px) : 'stable';
+        regions[code] = v;
+      }
+      const view = Object.assign({}, base, { regions, _dtype: t, _missing: missing, _typesUpdated: types.updated });
+      view._picks = scorePicks(regions);
+      return view;
+    }
+
+    function DtypeBar({ dtype, setDtype, typesState, view }) {
+      const t = view && view._dtype;              // 'h' | 'u' | undefined (= all)
+      const word = t === 'h' ? 'houses' : t === 'u' ? 'units' : null;
+      return h(Fragment, null,
+        h('div', { className: 'dtype-bar', role: 'tablist' },
+          DTYPES.map(d => h('button', {
+            key: d.key, role: 'tab', 'aria-selected': dtype === d.key,
+            className: 'dtype-btn' + (dtype === d.key ? ' active' : ''),
+            onClick: () => setDtype(d.key),
+          }, d.label))),
+        dtype !== 'A' && typesState === 'loading' && h('div', { className: 'dtype-note' },
+          'Loading the houses / units split… showing all dwellings until it arrives.'),
+        dtype !== 'A' && typesState === 'missing' && h('div', { className: 'dtype-note' },
+          h('b', null, '⚠ Houses / units data not baked yet. '),
+          'It is produced by the weekly property bake (runs automatically after SQM\'s Tuesday update). ',
+          'Showing all dwellings for now.'),
+        word && h('div', { className: 'dtype-note' },
+          h('b', null, 'Showing ' + word + ' only. '),
+          'Prices, trend signals, rents and yields are ' + word + '-only. ',
+          h('b', null, 'Vacancy and stock on market are all dwellings'), ' (SQM does not split them). ',
+          'The buy/sell scoring and the forecast fan were validated on the combined index — ',
+          h('b', null, word + '-only picks have not been separately backtested'), '. ',
+          'Towns tagged ', h('span', { className: 'thin-tag' }, 'thin data'), ' have a noisy or sparse ' + word + ' index.',
+          view._missing ? ' ' + view._missing + ' markets have no ' + word + ' series and are hidden.' : ''));
+    }
+
     function App() {
       const [payload, setPayload] = useState(null);
       const [err, setErr] = useState(null);
+      const [dtype, setDtypeS] = useState(loadDtype);
+      const [types, setTypes] = useState(null);
+      const [typesState, setTypesState] = useState('loading');   // loading | ready | missing
+      const cache = useRef({});
+      const setDtype = (v) => { setDtypeS(v); saveDtype(v); };
+      // The split is fetched AFTER the board renders, so boot time is unchanged.
+      useEffect(() => {
+        if (!payload) return;
+        (async () => {
+          try {
+            const c = new AbortController(); const t = setTimeout(() => c.abort(), 20000);
+            const res = await fetch('data/property-types.json?t=' + Date.now(), { signal: c.signal })
+              .finally(() => clearTimeout(t));
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const d = await res.json();
+            if (!d || !d.regions || !Object.keys(d.regions).length) throw new Error('empty');
+            cache.current = {};
+            setTypes(d); setTypesState('ready');
+          } catch (e) { setTypesState('missing'); }
+        })();
+      }, [payload]);
+      const getView = (k) => {
+        if (k === 'A' || !types || !payload) return payload;
+        if (!cache.current[k]) {
+          try { cache.current[k] = buildTypedView(payload, types, k === 'H' ? 'h' : 'u'); }
+          catch (e) { console.error('[typed view]', e); cache.current[k] = payload; }
+        }
+        return cache.current[k];
+      };
       useEffect(() => {
         (async () => {
           try {
@@ -1784,7 +1894,11 @@
         'Run "python update-property.py" once, or trigger the update-property GitHub Action. ',
         'Opening via file:// blocks the fetch — use serve.bat.');
       if (!payload) return h('div', { className: 'spinner-wrap' }, 'Loading property data…');
-      return h(Board, { payload });
+      const view = getView(dtype);
+      window.__TM_PROPERTY = view;                 // Ask-AI answers for the type on screen
+      // lazy: the two typed views are only built if the portfolio tab asks for them
+      const typed = types ? { get h() { return getView('H'); }, get u() { return getView('U'); } } : null;
+      return h(Board, { payload: view, dtype, setDtype, typesState, typed });
     }
 
     createRoot(document.getElementById('root')).render(h(App)); window.__appMounted = true;

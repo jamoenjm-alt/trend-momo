@@ -40,6 +40,13 @@ OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "property
 # Full untrimmed series for backtesting. NOT fetched by the board and NOT
 # committed (gitignored) — it is ~4 MB and would bloat git history weekly.
 HIST_OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "property-history.json")
+# Houses vs units, split out (added 2026-11-16). Fetched by the board only when
+# the Houses/Units toggle is used, so boot size is unchanged. Prices are stored
+# in $100 units, delta-encoded (first value absolute, then week-on-week change)
+# — about a third of the size of raw dollars. Vacancy and stock-on-market are
+# NOT split by SQM, so they stay all-dwellings in property.json.
+TYPES_OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "property-types.json")
+TYPE_KEYS = {"h": "houses_all", "u": "units_all"}
 SLEEP = 0.5
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/126.0 Safari/537.36")
@@ -811,9 +818,49 @@ def pct_rank(vals, x):
     return round(100.0 * below / len(vals), 1)
 
 
+def _num(v):
+    try:
+        v = float(v)
+    except (TypeError, ValueError):
+        return None
+    return v if v > 0 else None
+
+
+def type_series(rows, key):
+    """One dwelling type's weekly series: drop leading empties, forward-fill
+    gaps (thin markets skip weeks). Returns (dates, vals, filled_flags)."""
+    dates, vals, filled = [], [], []
+    last = None
+    for r in rows:
+        v = _num(r.get(key))
+        if v is None and last is None:
+            continue
+        dates.append(r["date"])
+        vals.append(v if v is not None else last)
+        filled.append(v is None)
+        if v is not None:
+            last = v
+    return dates, vals, filled
+
+
+def delta_encode(vals):
+    q = [int(round(v / 100.0)) for v in vals]
+    return [q[0]] + [q[i] - q[i - 1] for i in range(1, len(q))]
+
+
+def worst_drawdown(vals):
+    peak, worst = vals[0], 0.0
+    for v in vals:
+        peak = max(peak, v)
+        if peak:
+            worst = min(worst, v / peak - 1)
+    return round(worst * 100, 1)
+
+
 def bake_region(code, name, state, kind, param):
     out = {"name": name, "state": state, "kind": kind, "param": param}
     hist = {"name": name, "state": state}   # full untrimmed series for backtests
+    types = {}                               # {"h": {...}, "u": {...}} → property-types.json
     ok = False
 
     # ── weekly asking prices (signal series) ─────────────────────────────
@@ -852,6 +899,25 @@ def bake_region(code, name, state, kind, param):
                 "u52": int(round(y_ago.get("units_all") or 0)) or None,
             }
             ok = True
+        # Per-type price series (same 10y window as the combined px).
+        for t, key in TYPE_KEYS.items():
+            dts, vals, filled = type_series(rows, key)
+            if len(vals) < 60:
+                continue
+            # Index quality over the last 5y. SQM carries the last value forward
+            # in thin markets (flat weeks) and small samples swing hard (noise).
+            # Board tags a type "thin data" if flat > 0.15 or noise > 2.0.
+            rv = vals[-261:]
+            chg = [abs(rv[i] / rv[i - 1] - 1) for i in range(1, len(rv)) if rv[i - 1]]
+            chg_sorted = sorted(chg)
+            types[t] = {
+                "px": delta_encode(vals[-520:]),
+                "end": dts[-1],
+                "ddmax": worst_drawdown(vals),
+                "hist_w": len(vals),
+                "flat": round((sum(1 for c in chg if c < 1e-9) + sum(filled[-260:])) / max(1, len(chg)), 3),
+                "noise": round(chg_sorted[len(chg_sorted) // 2] * 100, 2) if chg_sorted else None,
+            }
 
     # ── weekly rents ─────────────────────────────────────────────────────
     rows = extract_series(fetch_html(build_url("rent", kind, param)))
@@ -866,6 +932,12 @@ def bake_region(code, name, state, kind, param):
             out["rent52"] = round(val(y_ago), 1)
             hist["rent"] = [[r["date"], round(val(r), 1)] for r in rows if val(r)]
             ok = True
+        for t, key in TYPE_KEYS.items():
+            dts, vals, _ = type_series(rows, key)
+            if len(vals) >= 53 and t in types:
+                types[t]["rent"] = round(vals[-1], 1)
+                types[t]["rent52"] = round(vals[-53], 1)
+                hist["rent_" + t] = [[d, round(v, 1)] for d, v in zip(dts, vals)]
 
     # ── rental yield (weekly; houses_all preferred) ──────────────────────
     rows = extract_series(fetch_html(build_url("yield", kind, param)))
@@ -880,6 +952,12 @@ def bake_region(code, name, state, kind, param):
             out["yield_pct"] = pct_rank(series, series[-1])
             hist["yield"] = [[r["date"], round(val(r), 2)] for r in rows if val(r)]
             ok = True
+        for t, key in TYPE_KEYS.items():
+            dts, vals, _ = type_series(rows, key)
+            if vals and t in types:
+                types[t]["yield"] = round(vals[-1], 2)
+                types[t]["yield_pct"] = pct_rank(vals, vals[-1])
+                hist["yield_" + t] = [[d, round(v, 2)] for d, v in zip(dts, vals)]
 
     # ── vacancy (monthly) ────────────────────────────────────────────────
     rows = extract_series(fetch_html(build_url("vac", kind, param)))
@@ -921,7 +999,7 @@ def bake_region(code, name, state, kind, param):
             hist["stock"] = [[m, t] for m, t in pairs]
             ok = True
 
-    return (out, hist) if ok else (None, None)
+    return (out, hist, types) if ok else (None, None, None)
 
 
 def main():
@@ -942,8 +1020,17 @@ def main():
         except Exception:
             old_hist = {}
 
+    old_types = {}
+    if os.path.exists(TYPES_OUT):
+        try:
+            with open(TYPES_OUT, encoding="utf-8") as f:
+                old_types = json.load(f).get("regions", {})
+        except Exception:
+            old_types = {}
+
     regions = {}
     hists = {}
+    typed = {}
     n = len(REGIONS)
     for i, (code, (name, state, kind, param)) in enumerate(REGIONS.items(), 1):
         if only and code not in only:
@@ -951,13 +1038,19 @@ def main():
                 regions[code] = old[code]
             if code in old_hist:
                 hists[code] = old_hist[code]
+            if code in old_types:
+                typed[code] = old_types[code]
             continue
         print(f"[{i}/{n}] {code} {name} ...", flush=True)
         try:
-            baked, hist = bake_region(code, name, state, kind, param)
+            baked, hist, types = bake_region(code, name, state, kind, param)
         except Exception as e:
             print(f"    ERROR {code}: {e}")
-            baked, hist = None, None
+            baked, hist, types = None, None, None
+        if types:
+            typed[code] = types
+        elif code in old_types:
+            typed[code] = old_types[code]
         if hist:
             hists[code] = hist
         elif code in old_hist:
@@ -984,6 +1077,18 @@ def main():
     os.replace(tmp, OUT)
     size_kb = os.path.getsize(OUT) // 1024
     print(f"\nWrote {OUT} ({size_kb} KB, {len(regions)}/{n} regions)")
+
+    types_payload = {
+        "updated": payload["updated"],
+        "source": payload["source"],
+        "encoding": "px = $100 units, delta-encoded (first absolute, then week-on-week change)",
+        "regions": typed,
+    }
+    tmp_t = TYPES_OUT + ".tmp"
+    with open(tmp_t, "w", encoding="utf-8") as f:
+        json.dump(types_payload, f, separators=(",", ":"))
+    os.replace(tmp_t, TYPES_OUT)
+    print(f"Wrote {TYPES_OUT} ({os.path.getsize(TYPES_OUT) // 1024} KB, houses/units split)")
 
     hist_payload = {"updated": payload["updated"], "source": payload["source"], "regions": hists}
     tmp_h = HIST_OUT + ".tmp"

@@ -54,6 +54,10 @@ model, so per project rules it does NOT replace the fan yet.
 Hiking-cycle twins (general knowledge, rates not in panel — verify): CAN 2021 −22%, GBR 2021 −9%, NLD 2021 +3%,
 DNK 1985 −25% (tax-deduction cut + tightening — closest policy twin), NOR 1987 −33%, IRL 2007 −48% (credit bust).
 
+**UPDATE later 16 Nov:** BIS rates added and the regime idea was properly backtested — it does NOT beat the
+unconditional base rate at 5y, so the "median too generous" claim above is retracted as unproven. 1y momentum DOES
+beat naive by 12–20%. Read `data/forecasts/regime_tests.md` — it supersedes §4.
+
 ## 5. Open items (priority order)
 1. Owner: publish hover readout (`.\claude-publish.bat property chart hover readout`), add `CG_KEY` secret, deploy ai-worker.
 2. Regime-conditioned forecasting — see `DATA-UPGRADE-PLAN.md`. Backtest before shipping.

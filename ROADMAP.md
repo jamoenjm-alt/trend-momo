@@ -93,6 +93,11 @@ Scored 1–5: (a) forecast accuracy, (b) user value, (c) effort (5 = least effor
   feature — reconcile with the state forecasts before building the chart (one forecast language on the site).
 
 ## 7. Change log
+- 2026-11-16 — Property board: Houses | Units | All switch + `data/property-types.json` bake (SQM houses_all /
+  units_all prices, rents, yields). Typed picks unvalidated (labelled). Fan chart hover readout.
+- 2026-11-16 — Added BIS policy rates (`raw/bis_cbpol_quarterly.csv`). Regime-conditioned 5y base rate backtested:
+  does NOT beat unconditional base rate (rejected). 1y momentum model beats mean/zero by 12–20% (candidate for
+  short-horizon nowcast). Earlier "fan median too generous" claim retracted as unproven. See `regime_tests.md`.
 - 2026-11-16 — Twin-episode test (`scripts/twins_analysis.py`): expensive + falling real income → 5y real median
   +2% (p10 −25%, p90 +26%, n=24) vs town fan ≈ +7% real median and much fatter upside. Fan flagged as too generous;
   not replaced (not yet backtested). Hover readout added to fan chart. Handoff in `HANDOFF/`.
