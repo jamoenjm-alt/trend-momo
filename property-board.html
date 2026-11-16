@@ -1122,6 +1122,15 @@
         })();
         return () => { live = false; };
       }, [dtype]);
+      // Houses AND units fans, loaded once, so the chart can always show both medians side by side.
+      const [both, setBoth] = useState({ h: null, u: null });
+      useEffect(() => {
+        let live = true;
+        Promise.all(['h', 'u'].map(t => fetch('data/property-forecast-' + t + '.json?t=' + Date.now())
+          .then(r => r.ok ? r.json() : null).catch(() => null)))
+          .then(([fh, fu]) => { if (live) setBoth({ h: fh && fh.base ? fh : null, u: fu && fu.base ? fu : null }); });
+        return () => { live = false; };
+      }, []);
       if (!fc || !fc.base || !fc.markets) return null;
       const fanWord = fc.dtype === 'h' ? 'houses' : fc.dtype === 'u' ? 'units' : null;
       const H = fc.horizons_m, B = fc.base, Q = fc.quantiles;
@@ -1133,9 +1142,16 @@
       const pts = (qi, withTilt) => [[0, 1]].concat(H.map((h, i) => [h / 12, ratio(i, qi, withTilt)]));
       const P10 = pts(0, tilted), P25 = pts(1, tilted), P50 = pts(2, tilted), P75 = pts(3, tilted), P90 = pts(4, tilted);
       const U50 = pts(2, false);
+      const typedPath = (f, qi) => {
+        if (!f || !f.base || !f.horizons_m) return null;
+        const dd = f.markets && f.markets[code] ? f.markets[code].d : null;
+        const tl = (dd != null && f.model === 'B_tilted' && f.tilt_pp && f.tilt_pp[String(dd)]) ? f.tilt_pp[String(dd)] : null;
+        return [[0, 1]].concat(f.horizons_m.map((hm, i) => [hm / 12, f.base[i][qi] + (tl ? tl[i] / 100 : 0)]));
+      };
+      const H50 = typedPath(both.h, 2), N50 = typedPath(both.u, 2);   // N = units
       const W = 820, Hh = 340, L = 54, R = 70, T = 18, Bm = 30;
       const pct = (r) => (r - 1) * 100;
-      const allY = [].concat(P10, P90, U50).map(p => pct(p[1]));
+      const allY = [].concat(P10, P90, U50, H50 || [], N50 || []).map(p => pct(p[1]));
       let yMin = Math.min(-30, Math.floor(Math.min(...allY) / 10) * 10 - 10);
       let yMax = Math.ceil(Math.max(...allY) / 10) * 10 + 10;
       const X = (yr) => L + (yr / 10) * (W - L - R);
@@ -1189,6 +1205,8 @@
           // universe median (dashed) and market median
           h('path', { d: line(U50), fill: 'none', stroke: 'rgba(0,0,0,.35)', strokeWidth: 1.2, strokeDasharray: '5 4' }),
           h('path', { d: line(P50), fill: 'none', stroke: '#2e8b57', strokeWidth: 2.4 }),
+          fanWord !== 'houses' && H50 && h('path', { d: line(H50), fill: 'none', stroke: '#2563eb', strokeWidth: 1.8, strokeDasharray: '7 4' }),
+          fanWord !== 'units' && N50 && h('path', { d: line(N50), fill: 'none', stroke: '#d97706', strokeWidth: 1.8, strokeDasharray: '7 4' }),
           h('path', { d: line(P10), fill: 'none', stroke: 'rgba(178,34,34,.6)', strokeWidth: 1 }),
           h('path', { d: line(P90), fill: 'none', stroke: 'rgba(46,139,87,.6)', strokeWidth: 1 }),
           // end labels
@@ -1215,6 +1233,24 @@
             onMouseMove: (e) => { const r = e.currentTarget.ownerSVGElement.getBoundingClientRect(); const vx = (e.clientX - r.left) * W / r.width; const yr = Math.max(0, Math.min(10, (vx - L) / (W - L - R) * 10)); let bi = 0; P50.forEach((p, i) => { if (Math.abs(p[0] - yr) < Math.abs(P50[bi][0] - yr)) bi = i; }); setHov(bi); },
             onTouchStart: (e) => { const t = e.touches[0]; const r = e.currentTarget.ownerSVGElement.getBoundingClientRect(); const vx = (t.clientX - r.left) * W / r.width; const yr = Math.max(0, Math.min(10, (vx - L) / (W - L - R) * 10)); let bi = 0; P50.forEach((p, i) => { if (Math.abs(p[0] - yr) < Math.abs(P50[bi][0] - yr)) bi = i; }); setHov(bi); },
             onMouseLeave: () => setHov(null) })),
+        (H50 || N50) && (() => {
+          const at = (ps, yrs) => { if (!ps) return null; const p = ps.find(x => Math.abs(x[0] - yrs) < 1e-6); return p ? p[1] : null; };
+          const lowAt = (f, yrs) => { const ps = typedPath(f, 0); return at(ps, yrs); };
+          const cellv = (r) => r == null ? '—' : fmtP(r);
+          const row = (label, color, ps, f) => h('tr', null,
+            h('td', { style: { padding: '3px 10px 3px 0', fontWeight: 600, color } }, label),
+            ...[3, 5, 10].map(y => h('td', { key: y, style: { padding: '3px 10px', textAlign: 'right' } },
+              h('b', null, cellv(at(ps, y))), h('span', { style: { opacity: .65, fontSize: '11.5px' } }, '  (bad case ', cellv(lowAt(f, y)), ')'))));
+          return h('div', { style: { margin: '10px 0 4px', fontSize: '13px' } },
+            h('div', { style: { fontWeight: 700, marginBottom: 4 } }, 'Houses vs units for ', mname, ' — median path (dashed lines on the chart)'),
+            h('table', { style: { borderCollapse: 'collapse' } },
+              h('thead', null, h('tr', null, h('th', null, ''), ...['3 years', '5 years', '10 years (untested)'].map(t => h('th', { key: t, style: { padding: '2px 10px', textAlign: 'right', fontWeight: 600, opacity: .7 } }, t)))),
+              h('tbody', null,
+                H50 && row('🏠 Houses', '#2563eb', H50, both.h),
+                N50 && row('🏢 Units', '#d97706', N50, both.u))),
+            h('div', { style: { fontSize: '11.5px', opacity: .7, marginTop: 3 } },
+              'Each built only from that type\'s price histories, with its own out-of-sample width check. "Bad case" = 10th percentile.'));
+        })(),
         h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: '8px', margin: '10px 0', fontSize: '13px' } },
           ...[3, 5, 10].map(yrs => [yrs, H.indexOf(yrs * 12) + 1]).filter(([, i]) => i > 0 && P50[i] && P10[i] && P90[i]).map(([yrs, i]) => h('div', { key: yrs, style: { padding: '8px 10px', background: 'rgba(127,127,127,.07)', borderRadius: '6px' } },
             h('div', { style: { opacity: .7 } }, yrs + ' years' + (yrs > untestFrom ? ' · untested' : '')),
