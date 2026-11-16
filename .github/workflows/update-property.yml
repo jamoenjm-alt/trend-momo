@@ -64,14 +64,17 @@ jobs:
       # go stale. Needs data/property-history.json, which the bake above just wrote on the runner.
       - name: Refresh the 10-year forecast fan
         if: steps.fresh.outputs.stale == 'true'
-        run: python backtests/property-forecast.py || true
+        run: |
+          python backtests/property-forecast.py || true
+          python backtests/property-forecast.py --type h || true
+          python backtests/property-forecast.py --type u || true
 
       - name: Commit and push
         if: steps.fresh.outputs.stale == 'true'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/property.json data/property-types.json data/sold-vic.json data/property-forecast.json backtests/property-picks-history.json backtests/property-decile-results.json
+          git add data/property.json data/property-types.json data/sold-vic.json data/property-forecast.json data/property-forecast-h.json data/property-forecast-u.json backtests/property-picks-history.json backtests/property-decile-results.json
           if git diff --cached --quiet; then
             echo "nothing to commit"; exit 0
           fi

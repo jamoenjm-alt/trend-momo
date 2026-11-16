@@ -1095,21 +1095,35 @@
     }
     const safe = (name, el) => h(SafeBox, { name }, el);
 
-    function ForecastFan({ regions }) {
+    // dtype 'h' | 'u' | undefined: houses / units fans are built separately from the typed SQM
+    // series (backtests/property-forecast.py --type h|u). Falls back to the combined fan, and says so.
+    function ForecastFan({ regions, dtype }) {
       const [fc, setFc] = useState(null);
       const [code, setCode] = useState('TOM');
       const [hov, setHov] = useState(null);
+      const [fellBack, setFellBack] = useState(false);
       useEffect(() => {
+        let live = true;
+        const get = async (file) => {
+          const c = new AbortController(); const t = setTimeout(() => c.abort(), 8000);
+          const res = await fetch(file + '?t=' + Date.now(), { signal: c.signal }).finally(() => clearTimeout(t));
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const j = await res.json(); if (!j || !j.base || !j.markets) throw new Error('bad'); return j;
+        };
         (async () => {
           try {
-            const c = new AbortController(); const t = setTimeout(() => c.abort(), 8000);
-            const res = await fetch('data/property-forecast.json?t=' + Date.now(), { signal: c.signal })
-              .finally(() => clearTimeout(t));
-            if (res.ok) setFc(await res.json());
-          } catch (e) { /* optional */ }
+            if (dtype === 'h' || dtype === 'u') {
+              try { const j = await get('data/property-forecast-' + dtype + '.json'); if (live) { setFc(j); setFellBack(false); } return; }
+              catch (e) { /* typed fan not built yet — fall through */ }
+            }
+            const j = await get('data/property-forecast.json');
+            if (live) { setFc(j); setFellBack(dtype === 'h' || dtype === 'u'); }
+          } catch (e) { /* optional panel */ }
         })();
-      }, []);
+        return () => { live = false; };
+      }, [dtype]);
       if (!fc || !fc.base || !fc.markets) return null;
+      const fanWord = fc.dtype === 'h' ? 'houses' : fc.dtype === 'u' ? 'units' : null;
       const H = fc.horizons_m, B = fc.base, Q = fc.quantiles;
       const mk = fc.markets[code]; const d = mk ? mk.d : null;
       const tilt = (d != null && fc.tilt_pp && fc.tilt_pp[String(d)]) ? fc.tilt_pp[String(d)] : H.map(() => 0);
@@ -1144,7 +1158,9 @@
       const persist = fc.persistence_5y || []; const lastRho = persist.length ? persist[persist.length - 1].rho : null;
       const mname = (regions && regions[code] && regions[code].name) || code;
       return h('div', { className: 'picks-wrap' },
-        h('h2', { className: 'picks-title' }, '10-year outlook — a probability fan, not a line'),
+        h('h2', { className: 'picks-title' }, '10-year outlook' + (fanWord ? ' — ' + fanWord : '') + ' — a probability fan, not a line'),
+        fellBack && h('div', { className: 'dtype-note' }, h('b', null, '⚠ The ' + (dtype === 'u' ? 'units' : 'houses') + ' fan has not been built yet — showing the combined (houses + units) fan.')),
+        fanWord && h('div', { className: 'dtype-note' }, 'Built only from ' + fanWord + ' asking-price histories (every market, every start date since 2009), with its own out-of-sample width check' + (fc.model === 'B_tilted' ? ' and decile tilt test (passed).' : '; the decile tilt failed its test for ' + fanWord + ', so none is applied.')),
         h('div', { className: 'picks-sub' },
           'Where an Australian postcode index has actually gone over 6 months to 10 years, pooled across every market and start date since 2009, ',
           'widened so the 80% band would have been honest out-of-sample, then tilted by the selected market\'s validated decile. ',
@@ -1958,7 +1974,7 @@
 
         // Everything pick-related lives on one tab so it can actually be found.
         !q && filter === 'PICKS' && h(Fragment, null,
-          safe('Forecast fan', h(ForecastFan, { regions: payload.regions })),
+          safe('Forecast fan', h(ForecastFan, { regions: payload.regions, dtype: payload._dtype })),
           safe('Decile strip', h(DecileStrip, null)),
           safe('Top picks', h(TopPicks, { picks: payload._picks })),
           safe('State opportunity', h(StateOpportunity, { picks: payload._picks })),

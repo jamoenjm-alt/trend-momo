@@ -61,11 +61,13 @@ class Ser:
     def idx(self, asof): return bisect.bisect_right(self.d, asof)
     def sma(self, n, k): return (self.cs[k] - self.cs[k - n]) / n if k >= n else None
 
-def load():
+def load(px_key="px"):
+    """px_key: "px" (combined, default) or "px_h" / "px_u" for the houses / units index
+    (added 2026-11-16 for the typed forecast fans). Zero weeks are dropped."""
     data = json.load(open(HIST, encoding="utf-8"))
     regs = {}
     for code, r in data["regions"].items():
-        px = r.get("px") or []
+        px = [p for p in (r.get(px_key) or []) if p[1]]
         if not px: continue
         P = Ser(px); rmax = []; rdd = []; peak = None; worst = 0.0
         for x in P.v:

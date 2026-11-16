@@ -101,6 +101,9 @@ claude-publish.bat feat: my change description
   data/property-history.json; since 2026-11-16 rebuilt in the property workflow after each bake (was stale/manual).
   The fan's Market list shows EVERY board market; ones not decile-scored on `deciles_asof` (e.g. <100 listings then —
   Esperance had 92 in Jun 2026) get the all-market fan with no tilt.
+  Houses/units fans: `property-forecast.py --type h|u` → data/property-forecast-h.json / -u.json, built from px_h / px_u
+  with the same method and its own pre-registered tilt test (`V.load(px_key)`); `ForecastFan` picks the file from the
+  Houses/Units switch and falls back to the combined fan with a warning if a typed file is missing.
 - Cautions/comments (`marketNotes` + `MarketNotes`, added 2026-11-16) show on the fan (selected market), each top pick
   card (compact) and every town's detail. Rule-of-thumb DATA CHECKS, labelled as such — NOT backtested: <100 listings
   (red) / 100–149 (amber, same floor as picks); worst-10%-on-the-board for drawdown since 2009, listings growth, vacancy,

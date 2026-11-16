@@ -37,7 +37,12 @@ from datetime import datetime, timezone
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-OUT = os.path.join(ROOT, "data", "property-forecast.json")
+# --type h|u builds the houses / units fan from the typed SQM series (px_h / px_u) into
+# data/property-forecast-h.json / -u.json. Same method, same pre-registered tilt test, run
+# separately per type — the tilt only ships for a type if it passes on that type's data.
+DTYPE = sys.argv[sys.argv.index("--type") + 1] if "--type" in sys.argv else None
+assert DTYPE in (None, "h", "u"), "--type must be h or u"
+OUT = os.path.join(ROOT, "data", "property-forecast.json" if not DTYPE else "property-forecast-%s.json" % DTYPE)
 sys.path.insert(0, HERE)
 V = importlib.import_module("property-decile-validation")
 
@@ -76,7 +81,7 @@ def conformal_k(recs):
     return quantile(z, 0.80)
 
 def main():
-    regs, raw, baked = V.load()
+    regs, raw, baked = V.load("px_" + DTYPE if DTYPE else "px")
     last_px = max(r["px"].d[-1] for r in regs.values() if r["px"].d)
     grid = [d.strftime("%Y-%m-%d") for d in V.month_ends("2009-06", last_px[:7])]
     grid = [d for d in grid if d <= last_px]
@@ -214,7 +219,7 @@ def main():
     last_scored = scored[-1]
     markets = {c: {"d": d} for c, d in sorted(dec_of[last_scored].items())}
 
-    out = {"generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    out = {"generated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "dtype": DTYPE or "all",
            "history_baked": baked, "asof": grid[LAST], "deciles_asof": grid[last_scored],
            "model": model, "horizons_m": H, "quantiles": Q,
            "base": base, "base_raw": base_raw, "pool_n": pool_n,
