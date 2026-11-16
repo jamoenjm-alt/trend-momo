@@ -255,8 +255,14 @@ def main():
             if v: out.append({"factor": lab, **tstat(v)})
         factors[f"h{h}"] = out
 
-    # ── 6. current placement of pinned markets + top decile (latest scored month) ──
-    last = D[-1]; rows = sorted(last["rows"], key=lambda r: r["buy"]); n = len(rows)
+    # ── 6. current placement of pinned markets + top decile ──────────────────────
+    # The validation window deliberately stops ~200 days before the last price (forward returns
+    # must exist). Placement must NOT: until 2026-11-16 it used D[-1] and so was always ~6 months
+    # stale. Score the latest data instead; fall back to D[-1] only if too few markets score.
+    cur_asof = last_px or D[-1]["asof"]
+    cur_rows = score_asof_fast(regs, cur_asof, cur_asof[:7]) if last_px else []
+    last = {"asof": cur_asof, "rows": cur_rows} if len(cur_rows) >= 50 else D[-1]
+    rows = sorted(last["rows"], key=lambda r: r["buy"]); n = len(rows)
     rank = {r["code"]: i for i, r in enumerate(rows)}
     d12 = deciles.get("h12"); d24 = deciles.get("h24")
     def place(code):
@@ -282,7 +288,7 @@ def main():
               "notes": ["excess = forward index change minus that month's universe median",
                         "t-stats overstate significance (overlapping horizons); era consistency is the evidence",
                         "index != tradeable; ~8% round-trip means this is a 24m+ signal",
-                        "placement/pinned reflect the LAST month in the history file — re-bake before relying on them"]}
+                        "placement/pinned are scored on the latest data in the history file (validation window ends ~200 days earlier)"]}
     tmp = OUT + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f: json.dump(result, f, indent=1)
     os.replace(tmp, OUT)

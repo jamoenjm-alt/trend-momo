@@ -206,6 +206,10 @@ Baked `data/prices.json` is the primary path; live APIs are best-effort fallback
   no error boundary React unmounted the whole board. Guards: every optional panel on the Picks tab is wrapped in
   `safe(name, el)` (`SafeBox` error boundary) — keep new panels inside it. **Before any publish, check `git status`
   for other sessions' uncommitted work and test it** (node harness: run the component against the real JSON).
+- **Pinned-markets placement always ~200 days stale (fixed 2026-11-16).** property-decile-validation.py ends its
+  validation window ~200 days before the last price (forward returns needed) and used that last window month for the
+  "current placement" too, so the board always showed a stale-placement warning blaming the history file. Placement
+  is now scored on the latest data (`score_asof_fast(regs, last_px, ...)`); the validation window is unchanged.
 - **Loading hang (fixed 2026-09-20).** Root cause: the boot `fetch('data/prices.json')` had
   no timeout and the render was gated on it, so a stalled connection (or a hung esm.sh import)
   left an infinite “Loading…” spinner. Both boards now: (a) time out the boot fetch with an
