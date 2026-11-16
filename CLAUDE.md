@@ -104,6 +104,11 @@ claude-publish.bat feat: my change description
   Houses/units fans: `property-forecast.py --type h|u` → data/property-forecast-h.json / -u.json, built from px_h / px_u
   with the same method and its own pre-registered tilt test (`V.load(px_key)`); `ForecastFan` picks the file from the
   Houses/Units switch and falls back to the combined fan with a warning if a typed file is missing.
+  The fan always draws houses (blue dashed) and units (orange dashed) medians + a 3/5/10y comparison table.
+  "Value check" box (data/property-value-buckets.json, `backtests/property-value-buckets.py`, rebuilt in the workflow):
+  growth vs typical market by yield-vs-own-history bucket. Cheap-vs-own-history helped HOUSES (+3% OOS) but not units;
+  cheap by PRICE LEVEL flipped sign by era (not used). It's already inside the decile tilt → DISPLAY ONLY, never add it
+  to the fan again (double count).
 - Cautions/comments (`marketNotes` + `MarketNotes`, added 2026-11-16) show on the fan (selected market), each top pick
   card (compact) and every town's detail. Rule-of-thumb DATA CHECKS, labelled as such — NOT backtested: <100 listings
   (red) / 100–149 (amber, same floor as picks); worst-10%-on-the-board for drawdown since 2009, listings growth, vacancy,

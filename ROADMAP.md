@@ -93,6 +93,10 @@ Scored 1–5: (a) forecast accuracy, (b) user value, (c) effort (5 = least effor
   feature — reconcile with the state forecasts before building the chart (one forecast language on the site).
 
 ## 7. Change log
+- 2026-11-16 — Houses/units fans (separate, own tilt tests). Affordability test (ABS capitals 2004–21): when house
+  repayments are in the top 10% of own history, units roughly match houses over 5y (vs −9pp normally); OOS −18% error.
+  Market-level: houses expensive vs own yield history lag (−4.6/−7.7pp at 3/5y), cheap lead; units unaffected. Shown
+  as context on the fan (already in decile tilt). "Lower price does better" by price level is era-dependent → rejected.
 - 2026-11-16 — Sold prices (VIC Valuer-General, CC BY) added to each VIC town's detail. Backtest 2018–25: no blend or
   sold/asking predictor beat "no change" for next-year suburb sold medians (1y MAE 7.5%, 2y 12%) → display only.
   Owner's "median of asking and sold" idea tested and rejected (7.9% vs 7.7% error). NSW sales: licence NC-ND + bot check.
