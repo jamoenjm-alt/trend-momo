@@ -368,6 +368,14 @@
     .tc-table th { font-size: 0.7rem; font-weight: 700; text-align: right; padding: 0 10px 3px 0; color: var(--muted); border: none; }
     .tc-table th.tc-on { color: #1d4ed8; }
     .tc-table td.tc-on { font-weight: 700; }
+    .mnotes { margin: 8px 0; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; line-height: 1.5; max-width: 820px; }
+    .mnotes.mn-ok { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .mnotes.mn-warn { background: #fffbeb; border: 1px solid #fde68a; }
+    .mnotes.mn-bad { background: #fef2f2; border: 1px solid #fecaca; }
+    .mnotes ul { margin: 4px 0 0 0; padding-left: 18px; }
+    .mnotes li { margin: 1px 0; }
+    .mn-red { color: #b91c1c; } .mn-amber { color: #92400e; } .mn-green { color: #15803d; }
+    .mnotes .mn-foot { font-size: 11px; color: var(--muted); margin-top: 4px; }
     .shared-tag { font-size: 0.66rem; color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; }
     .dtype-note { font-size: 12.5px; line-height: 1.5; color: var(--muted); margin: 4px 0 10px; max-width: 980px; }
     .dtype-note b { color: inherit; }
@@ -768,6 +776,82 @@
             line('Index quality', x => x.thin ? h('span', { className: 'thin-tag' }, 'thin data') : 'ok', x => x.thin ? h('span', { className: 'thin-tag' }, 'thin data') : 'ok'))));
     }
 
+    // ── Cautions & comments per market (added 2026-11-16) ─────────────────
+    // Rule-of-thumb DATA CHECKS, not backtested signals. Most checks are relative: a caution
+    // fires when a market is in the worst ~10% of the markets on the board for that measure,
+    // so the wording says how unusual it is. Liquidity uses the same 100-listing floor as picks.
+    let CURRENT_REGIONS = null;                 // set by Board on every render
+    const NOTE_CTX = new WeakMap();
+    function noteCtx(regions) {
+      if (!regions) return null;
+      if (NOTE_CTX.has(regions)) return NOTE_CTX.get(regions);
+      const col = (f) => Object.values(regions).filter(r => r && r.state !== 'NAT').map(f).filter(v => v != null && isFinite(v)).sort((a, b) => a - b);
+      const noise = (r) => { const px = r.px || []; if (px.length < 60) return null; const w = []; for (let i = Math.max(1, px.length - 260); i < px.length; i++) if (px[i - 1] > 0 && px[i] > 0) w.push(Math.abs(Math.log(px[i] / px[i - 1]))); w.sort((a, b) => a - b); return w.length ? w[w.length >> 1] * 100 : null; };
+      const ctx = {
+        dd: col(r => r.ddmax), stockG: col(r => chg(r.stock, r.stock12)), vac: col(r => r.vac),
+        vacD: col(r => (r.vac != null && r.vac12 != null) ? r.vac - r.vac12 : null),
+        rentG: col(r => chg(r.rent, r.rent52)), noise: col(noise), noiseOf: noise,
+      };
+      NOTE_CTX.set(regions, ctx); return ctx;
+    }
+    const pctAt = (arr, v) => { if (!arr || !arr.length || v == null) return null; let lo = 0, hi = arr.length; while (lo < hi) { const m = (lo + hi) >> 1; if (arr[m] <= v) lo = m + 1; else hi = m; } return lo / arr.length * 100; };
+
+    function marketNotes(r, regions) {
+      const ctx = noteCtx(regions || CURRENT_REGIONS);
+      const bad = [], good = [];
+      if (!r) return { bad, good };
+      const n = r.stock;
+      if (n != null && n < 100) bad.push({ lvl: 'red', t: 'Thin market — only ' + n + ' homes listed (picks need 100+). A few sales can swing prices, and the index is less reliable.' });
+      else if (n != null && n < 150) bad.push({ lvl: 'amber', t: 'Only just liquid — ' + n + ' listings vs the 100 minimum for picks. It could drop out of the rankings on a few sales.' });
+      else if (n != null && n >= 250) good.push('Liquid market — ' + n.toLocaleString() + ' homes listed.');
+      if (ctx) {
+        const dd = r.ddmax, pdd = pctAt(ctx.dd, dd);
+        if (pdd != null && pdd <= 10) bad.push({ lvl: 'red', t: 'Boom-bust history — fell ' + fmtPct(dd, 0) + ' peak-to-trough since 2009, among the worst 10% on the board. It has done it before.' });
+        else if (pdd != null && pdd >= 85) good.push('Steady history — worst fall since 2009 only ' + fmtPct(dd, 0) + '.');
+        const sg = chg(r.stock, r.stock12), psg = pctAt(ctx.stockG, sg);
+        if (psg != null && psg >= 90) bad.push({ lvl: 'amber', t: 'Supply building fast — listings ' + fmtPct(sg, 0) + ' in 12 months (top 10% on the board).' });
+        else if (psg != null && psg <= 15) good.push('Supply tightening — listings ' + fmtPct(sg, 0) + ' in 12 months.');
+        const pv = pctAt(ctx.vac, r.vac);
+        if (pv != null && pv >= 90) bad.push({ lvl: 'amber', t: 'Loose rental market — vacancy ' + r.vac.toFixed(1) + '% (highest 10% on the board).' });
+        else if (pv != null && pv <= 15) good.push('Tight rentals — vacancy ' + r.vac.toFixed(1) + '%.');
+        const vd = (r.vac != null && r.vac12 != null) ? r.vac - r.vac12 : null, pvd = pctAt(ctx.vacD, vd);
+        if (pvd != null && pvd >= 90 && vd > 0.3) bad.push({ lvl: 'amber', t: 'Vacancy rising fast — up ' + vd.toFixed(1) + ' points in 12 months.' });
+        const rg = chg(r.rent, r.rent52), prg = pctAt(ctx.rentG, rg);
+        if (prg != null && prg <= 10 && rg < 0) bad.push({ lvl: 'amber', t: 'Rents falling — ' + fmtPct(rg, 1) + ' in 12 months.' });
+        else if (prg != null && prg >= 85) good.push('Rents rising strongly — ' + fmtPct(rg, 0) + ' in 12 months.');
+        const nz = ctx.noiseOf(r), pnz = pctAt(ctx.noise, nz);
+        if (pnz != null && pnz >= 90) bad.push({ lvl: 'amber', t: 'Jumpy price index — weekly moves are among the largest 10% on the board, so trend signals here are less reliable.' });
+      }
+      if (r.yield_pct != null && r.yield_pct <= 15) bad.push({ lvl: 'amber', t: 'Expensive vs its own history — rental yield is near the bottom of its range since 2009.' });
+      else if (r.yield_pct != null && r.yield_pct >= 75) good.push('Cheap vs its own history — rental yield is in the top ' + Math.max(1, Math.round(100 - r.yield_pct)) + '% of its range.');
+      const s = r._sigs;
+      if (s && s.allInd != null && s.allInd <= -0.6) bad.push({ lvl: 'amber', t: 'Prices are in a strong downtrend right now.' });
+      else if (s && s.cols && s.cols.h1 != null && s.cols.h4 != null && s.cols.h1 <= -0.6 && s.cols.h4 >= 0.6)
+        bad.push({ lvl: 'amber', t: 'Short-term trend has turned down against a long-term uptrend — watch for a turn.' });
+      if (r._thin) bad.push({ lvl: 'amber', t: 'Thin ' + (r._dtype === 'u' ? 'units' : 'houses') + ' index — few listings of this type, so its numbers are noisy.' });
+      if (r.px_end) { const age = (Date.now() - new Date(r.px_end + 'T00:00:00Z').getTime()) / 864e5; if (age > 35) bad.push({ lvl: 'amber', t: 'Price data is ' + Math.round(age / 7) + ' weeks old.' }); }
+      return { bad, good };
+    }
+
+    function MarketNotes({ r, regions, compact }) {
+      if (!r) return null;
+      const { bad, good } = marketNotes(r, regions);
+      const red = bad.some(x => x.lvl === 'red');
+      const cls = 'mnotes ' + (red ? 'mn-bad' : bad.length ? 'mn-warn' : 'mn-ok');
+      const head = bad.length
+        ? h('b', { className: red ? 'mn-red' : 'mn-amber' }, '⚠ ', bad.length === 1 ? '1 caution' : bad.length + ' cautions', ' for ', r.name)
+        : h('b', { className: 'mn-green' }, '✓ No red flags in the data checks for ', r.name);
+      const shownBad = compact ? bad.slice(0, 3) : bad;
+      const shownGood = compact ? (bad.length ? [] : good.slice(0, 2)) : good;
+      return h('div', { className: cls },
+        head,
+        (shownBad.length || shownGood.length) && h('ul', null,
+          ...shownBad.map((x, i) => h('li', { key: 'b' + i, className: x.lvl === 'red' ? 'mn-red' : 'mn-amber' }, x.t)),
+          ...shownGood.map((t, i) => h('li', { key: 'g' + i, className: 'mn-green' }, t))),
+        compact && bad.length > 3 && h('div', { className: 'mn-foot' }, '+', bad.length - 3, ' more in the town detail'),
+        !compact && h('div', { className: 'mn-foot' }, 'Rule-of-thumb data checks against the other markets on the board — not backtested signals, and not advice.'));
+    }
+
     // What homes actually SOLD for (VIC only, Valuer-General). Display-only: tested 2018-2025,
     // blending sold with asking or forecasting from either did not beat "no change".
     function SoldBlock({ code, r }) {
@@ -839,6 +923,7 @@
               h(Sparkline, { px }),
               h('div', { style: { fontSize: '0.72rem', color: 'var(--muted)', marginTop: 4 } },
                 'Drawdown from 10y peak: ', h('span', { className: pctCls(dd) }, fmtPct(dd)))),
+            safe('Cautions', h('div', { className: 'detail-block', style: { flexBasis: '100%' } }, h(MarketNotes, { r }))),
             safe('Houses vs Units', h(TypeCompare, { code, r })),
             SOLD_VIC && SOLD_VIC.regions && SOLD_VIC.regions[code] && safe('Sold prices', h(SoldBlock, { code, r })),
             h('div', { className: 'detail-block' },
@@ -967,6 +1052,7 @@
           h('span', { className: 'pick-score' }, 'score ', score.toFixed(2))),
         h('div', { className: 'pick-name' }, r.name,
           h('span', { className: 'td-sub' }, ' ', r.kind === 'postcode' ? r.param : '', ' ', r.state)),
+        safe('Cautions', h(MarketNotes, { r, compact: true })),
         h('div', { className: 'pick-price' }, fmtMoney(r.px[r.px.length - 1]),
           h('span', { className: 'td-sub' }, ' combined asking')),
         h('table', { className: 'pick-table' }, h('tbody', null,
@@ -1047,7 +1133,11 @@
       const cagr = (r, yrs) => ((Math.pow(r, 1 / yrs) - 1) * 100);
       const fmtP = (r) => (pct(r) >= 0 ? '+' : '') + pct(r).toFixed(0) + '%';
       const cal = fc.calibration || {}; const c36 = cal.h36 || {}, c60 = cal.h60 || {};
-      const names = Object.keys(fc.markets).map(k => [k, (regions && regions[k] && regions[k].name) || k, (regions && regions[k] && regions[k].state) || '']);
+      // Every board market is selectable. Markets that weren't decile-eligible on the decile date
+      // (e.g. <100 listings then) get the universe fan — they used to be missing from this list.
+      const allCodes = new Set(Object.keys(fc.markets));
+      if (regions) for (const [k, r] of Object.entries(regions)) if (r && r.state !== 'NAT' && r.px && r.px.length) allCodes.add(k);
+      const names = [...allCodes].map(k => [k, (regions && regions[k] && regions[k].name) || k, (regions && regions[k] && regions[k].state) || '']);
       const pinnedFirst = ['TOM', 'SEA', 'ARD', 'NRA', 'ULL', 'WOL', 'BAY', 'GOS'];
       names.sort((a, b) => { const ia = pinnedFirst.indexOf(a[0]), ib = pinnedFirst.indexOf(b[0]); if (ia !== -1 || ib !== -1) return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib); return a[1].localeCompare(b[1]); });
       const untestFrom = (fc.untestable_beyond_m || 60) / 12;
@@ -1065,7 +1155,9 @@
             ...names.map(n => h('option', { key: n[0], value: n[0] }, n[1] + (n[2] ? ' (' + n[2] + ')' : '')))),
           d != null
             ? h('span', { style: { fontSize: '13px' } }, 'Decile ', h('b', null, 'D' + d), ' as at ', fc.deciles_asof, tilted ? '' : ' (tilt not applied — failed its test)')
-            : h('span', { style: { fontSize: '13px', opacity: .7 } }, 'not eligible for the decile tilt — showing the universe fan')),
+            : h('span', { style: { fontSize: '13px', opacity: .7 } }, 'not scored on ', fc.deciles_asof,
+                ' (too few listings or too little history then) — showing the all-market fan, no tilt')),
+        regions && regions[code] && safe('Cautions', h(MarketNotes, { r: regions[code], regions })),
         h('svg', { viewBox: '0 0 ' + W + ' ' + Hh, style: { width: '100%', maxWidth: W + 'px', height: 'auto', display: 'block', background: 'rgba(127,127,127,.04)', borderRadius: '6px' } },
           // untestable zone
           h('rect', { x: X(untestFrom), y: T, width: X(10) - X(untestFrom), height: Hh - T - Bm, fill: 'rgba(178,34,34,.05)' }),
@@ -1805,6 +1897,7 @@
     }
 
     function Board({ payload, dtype, setDtype, typesState, typed }) {
+      CURRENT_REGIONS = payload.regions;
       const [filter, setFilter] = useState('PICKS');
       const [search, setSearch] = useState('');
       const [portfolio, setPortfolio] = useState(loadPortfolio);

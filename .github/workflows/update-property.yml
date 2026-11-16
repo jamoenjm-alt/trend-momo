@@ -60,12 +60,18 @@ jobs:
         if: steps.fresh.outputs.stale == 'true'
         run: python backtests/property-decile-validation.py || true
 
+      # 10-year fan (data/property-forecast.json) — rebuilt from the fresh history so it doesn't
+      # go stale. Needs data/property-history.json, which the bake above just wrote on the runner.
+      - name: Refresh the 10-year forecast fan
+        if: steps.fresh.outputs.stale == 'true'
+        run: python backtests/property-forecast.py || true
+
       - name: Commit and push
         if: steps.fresh.outputs.stale == 'true'
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/property.json data/property-types.json data/sold-vic.json backtests/property-picks-history.json backtests/property-decile-results.json
+          git add data/property.json data/property-types.json data/sold-vic.json data/property-forecast.json backtests/property-picks-history.json backtests/property-decile-results.json
           if git diff --cached --quiet; then
             echo "nothing to commit"; exit 0
           fi

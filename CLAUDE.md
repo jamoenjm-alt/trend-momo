@@ -97,6 +97,15 @@ claude-publish.bat feat: my change description
   Never compare SQM index LEVELS with sold medians (SQM's level is not a median price) — only 12m changes.
   NSW bulk sales: behind a Cloudflare bot check and CC BY-NC-ND (no derivatives, non-commercial) — not automated; do not
   try to get around the bot check.
+- `data/property-forecast.json` (town 10-yr fan, `ForecastFan`) — built by `backtests/property-forecast.py` from
+  data/property-history.json; since 2026-11-16 rebuilt in the property workflow after each bake (was stale/manual).
+  The fan's Market list shows EVERY board market; ones not decile-scored on `deciles_asof` (e.g. <100 listings then —
+  Esperance had 92 in Jun 2026) get the all-market fan with no tilt.
+- Cautions/comments (`marketNotes` + `MarketNotes`, added 2026-11-16) show on the fan (selected market), each top pick
+  card (compact) and every town's detail. Rule-of-thumb DATA CHECKS, labelled as such — NOT backtested: <100 listings
+  (red) / 100–149 (amber, same floor as picks); worst-10%-on-the-board for drawdown since 2009, listings growth, vacancy,
+  vacancy rise, rent fall, index jumpiness; yield ≤15th pct of own history; strong downtrend / short-down-long-up; stale
+  data; thin typed index. Positives (best ~15%) shown when present. Don't present these as predictive.
 - `.github/workflows/update-property.yml` — weekly bake Tue 16:00 UTC (Wed 2am AEST; SQM
   publishes Tuesdays), commits `data/property.json`.
 - `update-prices-daily.bat` — legacy local daily task. Redundant with the Action;
