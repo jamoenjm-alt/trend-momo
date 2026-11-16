@@ -892,6 +892,7 @@
     function ForecastFan({ regions }) {
       const [fc, setFc] = useState(null);
       const [code, setCode] = useState('TOM');
+      const [hov, setHov] = useState(null);
       useEffect(() => {
         (async () => {
           try {
@@ -965,7 +966,27 @@
           // end labels
           h('text', { x: W - R + 6, y: Y(pct(last(P90))) + 4, fontSize: 11, fill: '#2e8b57' }, 'p90 ' + fmtP(last(P90))),
           h('text', { x: W - R + 6, y: Y(pct(last(P50))) + 4, fontSize: 12, fontWeight: 700, fill: '#2e8b57' }, 'p50 ' + fmtP(last(P50))),
-          h('text', { x: W - R + 6, y: Y(pct(last(P10))) + 4, fontSize: 11, fill: '#b22222' }, 'p10 ' + fmtP(last(P10)))),
+          h('text', { x: W - R + 6, y: Y(pct(last(P10))) + 4, fontSize: 11, fill: '#b22222' }, 'p10 ' + fmtP(last(P10))),
+          // hover / tap readout
+          hov != null && P50[hov] ? (() => {
+            const yr = P50[hov][0], hx = X(yr);
+            const rows = [['p90', P90, '#2e8b57'], ['p75', P75, '#3c9a6a'], ['p50', P50, '#1f6f45'], ['p25', P25, '#a0522d'], ['p10', P10, '#b22222']];
+            const bw = 178, bh = 22 + rows.length * 16 + 16;
+            const bx = hx + 12 + bw > W - 4 ? hx - 12 - bw : hx + 12, by = T + 4;
+            const mo = Math.round(yr * 12), ad = new Date((fc.asof || '2026-06-30') + 'T00:00:00Z'); ad.setUTCMonth(ad.getUTCMonth() + mo); const lab = (yr === 0 ? 'Data date' : (mo % 12 ? (mo / 12).toFixed(1) : String(mo / 12)) + ' yrs') + ' · ' + ad.toLocaleDateString('en-AU', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+            return h('g', { pointerEvents: 'none' },
+              h('line', { x1: hx, x2: hx, y1: T, y2: Hh - Bm, stroke: 'rgba(0,0,0,.45)', strokeDasharray: '3 3' }),
+              ...rows.map(([n, ps, col]) => h('circle', { key: n, cx: hx, cy: Y(pct(ps[hov][1])), r: n === 'p50' ? 4.5 : 3.2, fill: col, stroke: '#fff', strokeWidth: 1.2 })),
+              h('rect', { x: bx, y: by, width: bw, height: bh, rx: 6, fill: 'rgba(255,255,255,.96)', stroke: 'rgba(0,0,0,.2)' }),
+              h('text', { x: bx + 10, y: by + 16, fontSize: 12, fontWeight: 700, fill: '#222' }, lab),
+              ...rows.map(([n, ps, col], k) => h('text', { key: 't' + n, x: bx + 10, y: by + 34 + k * 16, fontSize: 12, fill: col, fontWeight: n === 'p50' ? 700 : 400 },
+                n + '  ' + fmtP(ps[hov][1]) + (yr >= 1 ? '   (' + cagr(ps[hov][1], yr).toFixed(1) + '%/yr)' : ''))),
+              h('text', { x: bx + 10, y: by + bh - 6, fontSize: 10, fill: 'rgba(0,0,0,.5)' }, 'nominal, asking-price index · ' + (yr > untestFrom ? 'beyond tested range' : 'within tested range')));
+          })() : null,
+          h('rect', { x: L, y: T, width: W - L - R, height: Hh - T - Bm, fill: 'transparent', style: { cursor: 'crosshair', touchAction: 'pan-y' },
+            onMouseMove: (e) => { const r = e.currentTarget.ownerSVGElement.getBoundingClientRect(); const vx = (e.clientX - r.left) * W / r.width; const yr = Math.max(0, Math.min(10, (vx - L) / (W - L - R) * 10)); let bi = 0; P50.forEach((p, i) => { if (Math.abs(p[0] - yr) < Math.abs(P50[bi][0] - yr)) bi = i; }); setHov(bi); },
+            onTouchStart: (e) => { const t = e.touches[0]; const r = e.currentTarget.ownerSVGElement.getBoundingClientRect(); const vx = (t.clientX - r.left) * W / r.width; const yr = Math.max(0, Math.min(10, (vx - L) / (W - L - R) * 10)); let bi = 0; P50.forEach((p, i) => { if (Math.abs(p[0] - yr) < Math.abs(P50[bi][0] - yr)) bi = i; }); setHov(bi); },
+            onMouseLeave: () => setHov(null) })),
         h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: '8px', margin: '10px 0', fontSize: '13px' } },
           ...[3, 5, 10].map(yrs => [yrs, H.indexOf(yrs * 12) + 1]).filter(([, i]) => i > 0 && P50[i] && P10[i] && P90[i]).map(([yrs, i]) => h('div', { key: yrs, style: { padding: '8px 10px', background: 'rgba(127,127,127,.07)', borderRadius: '6px' } },
             h('div', { style: { opacity: .7 } }, yrs + ' years' + (yrs > untestFrom ? ' · untested' : '')),

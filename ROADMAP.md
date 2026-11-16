@@ -93,6 +93,9 @@ Scored 1–5: (a) forecast accuracy, (b) user value, (c) effort (5 = least effor
   feature — reconcile with the state forecasts before building the chart (one forecast language on the site).
 
 ## 7. Change log
+- 2026-11-16 — Twin-episode test (`scripts/twins_analysis.py`): expensive + falling real income → 5y real median
+  +2% (p10 −25%, p90 +26%, n=24) vs town fan ≈ +7% real median and much fatter upside. Fan flagged as too generous;
+  not replaced (not yet backtested). Hover readout added to fan chart. Handoff in `HANDOFF/`.
 - 2026-11-16 — Property forecast v1.0 (state 10-yr bands). Fundamentals and drift models rejected by backtest. Bake
   made fail-safe (time budget, checkpoints, catch-up cron, `if: always()` commit).
 - 2026-11-13 — `docs/ROADMAP.md` v2: property primary, decile validation.
