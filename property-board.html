@@ -428,7 +428,7 @@
   </div>
 
   <script type="module">
-    import { createElement as h, useState, useEffect, Fragment } from 'https://esm.sh/react@18';
+    import { createElement as h, useState, useEffect, Fragment, Component } from 'https://esm.sh/react@18';
     import { createRoot } from 'https://esm.sh/react-dom@18/client';
 
     // ── Sections ──────────────────────────────────────────────────────────
@@ -875,6 +875,20 @@
     // validated decile tilt for the selected market (shipped only because it beat
     // the untilted fan on pinball loss at both horizons). Years 6-10 cannot be
     // scored out-of-sample with this history — the chart says so on its face.
+    // Error boundary: a crash inside one optional panel renders a small note instead of
+    // unmounting the whole board (incident 2026-11-16: ForecastFan index bug blanked the site).
+    class SafeBox extends Component {
+      constructor(p) { super(p); this.state = { err: null }; }
+      static getDerivedStateFromError(err) { return { err }; }
+      componentDidCatch(err) { try { console.error('[SafeBox ' + (this.props.name || '') + ']', err); } catch (e) {} }
+      render() {
+        if (this.state.err) return h('div', { className: 'picks-warn', style: { opacity: .8 } },
+          '⚠ The ', this.props.name || 'panel', ' panel failed to load and has been skipped. The rest of the board is unaffected.');
+        return this.props.children;
+      }
+    }
+    const safe = (name, el) => h(SafeBox, { name }, el);
+
     function ForecastFan({ regions }) {
       const [fc, setFc] = useState(null);
       const [code, setCode] = useState('TOM');
@@ -953,7 +967,7 @@
           h('text', { x: W - R + 6, y: Y(pct(last(P50))) + 4, fontSize: 12, fontWeight: 700, fill: '#2e8b57' }, 'p50 ' + fmtP(last(P50))),
           h('text', { x: W - R + 6, y: Y(pct(last(P10))) + 4, fontSize: 11, fill: '#b22222' }, 'p10 ' + fmtP(last(P10)))),
         h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: '8px', margin: '10px 0', fontSize: '13px' } },
-          ...[[3, 7], [5, 11], [10, 21]].map(([yrs, i]) => h('div', { key: yrs, style: { padding: '8px 10px', background: 'rgba(127,127,127,.07)', borderRadius: '6px' } },
+          ...[3, 5, 10].map(yrs => [yrs, H.indexOf(yrs * 12) + 1]).filter(([, i]) => i > 0 && P50[i] && P10[i] && P90[i]).map(([yrs, i]) => h('div', { key: yrs, style: { padding: '8px 10px', background: 'rgba(127,127,127,.07)', borderRadius: '6px' } },
             h('div', { style: { opacity: .7 } }, yrs + ' years' + (yrs > untestFrom ? ' · untested' : '')),
             h('div', null, h('b', null, fmtP(P50[i][1])), ' median  (', cagr(P50[i][1], yrs).toFixed(1), '%/yr)'),
             h('div', { style: { opacity: .8 } }, 'p10 ', fmtP(P10[i][1]), ' · p90 ', fmtP(P90[i][1]))))),
@@ -1703,14 +1717,14 @@
 
         // Everything pick-related lives on one tab so it can actually be found.
         !q && filter === 'PICKS' && h(Fragment, null,
-          h(ForecastFan, { regions: payload.regions }),
-          h(DecileStrip, null),
-          h(TopPicks, { picks: payload._picks }),
-          h(StateOpportunity, { picks: payload._picks }),
-          h(AllStatePicks, { picks: payload._picks })),
+          safe('Forecast fan', h(ForecastFan, { regions: payload.regions })),
+          safe('Decile strip', h(DecileStrip, null)),
+          safe('Top picks', h(TopPicks, { picks: payload._picks })),
+          safe('State opportunity', h(StateOpportunity, { picks: payload._picks })),
+          safe('All-state picks', h(AllStatePicks, { picks: payload._picks }))),
 
         !q && filter !== 'PICKS' && filter !== 'NAT'
-          && h(StatePicks, { picks: payload._picks, secKey: filter }),
+          && safe('State picks', h(StatePicks, { picks: payload._picks, secKey: filter })),
 
         filter !== 'PICKS' && visible.length === 0 && h('div', { className: 'spinner-wrap' },
           q ? 'No town, suburb or postcode matches "' + search.trim() + '".' : 'No regions match.'),
