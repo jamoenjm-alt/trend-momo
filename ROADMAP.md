@@ -93,6 +93,9 @@ Scored 1–5: (a) forecast accuracy, (b) user value, (c) effort (5 = least effor
   feature — reconcile with the state forecasts before building the chart (one forecast language on the site).
 
 ## 7. Change log
+- 2026-11-16 — Sold prices (VIC Valuer-General, CC BY) added to each VIC town's detail. Backtest 2018–25: no blend or
+  sold/asking predictor beat "no change" for next-year suburb sold medians (1y MAE 7.5%, 2y 12%) → display only.
+  Owner's "median of asking and sold" idea tested and rejected (7.9% vs 7.7% error). NSW sales: licence NC-ND + bot check.
 - 2026-11-16 — Property board: Houses | Units | All switch + `data/property-types.json` bake (SQM houses_all /
   units_all prices, rents, yields). Typed picks unvalidated (labelled). Fan chart hover readout.
 - 2026-11-16 — Added BIS policy rates (`raw/bis_cbpol_quarterly.csv`). Regime-conditioned 5y base rate backtested:

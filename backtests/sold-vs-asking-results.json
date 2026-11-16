@@ -1,0 +1,83 @@
+{
+ "change": {
+  "B0 no change": {
+   "n": 1695,
+   "all": 7.53,
+   "houses": 7.35,
+   "units": 7.72,
+   "worst_year": 15.15
+  },
+  "B1 avg past change": {
+   "n": 1695,
+   "all": 7.7,
+   "houses": 7.4,
+   "units": 8.03,
+   "worst_year": 11.15
+  },
+  "S  sold momentum": {
+   "n": 1695,
+   "all": 7.78,
+   "houses": 7.56,
+   "units": 8.02,
+   "worst_year": 11.16
+  },
+  "A  asking momentum": {
+   "n": 1695,
+   "all": 7.65,
+   "houses": 7.35,
+   "units": 7.98,
+   "worst_year": 11.17
+  },
+  "G  asking + sold/ask gap": {
+   "n": 1695,
+   "all": 7.69,
+   "houses": 7.47,
+   "units": 7.93,
+   "worst_year": 11.14
+  },
+  "X  everything": {
+   "n": 1695,
+   "all": 7.71,
+   "houses": 7.49,
+   "units": 7.97,
+   "worst_year": 11.29
+  }
+ },
+ "level": {
+  "L1 last sold": {
+   "n": 1695,
+   "all": 7.7,
+   "houses": 7.4,
+   "units": 8.03,
+   "worst_year": 11.15
+  },
+  "L2 asking x own ratio": {
+   "n": 1695,
+   "all": 10.17,
+   "houses": 9.71,
+   "units": 10.68,
+   "worst_year": 12.36
+  },
+  "L3 50/50 calibrated": {
+   "n": 1695,
+   "all": 8.11,
+   "houses": 7.89,
+   "units": 8.35,
+   "worst_year": 10.78
+  },
+  "L4 raw midpoint": {
+   "n": 1695,
+   "all": 7.94,
+   "houses": 7.82,
+   "units": 8.06,
+   "worst_year": 10.97
+  }
+ },
+ "coefs": [
+  0.04469318016416637,
+  -0.044367303143373685,
+  -0.031315671409013375,
+  0.22359884328233162,
+  -0.04209712936612607
+ ]
+}

@@ -88,6 +88,15 @@ claude-publish.bat feat: my change description
   Houses/Units buttons stay DISABLED until property-types.json loads (never highlight a type that isn't on screen —
   that misled the owner on 2026-11-16). Each suburb's detail row shows `TypeCompare` (houses next to units, via the
   module-level `TYPED_VIEWS`) plus an "All dwellings" block for the unsplit listings/vacancy.
+- `data/sold-vic.json` — Valuer-General Victoria SOLD medians (houses/units, latest 5 quarters + sales count, and
+  calendar-year medians 2015→) for 127/128 VIC board markets, matched by locality name. Built by `update-sold-vic.py`
+  (CKAN → latest XLS/XLSX; needs xlrd + openpyxl; failure keeps the old file) in the property workflow; seed snapshots in
+  `data/sold/*.txt`. CC BY 4.0 — keep the attribution. **Display only (`SoldBlock` in each VIC town's detail).**
+  Tested 2018–25 (`backtests/sold-vs-asking-backtest.py`): blending sold with asking, or forecasting next year's sold
+  median from sold momentum, asking momentum or the asking/sold gap, did NOT beat "no change" (MAE 7.5% vs 7.65–8.1%).
+  Never compare SQM index LEVELS with sold medians (SQM's level is not a median price) — only 12m changes.
+  NSW bulk sales: behind a Cloudflare bot check and CC BY-NC-ND (no derivatives, non-commercial) — not automated; do not
+  try to get around the bot check.
 - `.github/workflows/update-property.yml` — weekly bake Tue 16:00 UTC (Wed 2am AEST; SQM
   publishes Tuesdays), commits `data/property.json`.
 - `update-prices-daily.bat` — legacy local daily task. Redundant with the Action;

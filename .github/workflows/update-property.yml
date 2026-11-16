@@ -41,6 +41,14 @@ jobs:
         if: steps.fresh.outputs.stale == 'true'
         run: python update-property.py
 
+      # Valuer-General Victoria sold medians (CC BY 4.0). Display-only reality check on
+      # asking prices; never fatal — on any failure the previous data/sold-vic.json is kept.
+      - name: VIC sold prices (Valuer-General)
+        if: steps.fresh.outputs.stale == 'true'
+        run: |
+          pip install --quiet xlrd openpyxl || true
+          python update-sold-vic.py || true
+
       - name: Refresh the picks backtest
         if: steps.fresh.outputs.stale == 'true'
         run: python backtests/property-backtest.py --years 3 || true
@@ -57,7 +65,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/property.json data/property-types.json backtests/property-picks-history.json backtests/property-decile-results.json
+          git add data/property.json data/property-types.json data/sold-vic.json backtests/property-picks-history.json backtests/property-decile-results.json
           if git diff --cached --quiet; then
             echo "nothing to commit"; exit 0
           fi

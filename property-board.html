@@ -434,7 +434,9 @@
       <strong>Fundamentals:</strong> gross rental yield (houses), yield percentile vs the town's own history
       (higher percentile = cheaper vs itself), rental vacancy rate, 12-month rent growth, and stock on market
       (total aged listings; rising supply is bearish). Towns are proxied by their canonical postcode; capitals
-      use SQM's city-wide index. Data © SQM Research, personal reference only — this board is decision support,
+      use SQM's city-wide index. For Victorian markets, each town's detail also shows what homes actually
+      <strong>sold</strong> for (Valuer-General Victoria, CC BY 4.0) as a reality check on asking prices — display only, because
+      blending sold with asking prices did not improve forecasts when tested. Data © SQM Research, personal reference only — this board is decision support,
       not advice, and asking-price momentum leads settled prices by roughly one to two quarters.
       <br /><br />
       <strong>Noise caveat:</strong> the 0–6M column reacts within weeks, so it flips often — that's the point of
@@ -766,6 +768,60 @@
             line('Index quality', x => x.thin ? h('span', { className: 'thin-tag' }, 'thin data') : 'ok', x => x.thin ? h('span', { className: 'thin-tag' }, 'thin data') : 'ok'))));
     }
 
+    // What homes actually SOLD for (VIC only, Valuer-General). Display-only: tested 2018-2025,
+    // blending sold with asking or forecasting from either did not beat "no change".
+    function SoldBlock({ code, r }) {
+      const e = SOLD_VIC && SOLD_VIC.regions && SOLD_VIC.regions[code];
+      if (!e) return null;
+      const tv = TYPED_VIEWS, sp = r.snap_px || {};
+      // SQM's index LEVEL is not a median asking price, so levels are never compared with
+      // sold medians (that produced nonsense gaps like -50%). Only 12-month changes are.
+      const ask12 = (t) => {
+        const x = tv && tv[t] && tv[t].regions ? tv[t].regions[code] : null;
+        if (x && x.px && x.px.length > 53) return chg(x.px[x.px.length - 1], x.px[x.px.length - 53]);
+        return chg(sp[t], sp[t + '52']);
+      };
+      const QL = { 1: 'Mar', 2: 'Jun', 3: 'Sep', 4: 'Dec' };
+      const qLabel = (k) => k ? QL[+k.slice(-1)] + ' qtr ' + k.slice(0, 4) : '';
+      const col = (t) => {
+        const d = e[t]; if (!d) return null;
+        const q = d.q || [], y = d.y || [];
+        const lq = q.length ? q[q.length - 1] : null;
+        const yearAgo = q.length >= 5 ? q[q.length - 5] : null;
+        const ly = y.length ? y[y.length - 1] : null;
+        return {
+          lq, ly, n: d.n_last,
+          ch: (lq && yearAgo && !lq[2] && !yearAgo[2]) ? chg(lq[1], yearAgo[1]) : null,
+          ask: ask12(t),
+        };
+      };
+      const a = col('h'), b = col('u');
+      const latestKey = (a && a.lq && a.lq[0]) || (b && b.lq && b.lq[0]) || '';
+      const lastYr = (a && a.ly && a.ly[0]) || (b && b.ly && b.ly[0]) || '';
+      const on = r._dtype || null;
+      const money = (v, f) => v == null ? '—' : h('span', null, fmtMoney(v), f ? h('span', { className: 'thin-tag', title: 'Valuer-General flag: few sales — unreliable median' }, 'few sales') : '');
+      const cell = (k, v, cls) => h('td', { key: k, className: 'td-num ' + (cls || '') + (on === k ? ' tc-on' : '') }, v);
+      const line = (label, fa, fb, ca, cb) => h('tr', null, h('td', null, label),
+        cell('h', a ? fa(a) : '—', a && ca ? ca(a) : ''), cell('u', b ? fb(b) : '—', b && cb ? cb(b) : ''));
+      return h('div', { className: 'detail-block' },
+        h('h4', null, 'Sold prices ', h('span', { className: 'shared-tag' }, '· Valuer-General Victoria, ', e.loc.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()))),
+        h('table', { className: 'tc-table' },
+          h('thead', null, h('tr', null, h('th', null, ''),
+            h('th', { className: on === 'h' ? 'tc-on' : '' }, '🏠 Houses'),
+            h('th', { className: on === 'u' ? 'tc-on' : '' }, '🏢 Units'))),
+          h('tbody', null,
+            line('Median sold, ' + qLabel(latestKey), x => x.lq ? money(x.lq[1], x.lq[2]) : '—', x => x.lq ? money(x.lq[1], x.lq[2]) : '—'),
+            line('Sales that quarter', x => x.n != null ? String(x.n) : '—', x => x.n != null ? String(x.n) : '—'),
+            line('Sold 12m change, to ' + qLabel(latestKey), x => fmtPct(x.ch), x => fmtPct(x.ch), x => pctCls(x.ch), x => pctCls(x.ch)),
+            line('Asking 12m change (SQM)' + (r.px_end ? ', to ' + new Date(r.px_end + 'T00:00:00Z').toLocaleDateString('en-AU', { month: 'short', year: 'numeric', timeZone: 'UTC' }) : ''), x => fmtPct(x.ask), x => fmtPct(x.ask), x => pctCls(x.ask), x => pctCls(x.ask)),
+            line('Median sold, ' + lastYr + ' (full year)', x => x.ly ? money(x.ly[1], x.ly[2]) : '—', x => x.ly ? money(x.ly[1], x.ly[2]) : '—'))),
+        h('div', { style: { fontSize: '0.68rem', color: 'var(--muted)', marginTop: 4, maxWidth: 300, lineHeight: 1.4 } },
+          'What homes actually sold for — a reality check on asking prices, not a signal. ',
+          'Quarterly suburb medians are noisy (they swing with the mix of homes sold). Tested 2018–25: blending sold with asking, ',
+          'or forecasting from either, did not beat "no change" (typical 1-year miss ±7.5%). ',
+          'Source: Valuer-General Victoria, CC BY 4.0.'));
+    }
+
     function DetailRow({ code, r, sigs, colSpan }) {
       const px = r.px || [];
       const last = px[px.length - 1];
@@ -784,6 +840,7 @@
               h('div', { style: { fontSize: '0.72rem', color: 'var(--muted)', marginTop: 4 } },
                 'Drawdown from 10y peak: ', h('span', { className: pctCls(dd) }, fmtPct(dd)))),
             safe('Houses vs Units', h(TypeCompare, { code, r })),
+            SOLD_VIC && SOLD_VIC.regions && SOLD_VIC.regions[code] && safe('Sold prices', h(SoldBlock, { code, r })),
             h('div', { className: 'detail-block' },
               h('h4', null, 'All dwellings ', h('span', { className: 'shared-tag' }, '· same in every view — SQM doesn\'t split these')),
               h('table', null, h('tbody', null,
@@ -1848,6 +1905,8 @@
     // split has loaded. Read by DetailRow so every suburb can show houses next to
     // units whichever view is selected.
     let TYPED_VIEWS = null;
+    // Valuer-General Victoria sold medians (data/sold-vic.json), loaded after first render.
+    let SOLD_VIC = null;
 
     function buildTypedView(base, types, t) {          // t = 'h' | 'u'
       const regions = {};
@@ -1910,6 +1969,18 @@
       const [types, setTypes] = useState(null);
       const [typesState, setTypesState] = useState('loading');   // loading | ready | missing
       const cache = useRef({});
+      const [soldState, setSoldState] = useState('loading');
+      useEffect(() => {
+        if (!payload) return;
+        (async () => {
+          try {
+            const c = new AbortController(); const t = setTimeout(() => c.abort(), 15000);
+            const res = await fetch('data/sold-vic.json?t=' + Date.now(), { signal: c.signal }).finally(() => clearTimeout(t));
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            SOLD_VIC = await res.json(); setSoldState('ready');
+          } catch (e) { setSoldState('missing'); }
+        })();
+      }, [payload]);
       const setDtype = (v) => { setDtypeS(v); saveDtype(v); };
       // The split is fetched AFTER the board renders, so boot time is unchanged.
       useEffect(() => {
