@@ -364,6 +364,11 @@
     .dtype-btn:last-child { border-right: 0; }
     .dtype-btn:hover { background: #293548; color: #fff; }
     .dtype-btn.active { background: #1d4ed8; color: #fff; }
+    .dtype-btn[disabled] { opacity: .45; cursor: not-allowed; background: #1e293b; color: #94a3b8; }
+    .tc-table th { font-size: 0.7rem; font-weight: 700; text-align: right; padding: 0 10px 3px 0; color: var(--muted); border: none; }
+    .tc-table th.tc-on { color: #1d4ed8; }
+    .tc-table td.tc-on { font-weight: 700; }
+    .shared-tag { font-size: 0.66rem; color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; }
     .dtype-note { font-size: 12.5px; line-height: 1.5; color: var(--muted); margin: 4px 0 10px; max-width: 980px; }
     .dtype-note b { color: inherit; }
     .thin-tag { display: inline-block; margin-left: 6px; padding: 0 5px; border-radius: 4px; font-size: 10.5px; font-weight: 600; background: #fef3c7; color: #92400e; vertical-align: middle; }
@@ -682,6 +687,8 @@
     const fmtPct = (v, dp = 1) => v == null || isNaN(v) ? '—' : (v > 0 ? '+' : '') + v.toFixed(dp) + '%';
     const pctCls = (v) => v == null || isNaN(v) ? 'muted' : v > 0 ? 'pos' : v < 0 ? 'neg' : 'muted';
     const chg = (now, then) => (now != null && then != null && then !== 0) ? (now / then - 1) * 100 : null;
+    // 1 → 1st, 2 → 2nd, 3 → 3rd, 11 → 11th, 23 → 23rd
+    const ord = (n) => { const v = Math.round(n); const m = v % 100; return v + ((m >= 11 && m <= 13) ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[v % 10] || 'th')); };
 
     function sqmUrl(r) {
       const base = 'https://sqmresearch.com.au/property/asking-property-prices';
@@ -711,37 +718,82 @@
         h('polyline', { points: pts, fill: 'none', stroke: '#15803d', strokeWidth: 1.5 }));
     }
 
-    function DetailRow({ r, sigs, colSpan }) {
+    // Houses next to units for one market. Uses the typed views when the split has
+    // loaded; before that, only the asking-price snapshot exists for each type.
+    function TypeCompare({ code, r }) {
+      const tv = TYPED_VIEWS;
+      const H = tv && tv.h && tv.h.regions ? tv.h.regions[code] : null;
+      const U = tv && tv.u && tv.u.regions ? tv.u.regions[code] : null;
+      const on = r._dtype || null;                     // which column is the current view
+      const sp = r.snap_px || {};
+      if (!H && !U) {
+        const hChg = chg(sp.h, sp.h52), uChg = chg(sp.u, sp.u52);
+        return h('div', { className: 'detail-block' },
+          h('h4', null, 'Houses vs Units'),
+          h('table', null, h('tbody', null,
+            h('tr', null, h('td', null, 'Houses asking'), h('td', { className: 'td-num' }, fmtMoney(sp.h)), h('td', { className: pctCls(hChg) }, fmtPct(hChg), ' 12m')),
+            h('tr', null, h('td', null, 'Units asking'), h('td', { className: 'td-num' }, fmtMoney(sp.u)), h('td', { className: pctCls(uChg) }, fmtPct(uChg), ' 12m')))),
+          h('div', { style: { fontSize: '0.68rem', color: 'var(--muted)', marginTop: 4, maxWidth: 230 } },
+            'Only the price snapshot is split for now. Trend, rent and yield by type appear after the next weekly data bake.'));
+      }
+      const col = (x) => {
+        if (!x || !x.px || x.px.length < 2) return null;
+        const n = x.px.length;
+        return {
+          price: x.px[n - 1], ch: n > 53 ? chg(x.px[n - 1], x.px[n - 53]) : null,
+          reg: x._sigs ? x._sigs.allInd : null, rent: x.rent, rentCh: chg(x.rent, x.rent52),
+          yld: x.yield, yp: x.yield_pct, thin: !!x._thin,
+        };
+      };
+      const a = col(H), b = col(U);
+      const cell = (k, v, cls) => h('td', { key: k, className: 'td-num ' + (cls || '') + (on === k ? ' tc-on' : '') }, v);
+      const line = (label, fa, fb, clsA, clsB) => h('tr', null, h('td', null, label),
+        cell('h', a ? fa(a) : '—', a && clsA ? clsA(a) : ''), cell('u', b ? fb(b) : '—', b && clsB ? clsB(b) : ''));
+      return h('div', { className: 'detail-block' },
+        h('h4', null, 'Houses vs Units'),
+        h('table', { className: 'tc-table' },
+          h('thead', null, h('tr', null, h('th', null, ''),
+            h('th', { className: on === 'h' ? 'tc-on' : '' }, '🏠 Houses'),
+            h('th', { className: on === 'u' ? 'tc-on' : '' }, '🏢 Units'))),
+          h('tbody', null,
+            line('Asking price', x => fmtMoney(x.price), x => fmtMoney(x.price)),
+            line('12-month change', x => fmtPct(x.ch), x => fmtPct(x.ch), x => pctCls(x.ch), x => pctCls(x.ch)),
+            line('Trend (all signals)', x => h(Badge, { score: x.reg }), x => h(Badge, { score: x.reg })),
+            line('Rent $/wk', x => x.rent != null ? '$' + Math.round(x.rent) : '—', x => x.rent != null ? '$' + Math.round(x.rent) : '—'),
+            line('Rent 12m', x => fmtPct(x.rentCh), x => fmtPct(x.rentCh), x => pctCls(x.rentCh), x => pctCls(x.rentCh)),
+            line('Gross yield', x => x.yld != null ? x.yld.toFixed(2) + '%' : '—', x => x.yld != null ? x.yld.toFixed(2) + '%' : '—'),
+            line('Yield vs own history', x => x.yp != null ? 'p' + Math.round(x.yp) : '—', x => x.yp != null ? 'p' + Math.round(x.yp) : '—'),
+            line('Index quality', x => x.thin ? h('span', { className: 'thin-tag' }, 'thin data') : 'ok', x => x.thin ? h('span', { className: 'thin-tag' }, 'thin data') : 'ok'))));
+    }
+
+    function DetailRow({ code, r, sigs, colSpan }) {
       const px = r.px || [];
       const last = px[px.length - 1];
       const ath = px.length ? Math.max(...px) : null;
       const dd = (ath && last) ? (last / ath - 1) * 100 : null;
-      const sp = r.snap_px || {};
-      const hChg = chg(sp.h, sp.h52), uChg = chg(sp.u, sp.u52);
-      const rentChg = chg(r.rent, r.rent52);
       const stockChg = chg(r.stock, r.stock12);
       const vacDelta = (r.vac != null && r.vac12 != null) ? r.vac - r.vac12 : null;
+      const kind = r._dtype === 'h' ? 'Houses' : r._dtype === 'u' ? 'Units' : 'Combined (houses + units)';
+      const yieldNote = r._dtype ? '' : ' (houses — SQM publishes no combined yield)';
       return h('tr', { className: 'detail-row' },
         h('td', { colSpan },
           h('div', { className: 'detail-grid' },
             px.length > 30 && h('div', { className: 'detail-block' },
-              h('h4', null, 'Combined asking index — last 10y'),
+              h('h4', null, kind + ' asking index — last 10y'),
               h(Sparkline, { px }),
               h('div', { style: { fontSize: '0.72rem', color: 'var(--muted)', marginTop: 4 } },
                 'Drawdown from 10y peak: ', h('span', { className: pctCls(dd) }, fmtPct(dd)))),
+            safe('Houses vs Units', h(TypeCompare, { code, r })),
             h('div', { className: 'detail-block' },
-              h('h4', null, 'Houses vs Units (12m)'),
+              h('h4', null, 'All dwellings ', h('span', { className: 'shared-tag' }, '· same in every view — SQM doesn\'t split these')),
               h('table', null, h('tbody', null,
-                h('tr', null, h('td', null, 'Houses'), h('td', { className: 'td-num' }, fmtMoney(sp.h)), h('td', { className: pctCls(hChg) }, fmtPct(hChg))),
-                h('tr', null, h('td', null, 'Units'), h('td', { className: 'td-num' }, fmtMoney(sp.u)), h('td', { className: pctCls(uChg) }, fmtPct(uChg))),
-                h('tr', null, h('td', null, 'Rent ($/wk)'), h('td', { className: 'td-num' }, r.rent != null ? '$' + Math.round(r.rent) : '—'), h('td', { className: pctCls(rentChg) }, fmtPct(rentChg))),
-                h('tr', null, h('td', null, 'Listings'), h('td', { className: 'td-num' }, r.stock != null ? r.stock.toLocaleString() : '—'), h('td', { className: stockChg == null ? 'muted' : stockChg > 0 ? 'neg' : 'pos' }, fmtPct(stockChg))),
-                h('tr', null, h('td', null, 'Vacancy'), h('td', { className: 'td-num' }, r.vac != null ? r.vac.toFixed(1) + '%' : '—'), h('td', { className: vacDelta == null ? 'muted' : vacDelta > 0 ? 'neg' : 'pos' }, vacDelta != null ? (vacDelta > 0 ? '+' : '') + vacDelta.toFixed(1) + 'pp' : '—'))))),
+                h('tr', null, h('td', null, 'Listings'), h('td', { className: 'td-num' }, r.stock != null ? r.stock.toLocaleString() : '—'), h('td', { className: stockChg == null ? 'muted' : stockChg > 0 ? 'neg' : 'pos' }, fmtPct(stockChg), ' 12m')),
+                h('tr', null, h('td', null, 'Vacancy'), h('td', { className: 'td-num' }, r.vac != null ? r.vac.toFixed(1) + '%' : '—'), h('td', { className: vacDelta == null ? 'muted' : vacDelta > 0 ? 'neg' : 'pos' }, vacDelta != null ? (vacDelta > 0 ? '+' : '') + vacDelta.toFixed(1) + 'pp 12m' : '—'))))),
             h('div', { className: 'detail-block' },
               h('h4', null, 'Value vs own history'),
               h('div', { style: { fontSize: '0.8rem', marginBottom: 4 } },
-                'Gross yield ', r.yield != null ? r.yield.toFixed(1) + '%' : '—',
-                r.yield_pct != null ? ' — ' + r.yield_pct.toFixed(0) + 'th pctile' : ''),
+                'Gross yield ', r.yield != null ? r.yield.toFixed(1) + '%' : '—', yieldNote,
+                r.yield_pct != null ? ' — ' + ord(r.yield_pct) + ' pctile' : ''),
               r.yield_pct != null && h('div', { className: 'value-bar-wrap' },
                 h('div', { className: 'value-bar', style: { width: r.yield_pct + '%' } })),
               h('div', { style: { fontSize: '0.68rem', color: 'var(--muted)', marginTop: 4, maxWidth: 180 } },
@@ -812,7 +864,7 @@
           h('td', { className: 'td-num hide-sm' }, r.vac != null ? r.vac.toFixed(1) + '%' : '—'),
           h('td', { className: 'td-num hide-sm ' + pctCls(rentChg) }, fmtPct(rentChg)),
           h('td', { className: 'td-num hide-sm ' + (stockChg > 0 ? 'neg' : stockChg < 0 ? 'pos' : 'muted') }, fmtPct(stockChg))),
-        open && h(DetailRow, { r, sigs, colSpan: N_COLS }));
+        open && h(DetailRow, { code, r, sigs, colSpan: N_COLS }));
     }
 
     function SectionTable({ items }) {
@@ -837,7 +889,7 @@
       const score = buying ? pick.buy : pick.sell;
       const rows = [
         ['Gross yield', r.yield.toFixed(2) + '%',
-         r.yield_pct.toFixed(0) + 'th pctile vs own history',
+         ord(r.yield_pct) + ' pctile vs own history',
          buying ? r.yield_pct >= 60 : r.yield_pct <= 40],
         ['Vacancy', r.vac.toFixed(2) + '%',
          r.vac < 1 ? 'very tight' : r.vac < 2 ? 'balanced' : 'loose',
@@ -1260,7 +1312,7 @@
               row('Yield on cost', yoc != null ? yoc.toFixed(2) + '%' : '—', 'rent ÷ what you paid'),
               row('Yield on value', yNow != null ? yNow.toFixed(2) + '%' : '—', 'rent ÷ today\'s value'),
               row('Suburb yield', r.yield != null ? r.yield.toFixed(2) + '%' : '—',
-                r.yield_pct != null ? r.yield_pct.toFixed(0) + 'th pctile of own history' : ''),
+                r.yield_pct != null ? ord(r.yield_pct) + ' pctile of own history' : ''),
               row('Interest', intWk != null ? '$' + intWk.toFixed(0) + '/wk' : '—',
                 p.rate ? p.rate + '% on ' + fmtMoney(p.loan) : 'add loan + rate'),
               row('Rent − interest', cfWk != null ? '$' + cfWk.toFixed(0) + '/wk' : '—',
@@ -1287,7 +1339,7 @@
                 (r.stock || 0) < 100 ? 'thin — treat stats as noisy' : 'liquidity',
                 (r.stock || 0) < 100 ? 'neg' : ''),
               row('Buy score rank', r._buy != null ? r._buy.toFixed(2) : '—',
-                natRank != null ? natRank + 'th pctile nationally · ' + stRank + 'th in ' + r.state : '')))),
+                natRank != null ? ord(natRank) + ' pctile nationally · ' + (stRank != null ? ord(stRank) : '—') + ' in ' + r.state : '')))),
 
           h('div', { className: 'dd-box' },
             h('h4', null, 'Rental market, last 3 years'),
@@ -1792,6 +1844,11 @@
     const decodePx = (d) => { const out = new Array(d.length); let acc = 0; for (let i = 0; i < d.length; i++) { acc += d[i]; out[i] = acc * 100; } return out; };
     const nz = (v) => (v == null ? null : v);
 
+    // Set by App on every render: lazy { h, u } typed views, or null until the
+    // split has loaded. Read by DetailRow so every suburb can show houses next to
+    // units whichever view is selected.
+    let TYPED_VIEWS = null;
+
     function buildTypedView(base, types, t) {          // t = 'h' | 'u'
       const regions = {};
       let missing = 0;
@@ -1817,19 +1874,25 @@
     function DtypeBar({ dtype, setDtype, typesState, view }) {
       const t = view && view._dtype;              // 'h' | 'u' | undefined (= all)
       const word = t === 'h' ? 'houses' : t === 'u' ? 'units' : null;
+      const ready = typesState === 'ready';
+      const shown = t === 'h' ? 'H' : t === 'u' ? 'U' : 'A';   // what is ACTUALLY on screen
       return h(Fragment, null,
         h('div', { className: 'dtype-bar', role: 'tablist' },
-          DTYPES.map(d => h('button', {
-            key: d.key, role: 'tab', 'aria-selected': dtype === d.key,
-            className: 'dtype-btn' + (dtype === d.key ? ' active' : ''),
-            onClick: () => setDtype(d.key),
-          }, d.label))),
-        dtype !== 'A' && typesState === 'loading' && h('div', { className: 'dtype-note' },
+          DTYPES.map(d => {
+            const off = d.key !== 'A' && !ready;
+            return h('button', {
+              key: d.key, role: 'tab', 'aria-selected': shown === d.key, disabled: off,
+              title: off ? (typesState === 'loading' ? 'Loading the houses / units split…' : 'Houses / units data has not been baked yet') : '',
+              className: 'dtype-btn' + (shown === d.key ? ' active' : ''),
+              onClick: () => { if (!off) setDtype(d.key); },
+            }, d.label);
+          })),
+        typesState === 'loading' && dtype !== 'A' && h('div', { className: 'dtype-note' },
           'Loading the houses / units split… showing all dwellings until it arrives.'),
-        dtype !== 'A' && typesState === 'missing' && h('div', { className: 'dtype-note' },
-          h('b', null, '⚠ Houses / units data not baked yet. '),
-          'It is produced by the weekly property bake (runs automatically after SQM\'s Tuesday update). ',
-          'Showing all dwellings for now.'),
+        typesState === 'missing' && h('div', { className: 'dtype-note' },
+          h('b', null, '⚠ Houses / Units are not available yet — everything below is all dwellings. '),
+          'The split is produced by the weekly property data bake (runs automatically after SQM\'s Tuesday update, ',
+          'or on demand from GitHub → Actions → Daily Property Freshness Check → Run workflow → force).'),
         word && h('div', { className: 'dtype-note' },
           h('b', null, 'Showing ' + word + ' only. '),
           'Prices, trend signals, rents and yields are ' + word + '-only. ',
@@ -1898,6 +1961,7 @@
       window.__TM_PROPERTY = view;                 // Ask-AI answers for the type on screen
       // lazy: the two typed views are only built if the portfolio tab asks for them
       const typed = types ? { get h() { return getView('H'); }, get u() { return getView('U'); } } : null;
+      TYPED_VIEWS = typed;
       return h(Board, { payload: view, dtype, setDtype, typesState, typed });
     }
 

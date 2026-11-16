@@ -85,6 +85,9 @@ claude-publish.bat feat: my change description
   `tm_property_dtype`) remaps each region to the typed series so every panel works unchanged. Vacancy and stock on
   market stay all-dwellings (SQM doesn't split them). Typed picks are NOT separately backtested — keep that label.
   Portfolio holdings track their own `type` (house/unit) series automatically.
+  Houses/Units buttons stay DISABLED until property-types.json loads (never highlight a type that isn't on screen —
+  that misled the owner on 2026-11-16). Each suburb's detail row shows `TypeCompare` (houses next to units, via the
+  module-level `TYPED_VIEWS`) plus an "All dwellings" block for the unsplit listings/vacancy.
 - `.github/workflows/update-property.yml` — weekly bake Tue 16:00 UTC (Wed 2am AEST; SQM
   publishes Tuesdays), commits `data/property.json`.
 - `update-prices-daily.bat` — legacy local daily task. Redundant with the Action;
