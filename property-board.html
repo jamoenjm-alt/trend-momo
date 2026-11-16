@@ -1320,8 +1320,29 @@
       const head = (txt, right) => h('th', { style: { padding: '4px 8px', textAlign: right ? 'right' : 'left', fontWeight: 600, opacity: .8 } }, txt);
       const trig = (r) => r.eligible && TRIGGER_SCOPE.includes(r.code) && (r.vac >= DECILE_TRIGGER.vac || r.rent12 < DECILE_TRIGGER.rent12);
       const decileColor = (k) => k == null ? 'inherit' : k >= 8 ? '#2e8b57' : k >= 5 ? '#6b8e23' : k >= 3 ? '#b8860b' : '#b22222';
+      const decileWord = (k) => k == null ? '' : k >= 8 ? 'strong' : k >= 5 ? 'above avg' : k >= 3 ? 'below avg' : 'weak';
+      const ex12 = (k) => d12[k] != null ? fmt(d12[k], 1, true) : '—', ex24 = (k) => d24[k] != null ? fmt(d24[k], 1, true) : '—';
       return h('div', { className: 'picks-wrap' },
         h('h2', { className: 'picks-title' }, 'Decile validation — the honest readout'),
+        // Plain-English key (added 2026-11-17): what a D score is and which end is good.
+        h('div', { style: { margin: '6px 0 10px', padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 8, background: '#fff', maxWidth: 900, fontSize: '13px', lineHeight: 1.5 } },
+          h('b', null, 'What the D score means. '),
+          'Every month, every market with 100+ listings and 5+ years of data is ranked on the board\'s buy score ',
+          '(mostly rental tightness and value: low vacancy, high yield vs its own history, rising rents, falling listings). ',
+          'The ranking is cut into ten equal groups: ', h('b', { style: { color: decileColor(0) } }, 'D0 = bottom 10% (worst)'), ' … ',
+          h('b', { style: { color: decileColor(9) } }, 'D9 = top 10% (best)'), '. Higher is better.',
+          h('div', { style: { display: 'flex', margin: '8px 0 4px', borderRadius: 6, overflow: 'hidden', maxWidth: 640 } },
+            ...Array.from({ length: 10 }, (_, k) => h('div', { key: k, title: 'D' + k + ': ' + ex12(k) + 'pp at 12m, ' + ex24(k) + 'pp at 24m',
+              style: { flex: 1, textAlign: 'center', padding: '4px 0', color: '#fff', fontWeight: 700, fontSize: '12px', background: decileColor(k) } }, 'D' + k))),
+          h('div', { style: { display: 'flex', justifyContent: 'space-between', maxWidth: 640, fontSize: '11.5px', opacity: .75 } },
+            h('span', null, '← worse: grew ', ex12(0), 'pp vs typical over 12m'), h('span', null, 'better: ', ex12(9), 'pp over 12m →')),
+          h('div', { style: { marginTop: 6 } },
+            h('b', null, 'Reading the pinned table: '),
+            h('b', null, '%ile'), ' = where the market ranks out of 100 (higher = better). ',
+            h('b', null, 'Δ12m'), ' = change in vacancy over 12 months (falling = tighter = good). ',
+            h('b', null, 'Yld %ile'), ' = yield vs its own history (higher = cheaper vs itself = good). ',
+            h('b', null, 'Fcast'), ' = what that decile has done on average vs the typical market, in percentage points — not a promise for that town. ',
+            h('b', null, 'Trigger'), ' = sell alarm for markets you hold (vacancy ≥ 1.8% or falling rents).')),
         h('div', { className: 'picks-sub' },
           'Every eligible market ranked by buy score each month since ', (d.window && d.window.start || '2014').slice(0, 7),
           ' (', d.window && d.window.months, ' months), bucketed into deciles, forward change measured as excess over that month\'s universe median. ',
@@ -1345,7 +1366,7 @@
             h('tbody', null, ...d.pinned.map(r => r.eligible
               ? h('tr', { key: r.code, style: trig(r) ? { background: 'rgba(178,34,34,.10)' } : null },
                   cell((r.name || r.code) + ' (' + r.state + ')'),
-                  cell('D' + r.decile, { textAlign: 'right', fontWeight: 700, color: decileColor(r.decile) }),
+                  cell(h('span', null, 'D' + r.decile, h('span', { style: { fontWeight: 500, fontSize: '11px', marginLeft: 4 } }, decileWord(r.decile))), { textAlign: 'right', fontWeight: 700, color: decileColor(r.decile), whiteSpace: 'nowrap' }),
                   cell(fmt(r.percentile, 0), { textAlign: 'right' }),
                   cell(fmt(r.vac, 2) + '%', { textAlign: 'right' }),
                   cell(fmt(r.vac_delta12, 2, true), { textAlign: 'right' }),
