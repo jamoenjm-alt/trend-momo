@@ -1,0 +1,88 @@
+{
+ "nz_episode_real": {
+  "NZL": {
+   "ann_2021Q1_to_2023Q4": -10.9,
+   "ann_2021Q1_to_2026Q2": -17.5,
+   "peak": "2021:Q4",
+   "trough": "2026:Q1",
+   "peak_to_trough": -26.6,
+   "reversal_2024Q1_to_2026Q2": -6.8
+  },
+  "AUS": {
+   "ann_2021Q1_to_2023Q4": 6.4,
+   "ann_2021Q1_to_2026Q2": 14.1,
+   "peak": "2022:Q1",
+   "trough": "2023:Q1",
+   "peak_to_trough": -10.3,
+   "reversal_2024Q1_to_2026Q2": 6.6
+  },
+  "CAN": {
+   "ann_2021Q1_to_2023Q4": -2.6,
+   "ann_2021Q1_to_2026Q2": -12.0,
+   "peak": "2022:Q1",
+   "trough": "2026:Q1",
+   "peak_to_trough": -29.2,
+   "reversal_2024Q1_to_2026Q2": -9.6
+  },
+  "GBR": {
+   "ann_2021Q1_to_2023Q4": -6.3,
+   "ann_2021Q1_to_2026Q2": -8.4,
+   "peak": "2022:Q1",
+   "trough": "2025:Q2",
+   "peak_to_trough": -10.4,
+   "reversal_2024Q1_to_2026Q2": -0.4
+  }
+ },
+ "nz_did_vs_AUS_CAN": {
+  "removal_window_2021Q1_2023Q4_pp": -12.8,
+  "reversal_window_2024Q1_2026Q2_pp": -5.3
+ },
+ "panel_all_n": 384,
+ "panel_cond_n": 114,
+ "panel_cond_countries": [
+  "AUS",
+  "CAN",
+  "DNK",
+  "GBR",
+  "IRL",
+  "JPN",
+  "NLD",
+  "NOR",
+  "NZL",
+  "SWE",
+  "USA"
+ ],
+ "outcomes_all": {
+  "continued boom (>=+30% real)": 0.513,
+  "stagnation (-25% to +5% real)": 0.229,
+  "soft landing / moderate growth (+5% to +30% real)": 0.214,
+  "crash (<=-25% real)": 0.044
+ },
+ "outcomes_cond_top_decile_valuation": {
+  "continued boom (>=+30% real)": 0.412,
+  "stagnation (-25% to +5% real)": 0.333,
+  "soft landing / moderate growth (+5% to +30% real)": 0.211,
+  "crash (<=-25% real)": 0.044
+ },
+ "fwd10_real_cond_quantiles": {
+  "0.1": -0.17,
+  "0.25": -0.073,
+  "0.5": 0.231,
+  "0.75": 0.443,
+  "0.9": 0.619
+ },
+ "fwd10_real_all_quantiles": {
+  "0.1": -0.131,
+  "0.25": 0.036,
+  "0.5": 0.323,
+  "0.75": 0.604,
+  "0.9": 0.866
+ },
+ "cond_effective_episodes": 26,
+ "AUS_pti_now_vs_history": {
+  "now_2026Q2": 1.383,
+  "max": 1.388,
+  "max_at": "2025:Q4",
+  "pct_of_history": 0.981
+ }
+}

@@ -1,0 +1,416 @@
+{
+ "ship_blend_rmse": {
+  "W1 train<=2005 -> 2006-15": {
+   "B1": 0.271,
+   "M2": 0.268,
+   "SHIP": 0.269
+  },
+  "W2 train<=2010 -> 2011-20": {
+   "B1": 0.232,
+   "M2": 0.332,
+   "SHIP": 0.267
+  },
+  "W3 train<=2015 -> 2016-25": {
+   "B1": 0.325,
+   "M2": 0.279,
+   "SHIP": 0.284
+  }
+ },
+ "ship_blend_rmse_allh": {
+  "W1 train<=2005 -> 2006-15": {
+   "B1": 0.249,
+   "M2": 0.236,
+   "SHIP": 0.242
+  },
+  "W2 train<=2010 -> 2011-20": {
+   "B1": 0.143,
+   "M2": 0.226,
+   "SHIP": 0.175
+  },
+  "W3 train<=2015 -> 2016-25": {
+   "B1": 0.232,
+   "M2": 0.215,
+   "SHIP": 0.215
+  }
+ },
+ "loo_cov_raw": {
+  "cov80": 0.71,
+  "cov50": 0.33
+ },
+ "band_widening": {
+  "method": "offsets=c_q*sqrt(h), widen factor by leave-one-window-out CV",
+  "k80": 1.25,
+  "k50": 1.7,
+  "loo_cov80_after": 0.81,
+  "loo_cov50_after": 0.5
+ },
+ "band_c": [
+  -0.0964,
+  -0.0489,
+  0.0732,
+  0.1184
+ ],
+ "nz_policy_break_test": {
+  "nz_valuation_pct_2020": 1.0,
+  "pred_5y_no_policy": 0.053,
+  "pred_5y_with_overlay": -0.048,
+  "actual_5y_2021Q1_2026Q1": -0.177,
+  "verdict": "method too optimistic: missed the downside; rate shock + policy together exceeded both components"
+ },
+ "central_real_logchg_by_h": {
+  "1": 0.014,
+  "2": 0.019,
+  "3": 0.031,
+  "4": 0.04,
+  "5": 0.051,
+  "6": 0.058,
+  "7": 0.068,
+  "8": 0.074,
+  "9": 0.087,
+  "10": 0.096
+ },
+ "band_quantiles_logpts_by_h": {
+  "1": [
+   -0.12,
+   -0.083,
+   0.0,
+   0.124,
+   0.148
+  ],
+  "2": [
+   -0.17,
+   -0.118,
+   0.0,
+   0.176,
+   0.209
+  ],
+  "3": [
+   -0.209,
+   -0.144,
+   0.0,
+   0.215,
+   0.256
+  ],
+  "4": [
+   -0.241,
+   -0.166,
+   0.0,
+   0.249,
+   0.296
+  ],
+  "5": [
+   -0.269,
+   -0.186,
+   0.0,
+   0.278,
+   0.331
+  ],
+  "6": [
+   -0.295,
+   -0.204,
+   0.0,
+   0.305,
+   0.362
+  ],
+  "7": [
+   -0.319,
+   -0.22,
+   0.0,
+   0.329,
+   0.392
+  ],
+  "8": [
+   -0.341,
+   -0.235,
+   0.0,
+   0.352,
+   0.419
+  ],
+  "9": [
+   -0.361,
+   -0.249,
+   0.0,
+   0.373,
+   0.444
+  ],
+  "10": [
+   -0.381,
+   -0.263,
+   0.0,
+   0.393,
+   0.468
+  ]
+ },
+ "summary_2036": {
+  "Sydney houses": {
+   "base": 1532,
+   "p50_2036_real": 1636.5,
+   "chg_real": 0.068,
+   "p10_real": 1118.0,
+   "p90_real": 2613.0,
+   "p50_2036_nominal": 2125.6,
+   "chg_nom": 0.387
+  },
+  "Sydney units": {
+   "base": 851,
+   "p50_2036_real": 891.2,
+   "chg_real": 0.047,
+   "p10_real": 608.9,
+   "p90_real": 1423.1,
+   "p50_2036_nominal": 1157.6,
+   "chg_nom": 0.36
+  },
+  "Rest of NSW houses": {
+   "base": 808,
+   "p50_2036_real": 863.1,
+   "chg_real": 0.068,
+   "p10_real": 589.6,
+   "p90_real": 1378.1,
+   "p50_2036_nominal": 1121.1,
+   "chg_nom": 0.387
+  },
+  "Rest of NSW units": {
+   "base": 703,
+   "p50_2036_real": 736.3,
+   "chg_real": 0.047,
+   "p10_real": 503.0,
+   "p90_real": 1175.7,
+   "p50_2036_nominal": 956.4,
+   "chg_nom": 0.36
+  },
+  "Melbourne houses": {
+   "base": 866,
+   "p50_2036_real": 925.1,
+   "chg_real": 0.068,
+   "p10_real": 632.0,
+   "p90_real": 1477.2,
+   "p50_2036_nominal": 1201.6,
+   "chg_nom": 0.387
+  },
+  "Melbourne units": {
+   "base": 605,
+   "p50_2036_real": 633.5,
+   "chg_real": 0.047,
+   "p10_real": 432.8,
+   "p90_real": 1011.6,
+   "p50_2036_nominal": 822.8,
+   "chg_nom": 0.36
+  },
+  "Rest of VIC houses": {
+   "base": 615,
+   "p50_2036_real": 656.8,
+   "chg_real": 0.068,
+   "p10_real": 448.7,
+   "p90_real": 1048.8,
+   "p50_2036_nominal": 853.1,
+   "chg_nom": 0.387
+  },
+  "Rest of VIC units": {
+   "base": 463,
+   "p50_2036_real": 484.9,
+   "chg_real": 0.047,
+   "p10_real": 331.3,
+   "p90_real": 774.3,
+   "p50_2036_nominal": 629.8,
+   "chg_nom": 0.36
+  },
+  "Brisbane houses": {
+   "base": 1111,
+   "p50_2036_real": 1186.1,
+   "chg_real": 0.068,
+   "p10_real": 810.3,
+   "p90_real": 1893.9,
+   "p50_2036_nominal": 1540.6,
+   "chg_nom": 0.387
+  },
+  "Brisbane units": {
+   "base": 803,
+   "p50_2036_real": 840.1,
+   "chg_real": 0.047,
+   "p10_real": 573.9,
+   "p90_real": 1341.5,
+   "p50_2036_nominal": 1091.2,
+   "chg_nom": 0.36
+  },
+  "Rest of QLD houses": {
+   "base": 798,
+   "p50_2036_real": 851.7,
+   "chg_real": 0.068,
+   "p10_real": 581.9,
+   "p90_real": 1360.0,
+   "p50_2036_nominal": 1106.3,
+   "chg_nom": 0.387
+  },
+  "Rest of QLD units": {
+   "base": 792,
+   "p50_2036_real": 829.0,
+   "chg_real": 0.047,
+   "p10_real": 566.3,
+   "p90_real": 1323.7,
+   "p50_2036_nominal": 1076.8,
+   "chg_nom": 0.36
+  },
+  "Adelaide houses": {
+   "base": 954,
+   "p50_2036_real": 1018.4,
+   "chg_real": 0.068,
+   "p10_real": 695.7,
+   "p90_real": 1626.1,
+   "p50_2036_nominal": 1322.8,
+   "chg_nom": 0.387
+  },
+  "Adelaide units": {
+   "base": 722,
+   "p50_2036_real": 755.6,
+   "chg_real": 0.047,
+   "p10_real": 516.2,
+   "p90_real": 1206.6,
+   "p50_2036_nominal": 981.4,
+   "chg_nom": 0.36
+  },
+  "Rest of SA houses": {
+   "base": 576,
+   "p50_2036_real": 615.2,
+   "chg_real": 0.068,
+   "p10_real": 420.3,
+   "p90_real": 982.3,
+   "p50_2036_nominal": 799.1,
+   "chg_nom": 0.387
+  },
+  "Rest of SA units": {
+   "base": 375,
+   "p50_2036_real": 392.1,
+   "chg_real": 0.047,
+   "p10_real": 267.9,
+   "p90_real": 626.1,
+   "p50_2036_nominal": 509.3,
+   "chg_nom": 0.36
+  },
+  "Perth houses": {
+   "base": 962,
+   "p50_2036_real": 1027.7,
+   "chg_real": 0.068,
+   "p10_real": 702.1,
+   "p90_real": 1641.0,
+   "p50_2036_nominal": 1334.9,
+   "chg_nom": 0.387
+  },
+  "Perth units": {
+   "base": 700,
+   "p50_2036_real": 732.8,
+   "chg_real": 0.047,
+   "p10_real": 500.6,
+   "p90_real": 1170.1,
+   "p50_2036_nominal": 951.8,
+   "chg_nom": 0.36
+  },
+  "Rest of WA houses": {
+   "base": 633,
+   "p50_2036_real": 676.2,
+   "chg_real": 0.068,
+   "p10_real": 461.9,
+   "p90_real": 1079.7,
+   "p50_2036_nominal": 878.3,
+   "chg_nom": 0.387
+  },
+  "Rest of WA units": {
+   "base": 476,
+   "p50_2036_real": 498.6,
+   "chg_real": 0.047,
+   "p10_real": 340.6,
+   "p90_real": 796.1,
+   "p50_2036_nominal": 647.6,
+   "chg_nom": 0.36
+  },
+  "Hobart houses": {
+   "base": 743,
+   "p50_2036_real": 793.7,
+   "chg_real": 0.068,
+   "p10_real": 542.2,
+   "p90_real": 1267.3,
+   "p50_2036_nominal": 1030.9,
+   "chg_nom": 0.387
+  },
+  "Hobart units": {
+   "base": 599,
+   "p50_2036_real": 626.8,
+   "chg_real": 0.047,
+   "p10_real": 428.2,
+   "p90_real": 1000.8,
+   "p50_2036_nominal": 814.1,
+   "chg_nom": 0.36
+  },
+  "Rest of TAS houses": {
+   "base": 608,
+   "p50_2036_real": 648.8,
+   "chg_real": 0.068,
+   "p10_real": 443.2,
+   "p90_real": 1036.0,
+   "p50_2036_nominal": 842.7,
+   "chg_nom": 0.387
+  },
+  "Rest of TAS units": {
+   "base": 489,
+   "p50_2036_real": 511.9,
+   "chg_real": 0.047,
+   "p10_real": 349.7,
+   "p90_real": 817.3,
+   "p50_2036_nominal": 664.9,
+   "chg_nom": 0.36
+  },
+  "Darwin houses": {
+   "base": 721,
+   "p50_2036_real": 769.6,
+   "chg_real": 0.068,
+   "p10_real": 525.8,
+   "p90_real": 1228.9,
+   "p50_2036_nominal": 999.6,
+   "chg_nom": 0.387
+  },
+  "Darwin units": {
+   "base": 428,
+   "p50_2036_real": 448.3,
+   "chg_real": 0.047,
+   "p10_real": 306.2,
+   "p90_real": 715.8,
+   "p50_2036_nominal": 582.3,
+   "chg_nom": 0.36
+  },
+  "Rest of NT houses": {
+   "base": 450,
+   "p50_2036_real": 480.1,
+   "chg_real": 0.068,
+   "p10_real": 328.0,
+   "p90_real": 766.5,
+   "p50_2036_nominal": 623.6,
+   "chg_nom": 0.387
+  },
+  "Rest of NT units": {
+   "base": 324,
+   "p50_2036_real": 338.9,
+   "chg_real": 0.047,
+   "p10_real": 231.5,
+   "p90_real": 541.2,
+   "p50_2036_nominal": 440.2,
+   "chg_nom": 0.36
+  },
+  "Canberra houses": {
+   "base": 1052,
+   "p50_2036_real": 1124.1,
+   "chg_real": 0.068,
+   "p10_real": 767.9,
+   "p90_real": 1794.9,
+   "p50_2036_nominal": 1460.1,
+   "chg_nom": 0.387
+  },
+  "Canberra units": {
+   "base": 623,
+   "p50_2036_real": 652.4,
+   "chg_real": 0.047,
+   "p10_real": 445.7,
+   "p90_real": 1041.8,
+   "p50_2036_nominal": 847.4,
+   "chg_nom": 0.36
+  }
+ }
+}

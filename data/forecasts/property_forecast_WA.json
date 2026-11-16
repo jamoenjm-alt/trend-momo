@@ -1,0 +1,921 @@
+{
+ "schema_version": "1.0",
+ "state": "WA",
+ "generated": "2026-11-16",
+ "last_data": "ABS 6432 Jun qtr 2026; RBA Oct 2026; policy verified 15 Nov 2026",
+ "label": "Scenario-based estimate, not a prediction. General information only - not financial advice; does not consider your personal circumstances.",
+ "units": "$ thousand, median transfer price (ABS Total Value of Dwellings Table 2, unstratified)",
+ "base_period": "FY2026 (Jul 2025-Jun 2026) average of quarterly medians",
+ "years": [
+  2027,
+  2028,
+  2029,
+  2030,
+  2031,
+  2032,
+  2033,
+  2034,
+  2035,
+  2036
+ ],
+ "method": {
+  "central": "50% no-real-change + 50% international base-rate (valuation-conditioned, Dallas Fed IHPD) + policy overlay",
+  "why": "Only blend that did not lose to baselines; fundamentals ECM and drift models failed backtests and are NOT used",
+  "bands": "empirical out-of-sample error quantiles pooled over 3 rolling-origin backtests"
+ },
+ "policy_assumptions": [
+  "Tax Reform No.1 Act 2026 (assent 26 Jun 2026): negative gearing quarantined for established dwellings acquired after 7:30pm AEST 12 May 2026, from FY2027-28; pre-cut-off holdings grandfathered until sale; new builds exempt.",
+  "CGT 50% discount replaced by cost-base indexation + 30% minimum tax for gains accruing from 1 Jul 2027; pre-1 Jul 2027 gains keep 50% via deemed disposal/re-acquisition; new-build investors may choose either.",
+  "SMSF: no new residential LRBAs from 10 Aug 2026 (treated as minor).",
+  "Tax Reform No.3 Bill 2026 (\"Tranche 2\", new-dwelling definition s960-590) assumed to PASS substantially as introduced 14 Oct 2026. NOT yet law at retrieval.",
+  "Foreign purchase ban on established dwellings to 30 Jun 2029 (assumed to lapse then, no forecast effect modelled).",
+  "APRA serviceability buffer 3pp and 20%/6x DTI speed limit unchanged.",
+  "5% Deposit Scheme (uncapped since 1 Oct 2025) and Help to Buy continue."
+ ],
+ "macro_assumptions": [
+  "Cash rate 4.85% (3 Nov 2026) assumed to peak; scenarios span further +25-50bp (low) to cuts from H2 2027 (high).",
+  "CPI assumption for nominal conversion: 3.5% FY2027, 3.0% FY2028, 2.5% thereafter (RBA 2-3% target midpoint) \u2014 ASSUMPTION, CPI uncertainty not included in bands.",
+  "NOM per 2026-27 Budget: 245k in 2026-27 (stress test halves it).",
+  "Housing Accord: target reached ~Dec 2030 per NHSAC Aug 2026 (i.e. missed by Jun 2029)."
+ ],
+ "policy_overlay": {
+  "established_houses_real_level_shift": {
+   "FY2027": -0.01,
+   "FY2028": -0.02,
+   "FY2029_onward": -0.03
+  },
+  "units_real_level_shift": {
+   "FY2027": -0.015,
+   "FY2028": -0.035,
+   "FY2029_onward": -0.05
+  },
+  "new_builds_relative_to_established": "+1% to +3% (judgement; no free new-build price series to model)",
+  "basis": "JUDGEMENT anchored to NZ 2021-23 evidence (-12.8pp vs AUS/CAN = upper bound, confounded). AU measures are milder (existing stock grandfathered; CGT change also hits shares, so relative effect smaller). Units heavier because investor-owned share is higher.",
+  "effects": {
+   "a_grandfathered_lock_in": "reduces established listings -> partially offsets downside (included net)",
+   "b_shift_to_new_builds": "new-build relative +1-3%",
+   "c_sell_before_1Jul2027": "weak incentive (accrued gains preserved by deemed disposal) -> small 2027 listing bulge, inside FY2027 shift",
+   "d_fewer_investor_rentals": "upward pressure on rents (not a price forecast; flagged for Signals)",
+   "e_after_tax_vs_shares_super": "CGT change applies to shares too; relative shift driven mainly by negative gearing"
+  }
+ },
+ "stress_tests": {
+  "rates_plus2pp_sustained": {
+   "real_price_impact": "-5% (AUS-calibrated) to -14% (CAN/NZ-calibrated)",
+   "basis": "2022-23 episode: cash +4.25pp -> AUS real -10.3% peak-to-trough, CAN -29.2%, NZ -26.6% (Dallas Fed RHPI); scaled per pp"
+  },
+  "migration_halved": {
+   "real_price_impact": "-3% to -8% over 3-5y (ASSUMPTION; fundamentals model failed backtest so no validated elasticity)",
+   "basis": "2021 border closure: NOM negative yet AUS real prices +20% (stimulus/low rates dominated) \u2014 migration alone is not a reliable driver"
+  },
+  "housing_accord_met": {
+   "real_price_impact": "-2% to -5% relative to base by 2031 (ASSUMPTION)",
+   "basis": "~220k extra completions vs current trajectory (NHSAC)"
+  },
+  "housing_accord_missed_further": {
+   "real_price_impact": "+2% to +5% relative to base (ASSUMPTION)"
+  },
+  "recession_7pct_unemployment": {
+   "real_price_impact": "-5% to -15% (ASSUMPTION)",
+   "basis": "1990-92 recession: AUS real house prices ~-4% (Dallas Fed); NZ/CAN 2022-25 show larger falls when combined with high rates"
+  },
+  "grandfathering_removed_future": {
+   "real_price_impact": "up to -13pp vs base (upper bound)",
+   "basis": "NZ removed deductibility on existing stock: -12.8pp vs AUS/CAN 2021Q1-2023Q4"
+  },
+  "policy_reversed_by_future_govt": {
+   "real_price_impact": "overlay removed: +3% houses / +5% units vs base",
+   "basis": "NZ reversal 2024-25 produced NO rebound (-5.3pp vs peers) -> treat as upside skew only"
+  }
+ },
+ "series": {
+  "cap_H": {
+   "name": "Perth houses",
+   "region": "cap",
+   "type": "houses",
+   "stock": "established",
+   "base_value": 962.2,
+   "real": {
+    "p10": [
+     856.3,
+     810.6,
+     781.8,
+     763.9,
+     750.8,
+     736.4,
+     726.4,
+     715.2,
+     709.9,
+     702.1
+    ],
+    "p25": [
+     888.9,
+     854.6,
+     834.1,
+     823.2,
+     816.3,
+     807.0,
+     801.9,
+     795.0,
+     794.2,
+     790.2
+    ],
+    "p50": [
+     966.0,
+     961.2,
+     963.2,
+     972.1,
+     983.0,
+     989.1,
+     999.1,
+     1005.6,
+     1019.0,
+     1027.7
+    ],
+    "p75": [
+     1093.9,
+     1146.1,
+     1194.8,
+     1246.7,
+     1298.2,
+     1341.5,
+     1388.6,
+     1429.7,
+     1480.0,
+     1523.0
+    ],
+    "p90": [
+     1120.0,
+     1184.9,
+     1244.6,
+     1306.9,
+     1368.5,
+     1421.3,
+     1478.0,
+     1528.3,
+     1588.5,
+     1641.0
+    ]
+   },
+   "nominal": {
+    "p10": [
+     886.3,
+     864.1,
+     854.3,
+     855.6,
+     861.9,
+     866.5,
+     876.1,
+     884.2,
+     899.6,
+     911.9
+    ],
+    "p25": [
+     920.0,
+     911.0,
+     911.4,
+     922.0,
+     937.1,
+     949.6,
+     967.2,
+     982.9,
+     1006.4,
+     1026.4
+    ],
+    "p50": [
+     999.8,
+     1024.7,
+     1052.5,
+     1088.8,
+     1128.5,
+     1163.9,
+     1205.1,
+     1243.2,
+     1291.3,
+     1334.9
+    ],
+    "p75": [
+     1132.2,
+     1221.8,
+     1305.6,
+     1396.3,
+     1490.4,
+     1578.6,
+     1674.8,
+     1767.5,
+     1875.5,
+     1978.2
+    ],
+    "p90": [
+     1159.2,
+     1263.2,
+     1360.0,
+     1463.8,
+     1571.1,
+     1672.5,
+     1782.7,
+     1889.4,
+     2012.9,
+     2131.5
+    ]
+   },
+   "scenarios_real": {
+    "low": [
+     852.6,
+     786.3,
+     754.7,
+     744.9,
+     738.6,
+     730.2,
+     725.6,
+     719.3,
+     718.6,
+     715.0
+    ],
+    "base": [
+     966.0,
+     961.2,
+     963.2,
+     972.1,
+     983.0,
+     989.1,
+     999.1,
+     1005.6,
+     1019.0,
+     1027.7
+    ],
+    "high": [
+     1104.9,
+     1169.2,
+     1231.2,
+     1284.7,
+     1337.7,
+     1382.4,
+     1430.9,
+     1473.2,
+     1525.1,
+     1569.4
+    ]
+   },
+   "scenarios_nominal": {
+    "low": [
+     882.4,
+     838.2,
+     824.7,
+     834.3,
+     847.9,
+     859.2,
+     875.2,
+     889.3,
+     910.6,
+     928.7
+    ],
+    "base": [
+     999.8,
+     1024.7,
+     1052.5,
+     1088.8,
+     1128.5,
+     1163.9,
+     1205.1,
+     1243.2,
+     1291.3,
+     1334.9
+    ],
+    "high": [
+     1143.6,
+     1246.4,
+     1345.3,
+     1438.9,
+     1535.7,
+     1626.7,
+     1725.9,
+     1821.3,
+     1932.6,
+     2038.5
+    ]
+   }
+  },
+  "cap_U": {
+   "name": "Perth units",
+   "region": "cap",
+   "type": "units",
+   "stock": "attached (established+new mix)",
+   "base_value": 700.0,
+   "real": {
+    "p10": [
+     619.8,
+     580.9,
+     557.5,
+     544.7,
+     535.4,
+     525.1,
+     518.0,
+     510.0,
+     506.2,
+     500.6
+    ],
+    "p25": [
+     643.4,
+     612.4,
+     594.8,
+     587.0,
+     582.0,
+     575.4,
+     571.8,
+     566.8,
+     566.3,
+     563.4
+    ],
+    "p50": [
+     699.2,
+     688.8,
+     686.8,
+     693.2,
+     700.9,
+     705.3,
+     712.4,
+     717.1,
+     726.6,
+     732.8
+    ],
+    "p75": [
+     791.8,
+     821.3,
+     852.0,
+     889.0,
+     925.7,
+     956.6,
+     990.1,
+     1019.4,
+     1055.4,
+     1086.0
+    ],
+    "p90": [
+     810.7,
+     849.2,
+     887.5,
+     931.9,
+     975.8,
+     1013.5,
+     1053.9,
+     1089.8,
+     1132.7,
+     1170.1
+    ]
+   },
+   "nominal": {
+    "p10": [
+     641.5,
+     619.3,
+     609.2,
+     610.1,
+     614.6,
+     617.9,
+     624.8,
+     630.5,
+     641.5,
+     650.2
+    ],
+    "p25": [
+     665.9,
+     652.8,
+     649.9,
+     657.5,
+     668.1,
+     677.1,
+     689.7,
+     700.7,
+     717.6,
+     731.8
+    ],
+    "p50": [
+     723.7,
+     734.3,
+     750.5,
+     776.4,
+     804.6,
+     829.9,
+     859.3,
+     886.5,
+     920.7,
+     951.8
+    ],
+    "p75": [
+     819.5,
+     875.5,
+     931.0,
+     995.7,
+     1062.7,
+     1125.7,
+     1194.2,
+     1260.3,
+     1337.4,
+     1410.6
+    ],
+    "p90": [
+     839.1,
+     905.3,
+     969.8,
+     1043.7,
+     1120.2,
+     1192.6,
+     1271.1,
+     1347.3,
+     1435.4,
+     1519.8
+    ]
+   },
+   "scenarios_real": {
+    "low": [
+     612.1,
+     556.9,
+     527.5,
+     520.6,
+     516.2,
+     510.3,
+     507.2,
+     502.7,
+     502.2,
+     499.7
+    ],
+    "base": [
+     699.2,
+     688.8,
+     686.8,
+     693.2,
+     700.9,
+     705.3,
+     712.4,
+     717.1,
+     726.6,
+     732.8
+    ],
+    "high": [
+     795.8,
+     842.1,
+     886.8,
+     925.3,
+     963.5,
+     995.6,
+     1030.5,
+     1061.1,
+     1098.4,
+     1130.3
+    ]
+   },
+   "scenarios_nominal": {
+    "low": [
+     633.5,
+     593.7,
+     576.4,
+     583.1,
+     592.6,
+     600.5,
+     611.8,
+     621.5,
+     636.4,
+     649.0
+    ],
+    "base": [
+     723.7,
+     734.3,
+     750.5,
+     776.4,
+     804.6,
+     829.9,
+     859.3,
+     886.5,
+     920.7,
+     951.8
+    ],
+    "high": [
+     823.7,
+     897.7,
+     969.0,
+     1036.4,
+     1106.1,
+     1171.5,
+     1242.9,
+     1311.8,
+     1391.9,
+     1468.1
+    ]
+   }
+  },
+  "rest_H": {
+   "name": "Rest of WA houses",
+   "region": "rest",
+   "type": "houses",
+   "stock": "established",
+   "base_value": 633.1,
+   "real": {
+    "p10": [
+     563.4,
+     533.3,
+     514.4,
+     502.6,
+     494.0,
+     484.5,
+     478.0,
+     470.6,
+     467.1,
+     461.9
+    ],
+    "p25": [
+     584.9,
+     562.3,
+     548.8,
+     541.7,
+     537.1,
+     530.9,
+     527.6,
+     523.0,
+     522.5,
+     519.9
+    ],
+    "p50": [
+     635.6,
+     632.4,
+     633.8,
+     639.6,
+     646.7,
+     650.8,
+     657.4,
+     661.6,
+     670.5,
+     676.2
+    ],
+    "p75": [
+     719.8,
+     754.1,
+     786.2,
+     820.3,
+     854.2,
+     882.7,
+     913.6,
+     940.7,
+     973.8,
+     1002.1
+    ],
+    "p90": [
+     736.9,
+     779.6,
+     818.9,
+     859.9,
+     900.4,
+     935.2,
+     972.4,
+     1005.6,
+     1045.2,
+     1079.7
+    ]
+   },
+   "nominal": {
+    "p10": [
+     583.1,
+     568.5,
+     562.1,
+     562.9,
+     567.1,
+     570.1,
+     576.5,
+     581.8,
+     591.9,
+     600.0
+    ],
+    "p25": [
+     605.4,
+     599.4,
+     599.7,
+     606.7,
+     616.6,
+     624.7,
+     636.4,
+     646.6,
+     662.1,
+     675.3
+    ],
+    "p50": [
+     657.8,
+     674.2,
+     692.6,
+     716.4,
+     742.4,
+     765.8,
+     792.9,
+     817.9,
+     849.7,
+     878.3
+    ],
+    "p75": [
+     745.0,
+     803.9,
+     859.1,
+     918.8,
+     980.6,
+     1038.7,
+     1101.9,
+     1163.0,
+     1234.0,
+     1301.6
+    ],
+    "p90": [
+     762.7,
+     831.1,
+     894.8,
+     963.1,
+     1033.7,
+     1100.5,
+     1172.8,
+     1243.2,
+     1324.5,
+     1402.4
+    ]
+   },
+   "scenarios_real": {
+    "low": [
+     561.0,
+     517.3,
+     496.6,
+     490.1,
+     486.0,
+     480.4,
+     477.4,
+     473.3,
+     472.8,
+     470.4
+    ],
+    "base": [
+     635.6,
+     632.4,
+     633.8,
+     639.6,
+     646.7,
+     650.8,
+     657.4,
+     661.6,
+     670.5,
+     676.2
+    ],
+    "high": [
+     727.0,
+     769.3,
+     810.1,
+     845.3,
+     880.2,
+     909.6,
+     941.5,
+     969.3,
+     1003.5,
+     1032.6
+    ]
+   },
+   "scenarios_nominal": {
+    "low": [
+     580.6,
+     551.5,
+     542.6,
+     548.9,
+     557.9,
+     565.3,
+     575.8,
+     585.1,
+     599.1,
+     611.0
+    ],
+    "base": [
+     657.8,
+     674.2,
+     692.6,
+     716.4,
+     742.4,
+     765.8,
+     792.9,
+     817.9,
+     849.7,
+     878.3
+    ],
+    "high": [
+     752.4,
+     820.1,
+     885.2,
+     946.8,
+     1010.5,
+     1070.3,
+     1135.6,
+     1198.3,
+     1271.6,
+     1341.2
+    ]
+   }
+  },
+  "rest_U": {
+   "name": "Rest of WA units",
+   "region": "rest",
+   "type": "units",
+   "stock": "attached (established+new mix)",
+   "base_value": 476.2,
+   "real": {
+    "p10": [
+     421.7,
+     395.2,
+     379.3,
+     370.6,
+     364.2,
+     357.2,
+     352.4,
+     347.0,
+     344.4,
+     340.6
+    ],
+    "p25": [
+     437.8,
+     416.7,
+     404.6,
+     399.4,
+     396.0,
+     391.5,
+     389.0,
+     385.7,
+     385.3,
+     383.3
+    ],
+    "p50": [
+     475.7,
+     468.6,
+     467.3,
+     471.6,
+     476.9,
+     479.9,
+     484.7,
+     487.9,
+     494.4,
+     498.6
+    ],
+    "p75": [
+     538.7,
+     558.8,
+     579.7,
+     604.8,
+     629.8,
+     650.8,
+     673.6,
+     693.6,
+     718.0,
+     738.9
+    ],
+    "p90": [
+     551.6,
+     577.7,
+     603.8,
+     634.0,
+     663.9,
+     689.5,
+     717.0,
+     741.4,
+     770.7,
+     796.1
+    ]
+   },
+   "nominal": {
+    "p10": [
+     436.5,
+     421.3,
+     414.5,
+     415.1,
+     418.1,
+     420.3,
+     425.0,
+     429.0,
+     436.4,
+     442.4
+    ],
+    "p25": [
+     453.1,
+     444.2,
+     442.1,
+     447.3,
+     454.6,
+     460.7,
+     469.2,
+     476.8,
+     488.3,
+     497.9
+    ],
+    "p50": [
+     492.3,
+     499.6,
+     510.6,
+     528.2,
+     547.5,
+     564.7,
+     584.6,
+     603.2,
+     626.5,
+     647.6
+    ],
+    "p75": [
+     557.6,
+     595.7,
+     633.4,
+     677.4,
+     723.0,
+     765.8,
+     812.5,
+     857.5,
+     909.8,
+     959.7
+    ],
+    "p90": [
+     570.9,
+     615.9,
+     659.8,
+     710.1,
+     762.2,
+     811.3,
+     864.8,
+     916.6,
+     976.6,
+     1034.0
+    ]
+   },
+   "scenarios_real": {
+    "low": [
+     416.4,
+     378.9,
+     358.9,
+     354.2,
+     351.2,
+     347.2,
+     345.0,
+     342.0,
+     341.7,
+     340.0
+    ],
+    "base": [
+     475.7,
+     468.6,
+     467.3,
+     471.6,
+     476.9,
+     479.9,
+     484.7,
+     487.9,
+     494.4,
+     498.6
+    ],
+    "high": [
+     541.4,
+     572.9,
+     603.3,
+     629.5,
+     655.5,
+     677.4,
+     701.1,
+     721.9,
+     747.3,
+     769.0
+    ]
+   },
+   "scenarios_nominal": {
+    "low": [
+     431.0,
+     403.9,
+     392.2,
+     396.7,
+     403.2,
+     408.6,
+     416.1,
+     422.8,
+     433.0,
+     441.6
+    ],
+    "base": [
+     492.3,
+     499.6,
+     510.6,
+     528.2,
+     547.5,
+     564.7,
+     584.6,
+     603.2,
+     626.5,
+     647.6
+    ],
+    "high": [
+     560.3,
+     610.7,
+     659.2,
+     705.1,
+     752.5,
+     797.1,
+     845.6,
+     892.5,
+     947.0,
+     998.8
+    ]
+   }
+  }
+ }
+}
