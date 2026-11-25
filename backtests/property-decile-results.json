@@ -1,6 +1,6 @@
 {
- "generated": "2026-11-24T06:31:43Z",
- "history_baked": "2026-11-24T06:31:03Z",
+ "generated": "2026-11-25T09:43:53Z",
+ "history_baked": "2026-11-25T09:43:20Z",
  "last_px": "2026-11-20",
  "window": {
   "start": "2014-08-31",
@@ -15,59 +15,59 @@
  },
  "deciles": {
   "h6": [
-   -2.88,
-   -1.04,
-   -0.35,
-   0.24,
-   0.49,
-   1.29,
-   1.76,
-   2.03,
-   2.64,
+   -2.85,
+   -0.96,
+   -0.44,
+   0.27,
+   0.56,
+   1.34,
+   1.83,
+   1.99,
+   2.62,
    3.81
   ],
   "h12": [
-   -4.64,
-   -2.0,
-   -0.84,
+   -4.63,
+   -1.92,
+   -0.88,
    0.18,
-   0.87,
-   1.96,
-   2.79,
-   3.23,
-   4.38,
-   6.59
+   1.04,
+   2.09,
+   2.99,
+   3.21,
+   4.51,
+   6.6
   ],
   "h24": [
-   -7.71,
-   -4.41,
-   -1.9,
-   -0.28,
-   0.94,
-   2.76,
-   4.37,
-   5.31,
-   7.56,
-   11.71
+   -8.03,
+   -4.37,
+   -2.21,
+   -0.39,
+   1.28,
+   2.98,
+   4.64,
+   5.46,
+   7.82,
+   11.8
   ],
   "h36": [
-   -10.82,
-   -6.77,
-   -3.53,
-   -1.03,
-   0.9,
-   2.82,
-   5.52,
-   7.76,
-   11.18,
-   16.56
+   -11.32,
+   -6.99,
+   -3.97,
+   -1.32,
+   1.29,
+   3.19,
+   5.88,
+   8.1,
+   11.43,
+   16.86
   ]
  },
  "spread_top_minus_bottom": {
-  "h6": 6.69,
+  "h6": 6.66,
   "h12": 11.23,
-  "h24": 19.42,
-  "h36": 27.38
+  "h24": 19.83,
+  "h36": 28.18
  },
  "monotone_steps_of_9": {
   "h6": 9,
@@ -77,54 +77,54 @@
  },
  "monthly_spread": {
   "h6": {
-   "mean": 6.833,
-   "sd": 2.883,
-   "t": 28.14,
-   "pct_positive": 100.0,
+   "mean": 6.816,
+   "sd": 3.072,
+   "t": 26.35,
+   "pct_positive": 99.3,
    "n": 141
   },
   "h12": {
-   "mean": 11.553,
-   "sd": 4.711,
-   "t": 28.49,
+   "mean": 11.544,
+   "sd": 4.835,
+   "t": 27.74,
    "pct_positive": 100.0,
    "n": 135
   },
   "h24": {
-   "mean": 19.953,
-   "sd": 8.41,
-   "t": 26.31,
+   "mean": 20.435,
+   "sd": 8.787,
+   "t": 25.79,
    "pct_positive": 100.0,
    "n": 123
   },
   "h36": {
-   "mean": 28.233,
-   "sd": 12.68,
-   "t": 23.46,
+   "mean": 29.154,
+   "sd": 13.617,
+   "t": 22.56,
    "pct_positive": 100.0,
    "n": 111
   }
  },
  "state_neutral": {
   "h6": {
-   "raw": 6.83,
-   "state_neutral": 5.57,
-   "survives_pct": 82.0
+   "raw": 6.82,
+   "state_neutral": 5.41,
+   "survives_pct": 79.0
   },
   "h12": {
-   "raw": 11.55,
-   "state_neutral": 8.28,
-   "survives_pct": 72.0
+   "raw": 11.54,
+   "state_neutral": 7.93,
+   "survives_pct": 69.0
   },
   "h24": {
-   "raw": 19.95,
-   "state_neutral": 12.07,
-   "survives_pct": 60.0
+   "raw": 20.43,
+   "state_neutral": 11.61,
+   "survives_pct": 57.0
   },
   "h36": {
-   "raw": 28.23,
-   "state_neutral": 15.57,
-   "survives_pct": 55.0
+   "raw": 29.15,
+   "state_neutral": 14.88,
+   "survives_pct": 51.0
   }
  },
  "eras": [
@@ -133,16 +133,16 @@
    "start": "2014-08",
    "end": "2017-07",
    "h12": {
-    "mean": 8.631,
-    "sd": 1.659,
-    "t": 31.21,
+    "mean": 8.574,
+    "sd": 2.0,
+    "t": 25.72,
     "pct_positive": 100.0,
     "n": 36
    },
    "h24": {
-    "mean": 13.876,
-    "sd": 3.169,
-    "t": 26.27,
+    "mean": 13.833,
+    "sd": 3.817,
+    "t": 21.74,
     "pct_positive": 100.0,
     "n": 36
    }
@@ -152,16 +152,16 @@
    "start": "2017-08",
    "end": "2020-03",
    "h12": {
-    "mean": 8.339,
-    "sd": 3.262,
-    "t": 14.46,
+    "mean": 8.368,
+    "sd": 3.31,
+    "t": 14.3,
     "pct_positive": 100.0,
     "n": 32
    },
    "h24": {
-    "mean": 12.824,
-    "sd": 3.256,
-    "t": 22.28,
+    "mean": 13.52,
+    "sd": 3.735,
+    "t": 20.48,
     "pct_positive": 100.0,
     "n": 32
    }
@@ -171,16 +171,16 @@
    "start": "2020-04",
    "end": "2022-04",
    "h12": {
-    "mean": 14.159,
-    "sd": 4.589,
-    "t": 15.43,
+    "mean": 13.792,
+    "sd": 4.785,
+    "t": 14.41,
     "pct_positive": 100.0,
     "n": 25
    },
    "h24": {
-    "mean": 26.61,
-    "sd": 3.993,
-    "t": 33.32,
+    "mean": 26.843,
+    "sd": 4.145,
+    "t": 32.38,
     "pct_positive": 100.0,
     "n": 25
    }
@@ -190,16 +190,16 @@
    "start": "2022-05",
    "end": "2023-12",
    "h12": {
-    "mean": 17.012,
-    "sd": 4.264,
-    "t": 17.84,
+    "mean": 17.591,
+    "sd": 4.083,
+    "t": 19.27,
     "pct_positive": 100.0,
     "n": 20
    },
    "h24": {
-    "mean": 31.319,
-    "sd": 2.552,
-    "t": 54.88,
+    "mean": 32.474,
+    "sd": 2.74,
+    "t": 53.01,
     "pct_positive": 100.0,
     "n": 20
    }
@@ -209,16 +209,16 @@
    "start": "2024-01",
    "end": "2099-12",
    "h12": {
-    "mean": 13.085,
-    "sd": 3.395,
-    "t": 18.08,
+    "mean": 12.973,
+    "sd": 3.411,
+    "t": 17.84,
     "pct_positive": 100.0,
     "n": 22
    },
    "h24": {
-    "mean": 25.274,
-    "sd": 7.54,
-    "t": 10.6,
+    "mean": 26.231,
+    "sd": 7.9,
+    "t": 10.5,
     "pct_positive": 100.0,
     "n": 10
    }
@@ -228,132 +228,132 @@
   "h12": [
    {
     "factor": "composite buy score",
-    "mean": 11.553,
-    "sd": 4.711,
-    "t": 28.49,
+    "mean": 11.544,
+    "sd": 4.835,
+    "t": 27.74,
     "pct_positive": 100.0,
     "n": 135
    },
    {
     "factor": "trailing 12m price momentum",
-    "mean": -4.059,
-    "sd": 5.191,
-    "t": -9.09,
-    "pct_positive": 23.7,
+    "mean": -4.013,
+    "sd": 5.202,
+    "t": -8.96,
+    "pct_positive": 24.4,
     "n": 135
    },
    {
     "factor": "rent growth 12m",
-    "mean": 5.248,
-    "sd": 3.917,
-    "t": 15.57,
-    "pct_positive": 91.9,
+    "mean": 5.301,
+    "sd": 4.176,
+    "t": 14.75,
+    "pct_positive": 88.9,
     "n": 135
    },
    {
     "factor": "yield percentile",
-    "mean": 7.922,
-    "sd": 5.084,
-    "t": 18.11,
+    "mean": 8.0,
+    "sd": 5.157,
+    "t": 18.02,
     "pct_positive": 97.8,
     "n": 135
    },
    {
     "factor": "rental yield",
-    "mean": 6.862,
-    "sd": 6.168,
-    "t": 12.93,
+    "mean": 6.785,
+    "sd": 6.166,
+    "t": 12.79,
     "pct_positive": 83.7,
     "n": 135
    },
    {
     "factor": "vacancy (low=good)",
-    "mean": 8.4,
-    "sd": 3.247,
-    "t": 30.06,
+    "mean": 8.402,
+    "sd": 3.404,
+    "t": 28.68,
     "pct_positive": 100.0,
     "n": 135
    },
    {
     "factor": "listings growth (falling=good)",
-    "mean": 7.405,
-    "sd": 4.847,
-    "t": 17.75,
-    "pct_positive": 94.8,
+    "mean": 7.394,
+    "sd": 5.14,
+    "t": 16.71,
+    "pct_positive": 93.3,
     "n": 135
    },
    {
     "factor": "drawdown from own high",
-    "mean": -1.195,
-    "sd": 4.145,
-    "t": -3.35,
-    "pct_positive": 30.4,
+    "mean": -1.055,
+    "sd": 4.588,
+    "t": -2.67,
+    "pct_positive": 31.9,
     "n": 135
    }
   ],
   "h24": [
    {
     "factor": "composite buy score",
-    "mean": 19.953,
-    "sd": 8.41,
-    "t": 26.31,
+    "mean": 20.435,
+    "sd": 8.787,
+    "t": 25.79,
     "pct_positive": 100.0,
     "n": 123
    },
    {
     "factor": "trailing 12m price momentum",
-    "mean": -1.237,
-    "sd": 7.781,
-    "t": -1.76,
-    "pct_positive": 40.7,
+    "mean": -1.0,
+    "sd": 7.917,
+    "t": -1.4,
+    "pct_positive": 42.3,
     "n": 123
    },
    {
     "factor": "rent growth 12m",
-    "mean": 9.981,
-    "sd": 5.742,
-    "t": 19.28,
-    "pct_positive": 97.6,
-    "n": 123
-   },
-   {
-    "factor": "yield percentile",
-    "mean": 13.337,
-    "sd": 8.593,
-    "t": 17.21,
+    "mean": 10.534,
+    "sd": 6.036,
+    "t": 19.35,
     "pct_positive": 98.4,
     "n": 123
    },
    {
+    "factor": "yield percentile",
+    "mean": 13.537,
+    "sd": 8.452,
+    "t": 17.76,
+    "pct_positive": 99.2,
+    "n": 123
+   },
+   {
     "factor": "rental yield",
-    "mean": 11.936,
-    "sd": 10.558,
-    "t": 12.54,
+    "mean": 11.968,
+    "sd": 10.538,
+    "t": 12.6,
     "pct_positive": 80.5,
     "n": 123
    },
    {
     "factor": "vacancy (low=good)",
-    "mean": 16.265,
-    "sd": 5.401,
-    "t": 33.4,
+    "mean": 16.625,
+    "sd": 5.014,
+    "t": 36.77,
     "pct_positive": 100.0,
     "n": 123
    },
    {
     "factor": "listings growth (falling=good)",
-    "mean": 13.608,
-    "sd": 6.487,
-    "t": 23.27,
+    "mean": 14.017,
+    "sd": 6.692,
+    "t": 23.23,
     "pct_positive": 99.2,
     "n": 123
    },
    {
     "factor": "drawdown from own high",
-    "mean": 2.384,
-    "sd": 5.783,
-    "t": 4.57,
-    "pct_positive": 65.9,
+    "mean": 2.625,
+    "sd": 6.087,
+    "t": 4.78,
+    "pct_positive": 66.7,
     "n": 123
    }
   ]
@@ -365,7 +365,7 @@
    "state": "NSW",
    "eligible": true,
    "buy": 0.423,
-   "percentile": 46.0,
+   "percentile": 44.0,
    "decile": 4,
    "vac": 1.34,
    "vac_delta12": -0.5,
@@ -374,8 +374,8 @@
    "rent12": 7.2,
    "listings12": 0.1,
    "dd": -6.9,
-   "fcast_excess_12m": 0.87,
-   "fcast_excess_24m": 0.94
+   "fcast_excess_12m": 1.04,
+   "fcast_excess_24m": 1.28
   },
   {
    "code": "SEA",
@@ -392,8 +392,8 @@
    "rent12": 14.3,
    "listings12": 47.7,
    "dd": -11.5,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "ARD",
@@ -401,7 +401,7 @@
    "state": "WA",
    "eligible": true,
    "buy": 0.564,
-   "percentile": 84.0,
+   "percentile": 83.0,
    "decile": 8,
    "vac": 1.01,
    "vac_delta12": -0.21,
@@ -410,98 +410,28 @@
    "rent12": 13.6,
    "listings12": 50.4,
    "dd": -5.8,
-   "fcast_excess_12m": 4.38,
-   "fcast_excess_24m": 7.56
+   "fcast_excess_12m": 4.51,
+   "fcast_excess_24m": 7.82
   },
   {
    "code": "NRA",
-   "name": "Nowra",
-   "state": "NSW",
-   "eligible": true,
-   "buy": 0.417,
-   "percentile": 44.0,
-   "decile": 4,
-   "vac": 0.56,
-   "vac_delta12": -0.87,
-   "yield": 3.53,
-   "yield_pctile": 15.0,
-   "rent12": 5.1,
-   "listings12": 5.6,
-   "dd": -2.6,
-   "fcast_excess_12m": 0.87,
-   "fcast_excess_24m": 0.94
+   "eligible": false
   },
   {
    "code": "ULL",
-   "name": "Ulladulla",
-   "state": "NSW",
-   "eligible": true,
-   "buy": 0.47,
-   "percentile": 61.0,
-   "decile": 6,
-   "vac": 1.49,
-   "vac_delta12": 1.07,
-   "yield": 2.81,
-   "yield_pctile": 40.0,
-   "rent12": 17.4,
-   "listings12": 28.1,
-   "dd": -5.2,
-   "fcast_excess_12m": 2.79,
-   "fcast_excess_24m": 4.37
+   "eligible": false
   },
   {
    "code": "WOL",
-   "name": "Wollongong",
-   "state": "NSW",
-   "eligible": true,
-   "buy": 0.433,
-   "percentile": 50.0,
-   "decile": 4,
-   "vac": 0.8,
-   "vac_delta12": -0.08,
-   "yield": 3.32,
-   "yield_pctile": 25.0,
-   "rent12": 2.7,
-   "listings12": 2.0,
-   "dd": -9.8,
-   "fcast_excess_12m": 0.87,
-   "fcast_excess_24m": 0.94
+   "eligible": false
   },
   {
    "code": "BAY",
-   "name": "Batemans Bay",
-   "state": "NSW",
-   "eligible": true,
-   "buy": 0.573,
-   "percentile": 86.0,
-   "decile": 8,
-   "vac": 1.54,
-   "vac_delta12": -0.7,
-   "yield": 3.87,
-   "yield_pctile": 47.0,
-   "rent12": 17.2,
-   "listings12": -2.2,
-   "dd": -9.5,
-   "fcast_excess_12m": 4.38,
-   "fcast_excess_24m": 7.56
+   "eligible": false
   },
   {
    "code": "GOS",
-   "name": "Central Coast (Gosford)",
-   "state": "NSW",
-   "eligible": true,
-   "buy": 0.457,
-   "percentile": 57.0,
-   "decile": 5,
-   "vac": 0.8,
-   "vac_delta12": 0.15,
-   "yield": 3.49,
-   "yield_pctile": 35.0,
-   "rent12": 2.3,
-   "listings12": 2.0,
-   "dd": -19.0,
-   "fcast_excess_12m": 1.96,
-   "fcast_excess_24m": 2.76
+   "eligible": false
   }
  ],
  "top_decile_now": [
@@ -520,8 +450,8 @@
    "rent12": 31.1,
    "listings12": -7.9,
    "dd": -16.8,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "ROCH",
@@ -538,8 +468,8 @@
    "rent12": 21.2,
    "listings12": -20.3,
    "dd": -16.8,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "ALY",
@@ -556,8 +486,8 @@
    "rent12": 16.4,
    "listings12": 21.7,
    "dd": -11.8,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "ASP",
@@ -574,8 +504,8 @@
    "rent12": 15.7,
    "listings12": -43.2,
    "dd": 0.0,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "MDL",
@@ -592,8 +522,8 @@
    "rent12": 16.9,
    "listings12": -0.6,
    "dd": -8.5,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "SCB",
@@ -610,8 +540,8 @@
    "rent12": 7.4,
    "listings12": 47.8,
    "dd": -17.3,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "DNL2",
@@ -628,26 +558,8 @@
    "rent12": 18.2,
    "listings12": 60.9,
    "dd": -17.5,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
-  },
-  {
-   "code": "LIS",
-   "name": "Lismore",
-   "state": "NSW",
-   "eligible": true,
-   "buy": 0.73,
-   "percentile": 99.0,
-   "decile": 9,
-   "vac": 0.45,
-   "vac_delta12": -0.03,
-   "yield": 4.3,
-   "yield_pctile": 89.0,
-   "rent12": 18.7,
-   "listings12": -3.5,
-   "dd": -4.9,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "KAR",
@@ -664,8 +576,8 @@
    "rent12": 12.8,
    "listings12": 45.5,
    "dd": -10.0,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "WNR",
@@ -682,8 +594,8 @@
    "rent12": 8.7,
    "listings12": -6.1,
    "dd": -7.5,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "CANN",
@@ -700,26 +612,8 @@
    "rent12": 8.2,
    "listings12": 67.4,
    "dd": -12.0,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
-  },
-  {
-   "code": "GFN",
-   "name": "Grafton",
-   "state": "NSW",
-   "eligible": true,
-   "buy": 0.682,
-   "percentile": 98.0,
-   "decile": 9,
-   "vac": 0.49,
-   "vac_delta12": -0.16,
-   "yield": 4.44,
-   "yield_pctile": 50.0,
-   "rent12": 16.9,
-   "listings12": -2.4,
-   "dd": -8.3,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "BEER",
@@ -736,8 +630,8 @@
    "rent12": 22.0,
    "listings12": 73.0,
    "dd": -16.6,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "KLM",
@@ -745,7 +639,7 @@
    "state": "WA",
    "eligible": true,
    "buy": 0.677,
-   "percentile": 97.0,
+   "percentile": 98.0,
    "decile": 9,
    "vac": 0.45,
    "vac_delta12": 0.12,
@@ -754,8 +648,8 @@
    "rent12": 21.8,
    "listings12": 3.9,
    "dd": -21.0,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "ALP",
@@ -772,8 +666,8 @@
    "rent12": 10.0,
    "listings12": 38.2,
    "dd": -12.1,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "NMB",
@@ -790,8 +684,8 @@
    "rent12": 14.6,
    "listings12": 31.3,
    "dd": -14.8,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "KTH",
@@ -808,8 +702,8 @@
    "rent12": 14.8,
    "listings12": -5.8,
    "dd": -11.1,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "JDP",
@@ -826,8 +720,8 @@
    "rent12": 9.6,
    "listings12": 66.5,
    "dd": -14.4,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "PLM",
@@ -844,8 +738,8 @@
    "rent12": 15.0,
    "listings12": 55.1,
    "dd": -14.4,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "RIC",
@@ -862,8 +756,8 @@
    "rent12": 12.4,
    "listings12": -16.0,
    "dd": -2.6,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "MAD",
@@ -880,8 +774,8 @@
    "rent12": 23.5,
    "listings12": 14.0,
    "dd": -13.9,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "SUC",
@@ -898,8 +792,8 @@
    "rent12": 11.4,
    "listings12": 31.0,
    "dd": -5.0,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "BLC2",
@@ -916,8 +810,8 @@
    "rent12": 20.3,
    "listings12": 36.3,
    "dd": -23.0,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "BYW",
@@ -925,7 +819,7 @@
    "state": "WA",
    "eligible": true,
    "buy": 0.659,
-   "percentile": 96.0,
+   "percentile": 95.0,
    "decile": 9,
    "vac": 0.3,
    "vac_delta12": -0.36,
@@ -934,8 +828,8 @@
    "rent12": 10.7,
    "listings12": 0.0,
    "dd": -12.4,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "DUN",
@@ -952,8 +846,8 @@
    "rent12": 13.8,
    "listings12": 122.2,
    "dd": -15.5,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "BRU",
@@ -970,8 +864,8 @@
    "rent12": 7.5,
    "listings12": -11.8,
    "dd": -11.7,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "NCL",
@@ -988,8 +882,8 @@
    "rent12": 15.5,
    "listings12": 0.0,
    "dd": -10.2,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "CHE",
@@ -997,7 +891,7 @@
    "state": "VIC",
    "eligible": true,
    "buy": 0.646,
-   "percentile": 95.0,
+   "percentile": 94.0,
    "decile": 9,
    "vac": 0.79,
    "vac_delta12": -0.02,
@@ -1006,8 +900,8 @@
    "rent12": 13.0,
    "listings12": -4.2,
    "dd": -8.7,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "MRY",
@@ -1015,7 +909,7 @@
    "state": "WA",
    "eligible": true,
    "buy": 0.644,
-   "percentile": 95.0,
+   "percentile": 94.0,
    "decile": 9,
    "vac": 0.63,
    "vac_delta12": 0.29,
@@ -1024,8 +918,8 @@
    "rent12": 9.9,
    "listings12": 66.0,
    "dd": -7.8,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "GSN",
@@ -1042,8 +936,8 @@
    "rent12": 8.5,
    "listings12": 12.9,
    "dd": -10.4,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "INA",
@@ -1060,8 +954,8 @@
    "rent12": 15.0,
    "listings12": 68.4,
    "dd": -11.3,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "POR",
@@ -1078,8 +972,8 @@
    "rent12": 7.8,
    "listings12": -11.5,
    "dd": -6.5,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "YAR",
@@ -1087,7 +981,7 @@
    "state": "VIC",
    "eligible": true,
    "buy": 0.634,
-   "percentile": 94.0,
+   "percentile": 93.0,
    "decile": 9,
    "vac": 1.25,
    "vac_delta12": 0.29,
@@ -1096,8 +990,8 @@
    "rent12": 17.5,
    "listings12": 22.5,
    "dd": -16.1,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "ELB",
@@ -1105,7 +999,7 @@
    "state": "WA",
    "eligible": true,
    "buy": 0.629,
-   "percentile": 94.0,
+   "percentile": 93.0,
    "decile": 9,
    "vac": 0.67,
    "vac_delta12": -0.43,
@@ -1114,8 +1008,8 @@
    "rent12": 8.1,
    "listings12": 97.9,
    "dd": -8.4,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "MARY",
@@ -1132,8 +1026,8 @@
    "rent12": 8.0,
    "listings12": -4.0,
    "dd": -14.5,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "HUO",
@@ -1150,8 +1044,8 @@
    "rent12": 23.9,
    "listings12": 20.9,
    "dd": -24.4,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "GWL",
@@ -1159,7 +1053,7 @@
    "state": "SA",
    "eligible": true,
    "buy": 0.627,
-   "percentile": 93.0,
+   "percentile": 92.0,
    "decile": 9,
    "vac": 0.48,
    "vac_delta12": -0.19,
@@ -1168,8 +1062,8 @@
    "rent12": 6.6,
    "listings12": 48.5,
    "dd": -11.3,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "YAN",
@@ -1177,7 +1071,7 @@
    "state": "QLD",
    "eligible": true,
    "buy": 0.626,
-   "percentile": 93.0,
+   "percentile": 92.0,
    "decile": 9,
    "vac": 0.59,
    "vac_delta12": -0.57,
@@ -1186,8 +1080,8 @@
    "rent12": 49.8,
    "listings12": 59.6,
    "dd": -21.4,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "KAW",
@@ -1195,7 +1089,7 @@
    "state": "QLD",
    "eligible": true,
    "buy": 0.625,
-   "percentile": 93.0,
+   "percentile": 92.0,
    "decile": 9,
    "vac": 1.14,
    "vac_delta12": 0.41,
@@ -1204,8 +1098,8 @@
    "rent12": 14.6,
    "listings12": 33.0,
    "dd": -14.4,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "KLG",
@@ -1222,8 +1116,8 @@
    "rent12": 7.2,
    "listings12": 37.1,
    "dd": -18.0,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "SEA",
@@ -1240,8 +1134,8 @@
    "rent12": 14.3,
    "listings12": 47.7,
    "dd": -11.5,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "BEG",
@@ -1249,7 +1143,7 @@
    "state": "NSW",
    "eligible": true,
    "buy": 0.618,
-   "percentile": 92.0,
+   "percentile": 91.0,
    "decile": 9,
    "vac": 0.66,
    "vac_delta12": -1.09,
@@ -1258,8 +1152,8 @@
    "rent12": 19.8,
    "listings12": 2.4,
    "dd": -8.1,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "MRB",
@@ -1267,7 +1161,7 @@
    "state": "QLD",
    "eligible": true,
    "buy": 0.617,
-   "percentile": 92.0,
+   "percentile": 91.0,
    "decile": 9,
    "vac": 1.4,
    "vac_delta12": 0.94,
@@ -1276,8 +1170,8 @@
    "rent12": 10.2,
    "listings12": -13.2,
    "dd": -5.7,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "KYA",
@@ -1285,7 +1179,7 @@
    "state": "VIC",
    "eligible": true,
    "buy": 0.617,
-   "percentile": 92.0,
+   "percentile": 91.0,
    "decile": 9,
    "vac": 0.87,
    "vac_delta12": 0.73,
@@ -1294,8 +1188,8 @@
    "rent12": 17.0,
    "listings12": -11.7,
    "dd": -4.5,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "NNF",
@@ -1312,8 +1206,8 @@
    "rent12": 11.2,
    "listings12": -23.0,
    "dd": -4.7,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   },
   {
    "code": "CLC",
@@ -1321,7 +1215,7 @@
    "state": "VIC",
    "eligible": true,
    "buy": 0.615,
-   "percentile": 91.0,
+   "percentile": 90.0,
    "decile": 9,
    "vac": 0.94,
    "vac_delta12": 0.08,
@@ -1330,98 +1224,8 @@
    "rent12": 10.1,
    "listings12": 15.7,
    "dd": -5.0,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
-  },
-  {
-   "code": "SORR",
-   "name": "Sorrento (WA)",
-   "state": "WA",
-   "eligible": true,
-   "buy": 0.614,
-   "percentile": 91.0,
-   "decile": 9,
-   "vac": 0.53,
-   "vac_delta12": 0.33,
-   "yield": 3.85,
-   "yield_pctile": 76.0,
-   "rent12": 20.7,
-   "listings12": 73.3,
-   "dd": -24.5,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
-  },
-  {
-   "code": "KWI",
-   "name": "Kwinana",
-   "state": "WA",
-   "eligible": true,
-   "buy": 0.614,
-   "percentile": 91.0,
-   "decile": 9,
-   "vac": 0.99,
-   "vac_delta12": -0.23,
-   "yield": 4.56,
-   "yield_pctile": 29.0,
-   "rent12": 10.2,
-   "listings12": -9.2,
-   "dd": -10.1,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
-  },
-  {
-   "code": "BIB",
-   "name": "Bibra Lake",
-   "state": "WA",
-   "eligible": true,
-   "buy": 0.611,
-   "percentile": 91.0,
-   "decile": 9,
-   "vac": 0.39,
-   "vac_delta12": -0.06,
-   "yield": 4.34,
-   "yield_pctile": 73.0,
-   "rent12": 6.8,
-   "listings12": 46.6,
-   "dd": -10.9,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
-  },
-  {
-   "code": "KAL",
-   "name": "Kalgoorlie",
-   "state": "WA",
-   "eligible": true,
-   "buy": 0.611,
-   "percentile": 90.0,
-   "decile": 9,
-   "vac": 0.8,
-   "vac_delta12": -0.14,
-   "yield": 7.04,
-   "yield_pctile": 73.0,
-   "rent12": 19.4,
-   "listings12": 9.3,
-   "dd": 0.0,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
-  },
-  {
-   "code": "COOL",
-   "name": "Coolum Beach",
-   "state": "QLD",
-   "eligible": true,
-   "buy": 0.609,
-   "percentile": 90.0,
-   "decile": 9,
-   "vac": 0.89,
-   "vac_delta12": 0.22,
-   "yield": 3.42,
-   "yield_pctile": 24.0,
-   "rent12": 13.6,
-   "listings12": 4.3,
-   "dd": -12.9,
-   "fcast_excess_12m": 6.59,
-   "fcast_excess_24m": 11.71
+   "fcast_excess_12m": 6.6,
+   "fcast_excess_24m": 11.8
   }
  ],
  "notes": [

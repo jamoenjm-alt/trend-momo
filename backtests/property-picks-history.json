@@ -1,11 +1,11 @@
 {
- "generated": "2026-11-24T06:31:20Z",
+ "generated": "2026-11-25T09:43:35Z",
  "years": 3,
  "months": [
   {
    "asof": "2023-11-30",
-   "eligible": 480,
-   "median_buy_score": 0.471,
+   "eligible": 416,
+   "median_buy_score": 0.486,
    "buy": {
     "code": "SUC",
     "name": "Success",
@@ -36,17 +36,17 @@
     "fwd_12m": -10.078031874772764,
     "fwd_24m": 1.2484376441391998
    },
-   "bench_6m": 4.688924186070675,
-   "universe_median_6m": 4.408615024411011,
-   "bench_12m": 7.118042809074687,
-   "universe_median_12m": 7.299293651477301,
-   "bench_24m": 17.293032467637115,
-   "universe_median_24m": 20.50982019448164
+   "bench_6m": null,
+   "universe_median_6m": 4.589681204492502,
+   "bench_12m": null,
+   "universe_median_12m": 8.255891608811595,
+   "bench_24m": null,
+   "universe_median_24m": 22.787022972021155
   },
   {
    "asof": "2023-12-31",
-   "eligible": 455,
-   "median_buy_score": 0.46,
+   "eligible": 394,
+   "median_buy_score": 0.471,
    "buy": {
     "code": "KAR",
     "name": "Karrinyup",
@@ -77,17 +77,17 @@
     "fwd_12m": -13.908193797168733,
     "fwd_24m": -11.425110338251187
    },
-   "bench_6m": 2.6664894162378827,
-   "universe_median_6m": 3.784324934434835,
-   "bench_12m": 5.6613265630620635,
-   "universe_median_12m": 7.2260876698435395,
-   "bench_24m": 17.34777750553038,
-   "universe_median_24m": 21.75388762879271
+   "bench_6m": null,
+   "universe_median_6m": 4.075574794864467,
+   "bench_12m": null,
+   "universe_median_12m": 7.677868757595041,
+   "bench_24m": null,
+   "universe_median_24m": 23.690575167790673
   },
   {
    "asof": "2024-01-31",
-   "eligible": 434,
-   "median_buy_score": 0.471,
+   "eligible": 374,
+   "median_buy_score": 0.489,
    "buy": {
     "code": "KAR",
     "name": "Karrinyup",
@@ -118,17 +118,17 @@
     "fwd_12m": -8.446655709767448,
     "fwd_24m": -0.8984259648683213
    },
-   "bench_6m": 2.7240493521333065,
-   "universe_median_6m": 3.3654354958196686,
-   "bench_12m": 6.67012660767321,
-   "universe_median_12m": 7.791039104400022,
-   "bench_24m": 17.728388815958752,
-   "universe_median_24m": 22.980720526782328
+   "bench_6m": null,
+   "universe_median_6m": 3.558085399119282,
+   "bench_12m": null,
+   "universe_median_12m": 8.289340836039006,
+   "bench_24m": null,
+   "universe_median_24m": 24.22612206387904
   },
   {
    "asof": "2024-02-29",
-   "eligible": 467,
-   "median_buy_score": 0.475,
+   "eligible": 402,
+   "median_buy_score": 0.492,
    "buy": {
     "code": "BSN",
     "name": "Busselton",
@@ -159,17 +159,17 @@
     "fwd_12m": 8.944282424544859,
     "fwd_24m": -4.450309428467413
    },
-   "bench_6m": 3.393636505764075,
-   "universe_median_6m": 2.9755278734870494,
-   "bench_12m": 6.707093927438801,
-   "universe_median_12m": 6.808585060092631,
-   "bench_24m": 18.703998560619482,
-   "universe_median_24m": 21.848094032290334
+   "bench_6m": null,
+   "universe_median_6m": 3.1027953616043824,
+   "bench_12m": null,
+   "universe_median_12m": 7.221456644514879,
+   "bench_24m": null,
+   "universe_median_24m": 23.055316953816952
   },
   {
    "asof": "2024-03-31",
-   "eligible": 485,
-   "median_buy_score": 0.473,
+   "eligible": 420,
+   "median_buy_score": 0.484,
    "buy": {
     "code": "WNR",
     "name": "Wanneroo",
@@ -200,17 +200,17 @@
     "fwd_12m": 9.460471748129407,
     "fwd_24m": 15.182138257743416
    },
-   "bench_6m": 2.839034965745424,
-   "universe_median_6m": 3.5936137871627416,
-   "bench_12m": 5.78414414383388,
-   "universe_median_12m": 6.520997717589072,
-   "bench_24m": 16.779872762604708,
-   "universe_median_24m": 20.214951395062087
+   "bench_6m": null,
+   "universe_median_6m": 3.7520690882798746,
+   "bench_12m": null,
+   "universe_median_12m": 7.109536543099271,
+   "bench_24m": null,
+   "universe_median_24m": 21.327788347054554
   },
   {
    "asof": "2024-04-30",
-   "eligible": 461,
-   "median_buy_score": 0.465,
+   "eligible": 396,
+   "median_buy_score": 0.482,
    "buy": {
     "code": "PPI",
     "name": "Port Pirie",
@@ -241,17 +241,17 @@
     "fwd_12m": 4.590348437562319,
     "fwd_24m": 8.929312562864533
    },
-   "bench_6m": 2.9723827277954307,
-   "universe_median_6m": 3.6781319796954204,
-   "bench_12m": 7.201564918595538,
-   "universe_median_12m": 7.67964780076118,
-   "bench_24m": 15.750517184624812,
-   "universe_median_24m": 19.038814664724878
+   "bench_6m": null,
+   "universe_median_6m": 4.0237616278057775,
+   "bench_12m": null,
+   "universe_median_12m": 8.44411866757655,
+   "bench_24m": null,
+   "universe_median_24m": 21.143475397178825
   },
   {
    "asof": "2024-05-31",
-   "eligible": 480,
-   "median_buy_score": 0.455,
+   "eligible": 415,
+   "median_buy_score": 0.458,
    "buy": {
     "code": "SUC",
     "name": "Success",
@@ -282,17 +282,17 @@
     "fwd_12m": 11.979129312199666,
     "fwd_24m": 0.6762225796866916
    },
-   "bench_6m": 1.7275655415425195,
-   "universe_median_6m": 2.5867810993358997,
-   "bench_12m": 7.108638422921509,
-   "universe_median_12m": 7.085681106664854,
-   "bench_24m": 13.5938329047794,
-   "universe_median_24m": 17.442676969562477
+   "bench_6m": null,
+   "universe_median_6m": 2.877840733491288,
+   "bench_12m": null,
+   "universe_median_12m": 7.6619281613126144,
+   "bench_24m": null,
+   "universe_median_24m": 19.654846602976694
   },
   {
    "asof": "2024-06-30",
-   "eligible": 453,
-   "median_buy_score": 0.443,
+   "eligible": 393,
+   "median_buy_score": 0.456,
    "buy": {
     "code": "CNS",
     "name": "Cairns",
@@ -323,17 +323,17 @@
     "fwd_12m": -5.605875379714009,
     "fwd_24m": 15.104282433133287
    },
-   "bench_6m": 2.9170542051772053,
-   "universe_median_6m": 3.152155392741518,
-   "bench_12m": 6.927199744753532,
-   "universe_median_12m": 6.785172989855459,
-   "bench_24m": 11.292117572484162,
-   "universe_median_24m": 16.738314559141408
+   "bench_6m": null,
+   "universe_median_6m": 3.521862154376598,
+   "bench_12m": null,
+   "universe_median_12m": 7.492287815562659,
+   "bench_24m": null,
+   "universe_median_24m": 17.98015492517695
   },
   {
    "asof": "2024-07-31",
-   "eligible": 453,
-   "median_buy_score": 0.441,
+   "eligible": 392,
+   "median_buy_score": 0.454,
    "buy": {
     "code": "PPI",
     "name": "Port Pirie",
@@ -364,16 +364,16 @@
     "fwd_12m": 11.358704144169174,
     "fwd_24m": 25.265890032813076
    },
-   "bench_6m": 3.8414346790525578,
-   "universe_median_6m": 3.3715296544436058,
-   "bench_12m": 6.489086640315533,
-   "universe_median_12m": 6.870205584535127,
-   "bench_24m": 10.537113065038618,
-   "universe_median_24m": 16.392630733598445
+   "bench_6m": null,
+   "universe_median_6m": 3.53978004677864,
+   "bench_12m": null,
+   "universe_median_12m": 7.541134362831747,
+   "bench_24m": null,
+   "universe_median_24m": 17.309372338415272
   },
   {
    "asof": "2024-08-31",
-   "eligible": 478,
+   "eligible": 415,
    "median_buy_score": 0.431,
    "buy": {
     "code": "PPI",
@@ -405,17 +405,17 @@
     "fwd_12m": 11.630686702191696,
     "fwd_24m": 25.365578253667653
    },
-   "bench_6m": 3.2043527769987312,
+   "bench_6m": null,
    "universe_median_6m": 2.9271290206163814,
-   "bench_12m": 7.763753214236235,
-   "universe_median_12m": 7.970352572058337,
-   "bench_24m": 9.843165545414912,
-   "universe_median_24m": 14.290570527468782
+   "bench_12m": null,
+   "universe_median_12m": 8.047695799544119,
+   "bench_24m": null,
+   "universe_median_24m": 15.468728621037853
   },
   {
    "asof": "2024-09-30",
-   "eligible": 471,
-   "median_buy_score": 0.446,
+   "eligible": 407,
+   "median_buy_score": 0.456,
    "buy": {
     "code": "KAR",
     "name": "Karrinyup",
@@ -446,17 +446,17 @@
     "fwd_12m": 15.182250113882457,
     "fwd_24m": 1.3868211905361694
    },
-   "bench_6m": 2.863804759612365,
-   "universe_median_6m": 3.2422050946306014,
-   "bench_12m": 7.854490654499036,
-   "universe_median_12m": 8.919059749884205,
-   "bench_24m": 8.479979906649637,
-   "universe_median_24m": 12.354708916330083
+   "bench_6m": null,
+   "universe_median_6m": 3.272464244959572,
+   "bench_12m": null,
+   "universe_median_12m": 9.44446122044489,
+   "bench_24m": null,
+   "universe_median_24m": 13.715614550045242
   },
   {
    "asof": "2024-10-31",
-   "eligible": 487,
-   "median_buy_score": 0.428,
+   "eligible": 422,
+   "median_buy_score": 0.437,
    "buy": {
     "code": "ESP",
     "name": "Esperance",
@@ -487,17 +487,17 @@
     "fwd_12m": 11.025009837618803,
     "fwd_24m": -5.531225047787269
    },
-   "bench_6m": 4.107103359917197,
-   "universe_median_6m": 3.58191323239867,
-   "bench_12m": 8.346249671353267,
-   "universe_median_12m": 10.173501186565792,
-   "bench_24m": 7.669926007536976,
-   "universe_median_24m": 11.14476718113162
+   "bench_6m": null,
+   "universe_median_6m": 3.615948122151913,
+   "bench_12m": null,
+   "universe_median_12m": 10.514664387576044,
+   "bench_24m": null,
+   "universe_median_24m": 12.074565739302368
   },
   {
    "asof": "2024-11-30",
-   "eligible": 507,
-   "median_buy_score": 0.42,
+   "eligible": 442,
+   "median_buy_score": 0.423,
    "buy": {
     "code": "ESP",
     "name": "Esperance",
@@ -528,17 +528,17 @@
     "fwd_12m": 8.668220251367774,
     "fwd_24m": null
    },
-   "bench_6m": 5.2896900193502905,
-   "universe_median_6m": 3.4361746961054207,
-   "bench_12m": 9.498856954190394,
-   "universe_median_12m": 10.791006450804774,
+   "bench_6m": null,
+   "universe_median_6m": 3.4940811470224986,
+   "bench_12m": null,
+   "universe_median_12m": 11.005207010414031,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2024-12-31",
-   "eligible": 449,
-   "median_buy_score": 0.411,
+   "eligible": 390,
+   "median_buy_score": 0.416,
    "buy": {
     "code": "BSN",
     "name": "Busselton",
@@ -569,17 +569,17 @@
     "fwd_12m": 4.953856854017791,
     "fwd_24m": null
    },
-   "bench_6m": 3.8964830178501053,
-   "universe_median_6m": 3.3565745567460503,
-   "bench_12m": 11.060291709941271,
-   "universe_median_12m": 12.301564883339932,
+   "bench_6m": null,
+   "universe_median_6m": 3.328031048070379,
+   "bench_12m": null,
+   "universe_median_12m": 12.392544271363558,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2025-01-31",
-   "eligible": 460,
-   "median_buy_score": 0.426,
+   "eligible": 399,
+   "median_buy_score": 0.433,
    "buy": {
     "code": "BSN",
     "name": "Busselton",
@@ -610,17 +610,17 @@
     "fwd_12m": -0.02323158431424277,
     "fwd_24m": null
    },
-   "bench_6m": 4.4037107225316285,
+   "bench_6m": null,
    "universe_median_6m": 4.004309227238068,
-   "bench_12m": 11.694320542209047,
-   "universe_median_12m": 12.371944731125662,
+   "bench_12m": null,
+   "universe_median_12m": 12.700949057517574,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2025-02-28",
-   "eligible": 478,
-   "median_buy_score": 0.416,
+   "eligible": 413,
+   "median_buy_score": 0.419,
    "buy": {
     "code": "BSN",
     "name": "Busselton",
@@ -651,17 +651,17 @@
     "fwd_12m": 4.536631607457231,
     "fwd_24m": null
    },
-   "bench_6m": 4.4178373436334795,
-   "universe_median_6m": 3.935904701390447,
-   "bench_12m": 11.242836995765826,
-   "universe_median_12m": 12.351221096489805,
+   "bench_6m": null,
+   "universe_median_6m": 4.13236298171864,
+   "bench_12m": null,
+   "universe_median_12m": 12.43066589356847,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2025-03-31",
-   "eligible": 474,
-   "median_buy_score": 0.432,
+   "eligible": 410,
+   "median_buy_score": 0.434,
    "buy": {
     "code": "ESP",
     "name": "Esperance",
@@ -692,17 +692,17 @@
     "fwd_12m": 2.7841256984721507,
     "fwd_24m": null
    },
-   "bench_6m": 4.851741491139316,
-   "universe_median_6m": 5.056495535429861,
-   "bench_12m": 10.394495987810814,
-   "universe_median_12m": 12.388096179203023,
+   "bench_6m": null,
+   "universe_median_6m": 5.232924423314023,
+   "bench_12m": null,
+   "universe_median_12m": 12.724766823823197,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2025-04-30",
-   "eligible": 460,
-   "median_buy_score": 0.394,
+   "eligible": 396,
+   "median_buy_score": 0.4,
    "buy": {
     "code": "ESP",
     "name": "Esperance",
@@ -733,16 +733,16 @@
     "fwd_12m": 0.004396846495891005,
     "fwd_24m": null
    },
-   "bench_6m": 3.839807841244536,
-   "universe_median_6m": 5.129099697009543,
-   "bench_12m": 7.974652489934275,
-   "universe_median_12m": 11.567114638499998,
+   "bench_6m": null,
+   "universe_median_6m": 5.328047306288108,
+   "bench_12m": null,
+   "universe_median_12m": 11.922424500171559,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2025-05-31",
-   "eligible": 480,
+   "eligible": 416,
    "median_buy_score": 0.392,
    "buy": {
     "code": "WGT",
@@ -774,17 +774,17 @@
     "fwd_12m": 4.332064109655764,
     "fwd_24m": null
    },
-   "bench_6m": 3.997700946851057,
-   "universe_median_6m": 6.217196457024299,
-   "bench_12m": 6.054781927346431,
-   "universe_median_12m": 10.663699446193453,
+   "bench_6m": null,
+   "universe_median_6m": 6.37606061824636,
+   "bench_12m": null,
+   "universe_median_12m": 10.843652748962661,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2025-06-30",
-   "eligible": 448,
-   "median_buy_score": 0.376,
+   "eligible": 388,
+   "median_buy_score": 0.378,
    "buy": {
     "code": "ASP",
     "name": "Alice Springs",
@@ -801,30 +801,30 @@
     "fwd_24m": null
    },
    "sell": {
-    "code": "MDG",
-    "name": "Mudgee",
-    "state": "NSW",
-    "score": 0.785,
-    "yield": 4.04,
-    "yield_pctile": 14.4,
-    "vacancy": 4.84,
-    "rent_12m": -8.7,
-    "listings_12m": 12.7,
-    "listings": 356,
-    "fwd_6m": 7.615906202478651,
-    "fwd_12m": 4.041442910700854,
+    "code": "VHB",
+    "name": "Victor Harbor",
+    "state": "SA",
+    "score": 0.72,
+    "yield": 4.37,
+    "yield_pctile": 43.2,
+    "vacancy": 3.84,
+    "rent_12m": -34.6,
+    "listings_12m": 29.1,
+    "listings": 253,
+    "fwd_6m": 1.3689624553055113,
+    "fwd_12m": 5.616158262652138,
     "fwd_24m": null
    },
-   "bench_6m": 6.895140705446567,
-   "universe_median_6m": 7.615906202478651,
-   "bench_12m": 4.082139846690236,
-   "universe_median_12m": 9.095092060363008,
+   "bench_6m": null,
+   "universe_median_6m": 7.500531364520735,
+   "bench_12m": null,
+   "universe_median_12m": 9.734305365005058,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2025-07-31",
-   "eligible": 429,
+   "eligible": 370,
    "median_buy_score": 0.387,
    "buy": {
     "code": "ASP",
@@ -856,17 +856,17 @@
     "fwd_12m": -1.7741820219732252,
     "fwd_24m": null
    },
-   "bench_6m": 7.893989822231928,
-   "universe_median_6m": 7.532888020301609,
-   "bench_12m": 3.8013533146320944,
-   "universe_median_12m": 7.5110653235653135,
+   "bench_6m": null,
+   "universe_median_6m": 7.689073652326228,
+   "bench_12m": null,
+   "universe_median_12m": 7.826119713442448,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2025-08-31",
-   "eligible": 454,
-   "median_buy_score": 0.391,
+   "eligible": 391,
+   "median_buy_score": 0.396,
    "buy": {
     "code": "ALY",
     "name": "Albany",
@@ -883,31 +883,31 @@
     "fwd_24m": null
    },
    "sell": {
-    "code": "PIC",
-    "name": "Picton",
-    "state": "NSW",
-    "score": 0.71,
-    "yield": 3.01,
-    "yield_pctile": 19.0,
-    "vacancy": 2.51,
-    "rent_12m": -6.0,
-    "listings_12m": 16.4,
-    "listings": 333,
-    "fwd_6m": 9.645692750639467,
-    "fwd_12m": 7.593926654910543,
+    "code": "KILM",
+    "name": "Kilmore",
+    "state": "VIC",
+    "score": 0.694,
+    "yield": 3.62,
+    "yield_pctile": 16.8,
+    "vacancy": 1.56,
+    "rent_12m": -3.5,
+    "listings_12m": 25.6,
+    "listings": 387,
+    "fwd_6m": -4.832128648904687,
+    "fwd_12m": -0.7360017268309371,
     "fwd_24m": null
    },
-   "bench_6m": 6.536239234367236,
-   "universe_median_6m": 7.868069427149327,
-   "bench_12m": 1.9296027366871416,
-   "universe_median_12m": 6.143735996942734,
+   "bench_6m": null,
+   "universe_median_6m": 7.9096117122851695,
+   "bench_12m": null,
+   "universe_median_12m": 6.648612203980031,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2025-09-30",
-   "eligible": 432,
-   "median_buy_score": 0.399,
+   "eligible": 371,
+   "median_buy_score": 0.405,
    "buy": {
     "code": "ALY",
     "name": "Albany",
@@ -938,17 +938,17 @@
     "fwd_12m": 18.5202630731786,
     "fwd_24m": null
    },
-   "bench_6m": 5.286277955755181,
-   "universe_median_6m": 6.759078420126885,
-   "bench_12m": 0.5799380705939328,
-   "universe_median_12m": 4.00733734881864,
+   "bench_6m": null,
+   "universe_median_6m": 6.686327037512285,
+   "bench_12m": null,
+   "universe_median_12m": 4.360668808375534,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2025-10-31",
-   "eligible": 470,
-   "median_buy_score": 0.381,
+   "eligible": 407,
+   "median_buy_score": 0.384,
    "buy": {
     "code": "ALY",
     "name": "Albany",
@@ -979,17 +979,17 @@
     "fwd_12m": 0.6251777390358093,
     "fwd_24m": null
    },
-   "bench_6m": 3.942943907630503,
-   "universe_median_6m": 5.543570487830918,
-   "bench_12m": -0.6242243417449167,
-   "universe_median_12m": 1.600197619909527,
+   "bench_6m": null,
+   "universe_median_6m": 5.653403544688507,
+   "bench_12m": null,
+   "universe_median_12m": 1.7180249390388092,
    "bench_24m": null,
    "universe_median_24m": null
   },
   {
    "asof": "2025-11-30",
-   "eligible": 451,
-   "median_buy_score": 0.406,
+   "eligible": 389,
+   "median_buy_score": 0.409,
    "buy": {
     "code": "SCB",
     "name": "Scarborough",
@@ -1020,8 +1020,8 @@
     "fwd_12m": null,
     "fwd_24m": null
    },
-   "bench_6m": 1.978006207605154,
-   "universe_median_6m": 3.2895897354959125,
+   "bench_6m": null,
+   "universe_median_6m": 3.5355854945572807,
    "bench_12m": null,
    "universe_median_12m": null,
    "bench_24m": null,
@@ -1029,8 +1029,8 @@
   },
   {
    "asof": "2025-12-31",
-   "eligible": 399,
-   "median_buy_score": 0.388,
+   "eligible": 342,
+   "median_buy_score": 0.395,
    "buy": {
     "code": "SCB",
     "name": "Scarborough",
@@ -1061,8 +1061,8 @@
     "fwd_12m": null,
     "fwd_24m": null
    },
-   "bench_6m": -2.631551668478249,
-   "universe_median_6m": 1.4507552986195105,
+   "bench_6m": null,
+   "universe_median_6m": 2.0881834809801214,
    "bench_12m": null,
    "universe_median_12m": null,
    "bench_24m": null,
@@ -1070,8 +1070,8 @@
   },
   {
    "asof": "2026-01-31",
-   "eligible": 406,
-   "median_buy_score": 0.417,
+   "eligible": 349,
+   "median_buy_score": 0.422,
    "buy": {
     "code": "SCB",
     "name": "Scarborough",
@@ -1102,8 +1102,8 @@
     "fwd_12m": null,
     "fwd_24m": null
    },
-   "bench_6m": -3.5507070814838504,
-   "universe_median_6m": -0.09312629603172029,
+   "bench_6m": null,
+   "universe_median_6m": 0.03726523271623261,
    "bench_12m": null,
    "universe_median_12m": null,
    "bench_24m": null,
@@ -1111,8 +1111,8 @@
   },
   {
    "asof": "2026-02-28",
-   "eligible": 432,
-   "median_buy_score": 0.398,
+   "eligible": 370,
+   "median_buy_score": 0.408,
    "buy": {
     "code": "SCB",
     "name": "Scarborough",
@@ -1143,8 +1143,8 @@
     "fwd_12m": null,
     "fwd_24m": null
    },
-   "bench_6m": -4.324008929530576,
-   "universe_median_6m": -1.4833624099158782,
+   "bench_6m": null,
+   "universe_median_6m": -1.3399264734240135,
    "bench_12m": null,
    "universe_median_12m": null,
    "bench_24m": null,
@@ -1152,8 +1152,8 @@
   },
   {
    "asof": "2026-03-31",
-   "eligible": 437,
-   "median_buy_score": 0.425,
+   "eligible": 375,
+   "median_buy_score": 0.429,
    "buy": {
     "code": "NNF",
     "name": "New Norfolk",
@@ -1184,8 +1184,8 @@
     "fwd_12m": null,
     "fwd_24m": null
    },
-   "bench_6m": -4.470041088487331,
-   "universe_median_6m": -3.133176648898861,
+   "bench_6m": null,
+   "universe_median_6m": -3.0372518198104825,
    "bench_12m": null,
    "universe_median_12m": null,
    "bench_24m": null,
@@ -1193,8 +1193,8 @@
   },
   {
    "asof": "2026-04-30",
-   "eligible": 440,
-   "median_buy_score": 0.412,
+   "eligible": 379,
+   "median_buy_score": 0.413,
    "buy": {
     "code": "BWN",
     "name": "Bowen",
@@ -1225,8 +1225,8 @@
     "fwd_12m": null,
     "fwd_24m": null
    },
-   "bench_6m": -4.210592751546294,
-   "universe_median_6m": -3.109463931171408,
+   "bench_6m": null,
+   "universe_median_6m": -2.9847459605887527,
    "bench_12m": null,
    "universe_median_12m": null,
    "bench_24m": null,
@@ -1234,8 +1234,8 @@
   },
   {
    "asof": "2026-05-31",
-   "eligible": 472,
-   "median_buy_score": 0.415,
+   "eligible": 408,
+   "median_buy_score": 0.418,
    "buy": {
     "code": "ALY",
     "name": "Albany",
@@ -1275,8 +1275,8 @@
   },
   {
    "asof": "2026-06-30",
-   "eligible": 457,
-   "median_buy_score": 0.426,
+   "eligible": 395,
+   "median_buy_score": 0.427,
    "buy": {
     "code": "ALY",
     "name": "Albany",
@@ -1316,7 +1316,7 @@
   },
   {
    "asof": "2026-07-31",
-   "eligible": 475,
+   "eligible": 413,
    "median_buy_score": 0.422,
    "buy": {
     "code": "ASP",
@@ -1357,8 +1357,8 @@
   },
   {
    "asof": "2026-08-31",
-   "eligible": 471,
-   "median_buy_score": 0.439,
+   "eligible": 408,
+   "median_buy_score": 0.44,
    "buy": {
     "code": "ALY",
     "name": "Albany",
@@ -1398,8 +1398,8 @@
   },
   {
    "asof": "2026-09-30",
-   "eligible": 475,
-   "median_buy_score": 0.428,
+   "eligible": 412,
+   "median_buy_score": 0.431,
    "buy": {
     "code": "ALY",
     "name": "Albany",
@@ -1439,8 +1439,8 @@
   },
   {
    "asof": "2026-10-31",
-   "eligible": 513,
-   "median_buy_score": 0.438,
+   "eligible": 448,
+   "median_buy_score": 0.445,
    "buy": {
     "code": "ALY",
     "name": "Albany",
